@@ -21,12 +21,9 @@ class AnaNode():
         # handle response not found or empty ideally this should never happen
 
     def get_next_node_id(self, flow_id, message_content):
-        print("In get_next_node_id")
-        print(self.node_key)
         current_node_contents = self.get_contents(self.node_key)
         input_data = message_content["content"]["input"]
         node_key = ""
-        pdb().set_trace()
         if "val" in input_data.keys():
             self.node_id = input_data["val"]
             node_key = flow_id + "." + self.node_id
@@ -37,8 +34,7 @@ class AnaNode():
             for button in button_contents:
                 if button["ButtonType"] in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
                     node_id = button["NextNodeId"]
-                    return
-            print("node_id is", node_id)
+                    break
             if node_id != "":
                 node_key = flow_id + "." + node_id
             else:

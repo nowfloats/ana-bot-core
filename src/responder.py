@@ -25,12 +25,12 @@ class MessageProcessor():
         print("Final Messages")
         print(messages)
         print("**************")
-        # response = self._respond_with_messages(messages)
-        # if (response):
-            # User(self.user_id, self.session_id).set_state(self.state)
-            # print("User state updated")
-        # else:
-            # print("Could not respond back")
+        response = self._respond_with_messages(messages)
+        if (response):
+            User(self.user_id, self.session_id).set_state(self.state)
+            print("User state updated")
+        else:
+            print("Could not respond back")
 
     def _get_state(self):
         user_id = self.meta_data["sender"]["id"]
@@ -47,8 +47,8 @@ class MessageProcessor():
             next_node_id = AnaNode(node_id).get_next_node_id(self.flow_id, self.message_content)
             # print("State exists next_node_id is", next_node_id)
             self.state["last_node_id"] = next_node_id
-            print(next_node_id)
-            # node = AnaNode(next_node_id).get_contents(next_node_id)
+            print("next_node_id is",next_node_id)
+            node = AnaNode(next_node_id).get_contents(next_node_id)
         else:
             next_node_id =  self.flow_id + "." + flow_config["first_node_key"]
             self.state["last_node_id"] = next_node_id

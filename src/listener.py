@@ -36,9 +36,9 @@ class Scheduler():
                 MessageProcessor(parsed_message).respond_to_message()
             else: 
                 pass
-            # try:
-                # self.sqs_client.delete_message(message["ReceiptHandle"])
-            # except Exception as e:
-                # print(e)
-                # raise
+            try:
+                self.sqs_client.delete_message(message["ReceiptHandle"])
+            except Exception as e:
+                print(e)
+                raise
 
