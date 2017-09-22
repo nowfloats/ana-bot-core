@@ -1,4 +1,4 @@
-import urllib.request
+import requests
 import json
 from src import app
 from src.config import flow_config as config
@@ -14,12 +14,12 @@ class RefreshChatFlows():
             url = flow_data["api"]
             flow_id = flow_data["flow_id"]
             # handle request failure
-            response = urllib.request.urlopen(url)
-            body = response.read()
-            nodes = json.loads(body)
+            response = requests.get(url)
+            nodes = response.json()
             node_dict = {}
             for node in nodes:
                 if node["Id"] not in config["archived_node_ids"]: 
+                    # consider first node, this may not always be present
                     if node["IsStartNode"] == True:
                         key = flow_id + "." + config["first_node_key"]
                     else: 
