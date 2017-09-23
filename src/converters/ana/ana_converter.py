@@ -13,6 +13,8 @@ class Converter():
         pass
 
     def get_messages_data(self, node_data, message_content):
+        if (node_data == {}): 
+            return []
         node_type = node_data["NodeType"]
         messages = []
         if node_type == "Combination":
@@ -41,7 +43,8 @@ class Converter():
         return messages_data
         
     def convert_buttons(self,data):
-        messages_data = []
+        next_node_elem_message_data = []
+        other_elem_message_data = []
         next_node_elements = []
         other_elements = []
 
@@ -53,26 +56,27 @@ class Converter():
 
         next_node_elem_message_type = MessageType._NAMES_TO_VALUES["INPUT"]
         next_node_elem_input_type = InputType._NAMES_TO_VALUES["OPTIONS"]
-        # next_node_elem_input_type = 9
         next_node_elem_options = []
 
         # print(next_node_elements)
         for button in next_node_elements:
             option = {
                     "title": button["ButtonName"],
-                    "value": button["NextNodeId"]
+                    "value": button.get("NextNodeId", "")
                     }
             next_node_elem_options.append(option)
 
-        next_node_elem_content = MessageContent(
-                inputType=next_node_elem_input_type,
-                mandatory=1,
-                options=next_node_elem_options
-                ).trim()
-        next_node_elem_message_data = MessageData(
-                type=next_node_elem_message_type,
-                content=next_node_elem_content
-                ).trim()
+        if (next_node_elem_options != []):
+            next_node_elem_content = MessageContent(
+                    inputType=next_node_elem_input_type,
+                    mandatory=1,
+                    options=next_node_elem_options
+                    ).trim()
+            next_node_message_data = MessageData(
+                    type=next_node_elem_message_type,
+                    content=next_node_elem_content
+                    ).trim()
+            next_node_elem_message_data.append(next_node_message_data)
 
         # other_elem_data = []
         # for button in other_elements:
@@ -93,7 +97,7 @@ class Converter():
                 # print(e)
                 # raise
 
-        messages_data.append(next_node_elem_message_data)
+        messages_data = next_node_elem_message_data + other_elem_message_data
         # for next_node_elements
         # take out nextnode elements and convert them into input.options
         # remaining element as another input element accordingly

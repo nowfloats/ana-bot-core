@@ -11,7 +11,10 @@ class AnaNode():
         print("node_key in get_contents is", node_key)
         response = app.redis_client.get(node_key)
         # print(response)
+        if (response == None):
+            return {}
         try:
+
             response_dict = json.loads(response)
             return response_dict
         except Exception as e:
