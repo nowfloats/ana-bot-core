@@ -3,6 +3,7 @@ version: '3'
 services:
   api:
     image: 'anacore:latest'
+    build: .
     ports:
       - '9500:9500'
     depends_on:
