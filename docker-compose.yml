@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  api:
+    image: 'anacore:latest'
+    ports:
+      - '9500:9500'
+    depends_on:
+      - redis
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
