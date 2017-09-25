@@ -33,11 +33,12 @@ class Scheduler():
             print("************")
             # change hard coded values to class and factory
             if (parsed_message["meta"]["senderType"] == 0):
-                MessageProcessor(parsed_message).respond_to_message()
+                MessageProcessor(parsed_message).run()
             else: 
                 pass
             try:
                 self.sqs_client.delete_message(message["ReceiptHandle"])
+                print("Message Deleted")
             except Exception as e:
                 print(e)
                 raise

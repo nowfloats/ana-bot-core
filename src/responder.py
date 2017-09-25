@@ -1,6 +1,7 @@
 import requests
 import uuid
 import json
+import threading
 from pprint import pprint
 from src.models.user import User
 from src.models.ana_node import AnaNode
@@ -8,18 +9,28 @@ from src.config import flow_config
 from src.config import application_config
 from src.converters.converter import Converter
 
-class MessageProcessor():
+class MessageProcessor(threading.Thread):
 
     def __init__(self, message, *args, **kwargs):
-
+        threading.Thread.__init__(self)
         self.meta_data = message["meta"]
         self.message_content = message["data"]
         self.user_id = self.meta_data["sender"]["id"]
         self.business_id = self.meta_data["recipient"]["id"]
-        self.flow_id = flow_config["flows"][self.business_id].get("flow_id", "")
+        self.business_id = message["business_id"]
+        flow_data = flow_config["flows"].get(self.business_id, flow_config["flows"]["business_id"])
+        self.flow_id = flow_data.get("flow_id", "")
         self.state = self._get_state()
 
-    def respond_to_message(self):
+    # def run(self):
+        # print("******************")
+        # print("Yey thread started")
+        # print("******************")
+
+    def run(self):
+        if (self.flow_id == ""):
+            print("Could not find flow")
+            return 
         node = self._get_node()
         messages = Converter.get_messages(node,self.meta_data, self.message_content)
         print("Final Messages")

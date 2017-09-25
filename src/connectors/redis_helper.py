@@ -7,11 +7,10 @@ class RedisHelper():
         try:
             host = os.environ.get("REDIS_HOST")
             port = os.environ.get("REDIS_PORT")
-            # print("Hey in redis")
-            # print("Hey redis connected and flushed db")
-            self.redis_client = redis.StrictRedis(host=host, port=port, db=0)
-            print("Hey redis connected")
-
+            self.redis_client = redis.StrictRedis(host=host, port=port, db=1)
         except Exception as e:
             print(e)
 
+    def set_data(self, name, value):
+        response = self.redis_client.set(name, value)
+        return response

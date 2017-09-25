@@ -1,10 +1,18 @@
-from flask import Response
 import json
+from flask import Response
+from flask import request
 from src import app
 from src.services.refresh_chatflows import RefreshChatFlows as ChatFlowController
+from src.responder import MessageProcessor
 
 @app.route("/health-check")
 def hello_world():
+    return "OK"
+
+@app.route("/api/message", methods=["POST"])
+def message_handler():
+    message = request.get_json()
+    response = MessageProcessor(message).start()
     return "OK"
 
 @app.route("/service/refreshChatFlows")
