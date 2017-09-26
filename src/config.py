@@ -10,8 +10,9 @@ application_config = {
         }
 
 default_flow_id = str(uuid.uuid4())
-print(default_flow_id)
 default_flow_api = os.environ.get("DEFAULT_FLOW_API")
+print(default_flow_id)
+print(default_flow_api)
 # each object represents config for one business
 flow_config = {
         "first_node_key": "GET_STARTED_NODE",

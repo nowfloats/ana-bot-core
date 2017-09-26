@@ -14,7 +14,12 @@ class RefreshChatFlows():
             url = flow_data["api"]
             flow_id = flow_data["flow_id"]
             # handle request failure
-            response = requests.get(url)
+            try:
+                response = requests.get(url)
+            except Exception as e:
+                print("Error refreshing chat flows")
+                print(e)
+                return {"message": "failure"}
             nodes = response.json()
             node_dict = {}
             for node in nodes:
@@ -27,4 +32,5 @@ class RefreshChatFlows():
                     node_dict[key] = json.dumps(node)
             # handle redis_write failure
             redis_client.mset(node_dict)
+            print("Chat Flows refreshed")
         return {"message": "success"}

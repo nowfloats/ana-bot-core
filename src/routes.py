@@ -1,4 +1,5 @@
 import json
+import os
 from flask import Response
 from flask import request
 from src import app
@@ -9,13 +10,7 @@ from src.responder import MessageProcessor
 def hello_world():
     return "OK"
 
-@app.route("/api/message", methods=["POST"])
-def message_handler():
-    message = request.get_json()
-    response = MessageProcessor(message).start()
-    return "OK"
-
-@app.route("/service/refreshChatFlows")
+@app.route("/api/refreshChatFlows")
 def populate_ana_flows():
 
     data = ChatFlowController().populate_flows()
@@ -23,3 +18,9 @@ def populate_ana_flows():
 
     response = Response(json_data, status=200, mimetype="application/json")
     return response
+
+@app.route("/api/message", methods=["POST"])
+def message_handler():
+    message = request.get_json()
+    response = MessageProcessor(message).start()
+    return "OK"

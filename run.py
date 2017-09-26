@@ -19,7 +19,6 @@ if __name__ == "__main__":
         app.redis_client.flushdb()
         print("Flushed Redis Store")
         RefreshChatFlows().populate_flows()
-        print("Chat flows refreshed")
         app.run(host=host, port=port)
     except redis.exceptions.ConnectionError as e:
         print("Error connecting to redis\n",e)

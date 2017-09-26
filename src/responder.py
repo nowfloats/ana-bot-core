@@ -70,10 +70,10 @@ class MessageProcessor(threading.Thread):
         return node
 
     def _respond_with_messages(self, messages):
+        # messages empty array can be handled here
+        # call a method which gives you fallback message
         url = application_config["GATEWAY_URL"]
         headers = {"Content-Type" : "application/json"}
-        if messages == []:
-            pass
         for message in messages:
             pprint(message)
             json_message = json.dumps(message)
