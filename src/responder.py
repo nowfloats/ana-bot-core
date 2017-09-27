@@ -13,12 +13,12 @@ class MessageProcessor(threading.Thread):
 
     def __init__(self, message, *args, **kwargs):
         threading.Thread.__init__(self)
+        print(message)
         self.meta_data = message["meta"]
         self.message_content = message["data"]
         self.user_id = self.meta_data["sender"]["id"]
         self.business_id = self.meta_data["recipient"]["id"]
-        self.business_id = message["business_id"]
-        flow_data = flow_config["flows"].get(self.business_id, flow_config["flows"]["business_id"])
+        flow_data = flow_config["flows"].get(self.business_id, flow_config["flows"]["1213618262009721"])
         self.flow_id = flow_data.get("flow_id", "")
         self.state = self._get_state()
 

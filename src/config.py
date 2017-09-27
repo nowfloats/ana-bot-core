@@ -19,7 +19,7 @@ flow_config = {
         "default_flow_api": default_flow_api,
         "archived_node_ids": ["INIT_CHAT_NODE", "SEND_CHAT_HISTORY_TO_SERVER", "GET_CHAT_TEXT_NODE", "SEND_CHAT_TEXT_NODE","CONTINUE_CHAT_NODE"],  
         "flows": {
-            "business_id": {
+            "1213618262009721": {
                 "flow_id": default_flow_id,
                 "api": default_flow_api
                 }
