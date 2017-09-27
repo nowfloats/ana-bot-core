@@ -46,7 +46,9 @@ class MessageProcessor(threading.Thread):
     def _get_state(self):
         user_id = self.meta_data["sender"]["id"]
         print("user_id is", user_id)
-        self.session_id = self.meta_data.get("sessionId", str(uuid.uuid4()))
+        self.session_id = self.meta_data.get("sessionId")
+        if self.session_id == None:
+            self.session_id = str(uuid.uuid4())
         print("session_id is", self.session_id)
         self.meta_data["sessionId"] = self.session_id
         state = User(self.user_id, self.session_id).get_session_data()
