@@ -18,7 +18,7 @@ print(default_flow_api)
 flow_config = {
         "first_node_key": "GET_STARTED_NODE",
         "default_flow_api": os.environ.get("DEFAULT_FLOW_API"),
-        "default_flow_id": str(uuid.uuid4()),
+        "default_flow_id": default_flow_id,
         "default_business_id": default_business_id,
         "archived_node_ids": ["INIT_CHAT_NODE", "SEND_CHAT_HISTORY_TO_SERVER", "GET_CHAT_TEXT_NODE", "SEND_CHAT_TEXT_NODE","CONTINUE_CHAT_NODE"],  
         "flows": {
