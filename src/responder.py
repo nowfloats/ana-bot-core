@@ -2,6 +2,7 @@ import requests
 import uuid
 import json
 import threading
+import pdb
 from pprint import pprint
 from src.models.user import User
 from src.models.ana_node import AnaNode
@@ -18,8 +19,8 @@ class MessageProcessor(threading.Thread):
         self.message_content = message["data"]
         self.user_id = self.meta_data["sender"]["id"]
         self.business_id = self.meta_data["recipient"]["id"]
-        flow_data = flow_config["flows"].get(self.business_id, flow_config["flows"]["1213618262009721"])
-        self.flow_id = flow_data.get("flow_id", "")
+        flow_data = flow_config["flows"].get(self.business_id, {})
+        self.flow_id = flow_data.get("flow_id", flow_config["default_flow_id"])
         self.state = self._get_state()
 
     # def run(self):
@@ -46,9 +47,7 @@ class MessageProcessor(threading.Thread):
     def _get_state(self):
         user_id = self.meta_data["sender"]["id"]
         print("user_id is", user_id)
-        self.session_id = self.meta_data.get("sessionId")
-        if self.session_id == None:
-            self.session_id = str(uuid.uuid4())
+        self.session_id = self.meta_data.get("sessionId", str(uuid.uuid4()))
         print("session_id is", self.session_id)
         self.meta_data["sessionId"] = self.session_id
         state = User(self.user_id, self.session_id).get_session_data()
