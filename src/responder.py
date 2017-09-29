@@ -40,7 +40,7 @@ class MessageProcessor(threading.Thread):
         response = self._respond_with_messages(messages)
         if (response):
             User(self.user_id, self.session_id).set_state(self.state)
-            print("User state updated")
+            print("User state updated with", self.state)
         else:
             print("Could not respond back")
 

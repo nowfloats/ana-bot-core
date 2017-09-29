@@ -28,8 +28,21 @@ class AnaNode():
         input_data = message_content["content"]["input"]
         node_key = ""
         if "val" in input_data.keys():
-            self.node_id = input_data["val"]
-            node_key = flow_id + "." + self.node_id
+            print("I am coming here")
+            button_contents = current_node_contents["Buttons"]
+            print(button_contents)
+            for button in button_contents:
+                if button["ButtonType"] in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
+                    node_id = button["NextNodeId"]
+                    node_key = flow_id + "." + node_id
+                    print("Broke here")
+                    break
+            print("Also here")
+            node_id = input_data["val"]
+            if (node_key):
+                pass
+            else:
+                node_key = flow_id + "." + node_id
         else: 
             input_value = input_data["input"]
             button_contents = current_node_contents["Buttons"]
