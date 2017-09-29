@@ -37,8 +37,8 @@ class MessageProcessor(threading.Thread):
         print("Final Messages")
         print(messages)
         print("**************")
-        response = 1
-        # response = self._respond_with_messages(messages)
+        # response = 1
+        response = self._respond_with_messages(messages)
         if (response):
             User(self.user_id, self.session_id).set_state(self.state)
             print("User state updated with", self.state)
