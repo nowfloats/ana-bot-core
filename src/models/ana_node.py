@@ -23,9 +23,10 @@ class AnaNode():
 
         # handle response not found or empty ideally this should never happen
 
-    def get_next_node_id(self, flow_id, message_content):
+    def get_next_node_data(self, flow_id, message_content):
         current_node_contents = self.get_contents(self.node_key)
         input_data = message_content["content"]["input"]
+        user_input = {}
         node_key = ""
         if "val" in input_data.keys():
             print("I am coming here")
@@ -33,6 +34,8 @@ class AnaNode():
             print(button_contents)
             for button in button_contents:
                 if button["ButtonType"] in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
+                    var_name = current_node_contents["VariableName"]
+                    user_input[var_name] = input_data["val"]
                     node_id = button["NextNodeId"]
                     node_key = flow_id + "." + node_id
                     print("Broke here")
@@ -49,11 +52,13 @@ class AnaNode():
             node_id = ""
             for button in button_contents:
                 if button["ButtonType"] in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
+                    var_name = current_node_contents["VariableName"]
+                    user_input[var_name] = input_data["input"]
                     node_id = button["NextNodeId"]
                     break
             if node_id != "":
                 node_key = flow_id + "." + node_id
             else:
                 node_key = self.node_key
-        return node_key
+        return {"node_id": node_key, "input_data": user_input}
 

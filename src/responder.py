@@ -37,7 +37,8 @@ class MessageProcessor(threading.Thread):
         print("Final Messages")
         print(messages)
         print("**************")
-        response = self._respond_with_messages(messages)
+        response = 1
+        # response = self._respond_with_messages(messages)
         if (response):
             User(self.user_id, self.session_id).set_state(self.state)
             print("User state updated with", self.state)
@@ -58,7 +59,9 @@ class MessageProcessor(threading.Thread):
         if bool(self.state):
             node_id = self.state["last_node_id"]
             print("State exists node_id ", node_id)
-            next_node_id = AnaNode(node_id).get_next_node_id(self.flow_id, self.message_content)
+            next_node_data = AnaNode(node_id).get_next_node_data(self.flow_id, self.message_content)
+            next_node_id = next_node_data["node_id"]
+            self.state["var_data"] = next_node_data["input_data"]
             # print("State exists next_node_id is", next_node_id)
             self.state["last_node_id"] = next_node_id
             print("next_node_id is",next_node_id)
