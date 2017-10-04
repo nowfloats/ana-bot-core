@@ -1,12 +1,15 @@
-# If you run a mac or linux 
-# sudo pip install virutalenv
-# If you use ubuntu you can also try
-# sudo apt-get install python-virtualenv
+Install docker on your machine
 
-# Then execute the following code
-# virtualenv <venv_name>
-# This creates a virtual environment with the name venv_name
-# Then execute
-# . <venv_name>/bin/activate
+Environment settings can be found in .env
+.env is not included in source code
+copy .env.example to make a new file .env
+Edit settings according to your need
 
+From the root directory of the project run
 
+docker-compose build
+docker-compose up
+
+On a linux system, you might have to change 
+permissions of docker executable to execute 
+commands without 'sudo'
