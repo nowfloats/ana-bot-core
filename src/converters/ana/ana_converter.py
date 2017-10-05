@@ -38,7 +38,7 @@ class Converter():
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
                 pass
-            elif section_type == "Carousel":
+            elif section["SectionType"] == "Carousel":
                 pass
         return messages_data
         
