@@ -15,7 +15,7 @@ if __name__ == "__main__":
     port = os.environ.get("PORT") or 5000
     try:
         app.redis_client.get("None")
-        app.redis_client.flushdb()
+        # app.redis_client.flushdb()
         # RefreshChatFlows().populate_flows()
         app.run(host=host, port=port)
     except redis.exceptions.ConnectionError as e:
