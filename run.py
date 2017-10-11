@@ -15,13 +15,10 @@ if __name__ == "__main__":
     port = os.environ.get("PORT") or 5000
     try:
         app.redis_client.get("None")
-        print("Connected to Redis Store")
         app.redis_client.flushdb()
-        print("Flushed Redis Store")
         RefreshChatFlows().populate_flows()
         app.run(host=host, port=port)
     except redis.exceptions.ConnectionError as e:
         print("Error connecting to redis\n",e)
     except Exception as e:
         print("Server could not start.\n Exception caught as: ",e)
-        print("",e)

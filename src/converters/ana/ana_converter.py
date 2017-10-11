@@ -1,7 +1,10 @@
-from src.config import ana_config
-from src.thrift_models.ttypes import MessageType, InputType
-from src.models.message import MessageContent, MessageData, Message
 import json
+import urllib.parse
+import pdb
+from furl import furl
+from src.config import ana_config
+from src.thrift_models.ttypes import MessageType, InputType, MediaType
+from src.models.message import MessageContent, MessageData, Message, Media, Option, Item
 
 class Converter():
 
@@ -30,16 +33,50 @@ class Converter():
     def convert_sections(self,data):
         messages_data = []
         for section in data:
-            if section["SectionType"] == "Text":
+            section_type = section["SectionType"]
+            if section_type == "Text":
                 message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
                 text = section["Text"]
-                message_content = MessageContent(text=text).trim()
-                # print(message_content)
+                message_content = MessageContent(text=text, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
-                pass
-            elif section["SectionType"] == "Carousel":
-                pass
+
+            elif section_type in ["Image","Gif"]:
+                message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
+                media_type = MediaType._NAMES_TO_VALUES["IMAGE"]
+                url = section.get("Url","")
+                encoded_url = furl(url).url
+                preview_url = section.get("PreviewUrl","")
+                text = section["Title"]
+                media_content = Media(type=media_type, url=encoded_url, previewUrl=preview_url).trim() 
+                message_content = MessageContent(text=text, media=media_content, mandatory=1).trim()
+                message_data = MessageData(type=message_type, content=message_content).trim()
+                messages_data.append(message_data)
+
+            elif section_type == "Carousel":
+                message_type = MessageType._NAMES_TO_VALUES["CAROUSEL"]
+                section_items = section["Items"]
+                item_elements = []
+                for section_item in section_items:
+                    media_type = MediaType._NAMES_TO_VALUES["IMAGE"]
+                    image_url = section_item["ImageUrl"]
+                    title = section_item["Title"]
+                    description = section_item["Caption"]
+                    encoded_url = furl(image_url).url
+                    media_content = Media(type=media_type, url=encoded_url).trim()
+                    buttons = section_item["Buttons"]
+                    options = []
+                    for button in buttons:
+                        button_title = button["Text"]
+                        button_value = button["_id"]
+                        option_element = Option(title=button_title, value=button_value).trim()
+                        options.append(option_element)
+                    item_element = Item(title=title, desc=description, media=media_content,options=options).trim() 
+                    item_elements.append(item_element)
+                message_content = MessageContent(items = item_elements, mandatory=1).trim()
+                message_data = MessageData(type=message_type, content=message_content).trim()
+                messages_data.append(message_data)
+
         return messages_data
         
     def convert_buttons(self,data):
@@ -62,7 +99,7 @@ class Converter():
         for button in next_node_elements:
             option = {
                     "title": button["ButtonName"],
-                    "value": button.get("NextNodeId", "")
+                    "value": button.get("_id", "")
                     }
             next_node_elem_options.append(option)
 

@@ -43,5 +43,8 @@ def get_user_data():
 @app.route("/api/message", methods=["POST"])
 def message_handler():
     message = request.get_json()
+    print("Message Received")
+    print(message)
+    print("****************")
     response = MessageProcessor(message).start()
     return "OK"
