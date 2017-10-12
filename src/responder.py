@@ -46,7 +46,7 @@ class MessageProcessor(threading.Thread):
     def _get_node(self):
 
         if bool(self.state):
-            node_id = self.state["current_node_id"]
+            node_id = self.state.get("current_node_id", flow_config["first_node_key"]) # give first_node as default
             next_node_data = AnaNode(node_id).get_next_node_data(self.flow_id, self.message_content)
             next_node_id = next_node_data["node_id"]
             self.state["var_data"] = next_node_data["input_data"]
