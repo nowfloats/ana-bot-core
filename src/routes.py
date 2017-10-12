@@ -9,7 +9,9 @@ from src.responder import MessageProcessor
 
 @app.route("/health-check")
 def hello_world():
-    return "OK"
+    json_data = json.dumps({"status" : "UP"})
+    response = Response(json_data, status=200)
+    return response
 
 @app.route("/api/refreshChatFlows")
 def populate_ana_flows():
