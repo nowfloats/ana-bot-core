@@ -1,10 +1,10 @@
 import json
 import urllib.parse
-import pdb
 from furl import furl
 from src.config import ana_config
 from src.thrift_models.ttypes import MessageType, InputType, MediaType
-from src.models.message import MessageContent, MessageData, Message, Media, Option, Item
+from src.models.message import MessageContent, MessageData, Message, Media
+from src.models.inputs import Option, Item, TextInput
 
 class Converter():
 
@@ -32,6 +32,8 @@ class Converter():
 
     def convert_sections(self,data):
         messages_data = []
+        # after the types are handled remove if else clauses
+        # convert to objects, preferably using factory pattern
         for section in data:
             section_type = section["SectionType"]
             if section_type == "Text":
@@ -49,7 +51,14 @@ class Converter():
                 preview_url = section.get("PreviewUrl","")
                 text = section["Title"]
                 media_content = Media(type=media_type, url=encoded_url, previewUrl=preview_url).trim() 
-                message_content = MessageContent(text=text, media=media_content, mandatory=1).trim()
+                message_content = MessageContent(text=text, media=media_content, mandatory=0).trim()
+                message_data = MessageData(type=message_type, content=message_content).trim()
+                messages_data.append(message_data)
+
+            elif section_type in ["EmbeddedHtml", "Link"]:
+                message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
+                text = section["Url"]
+                message_content = MessageContent(text=text, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
 
@@ -73,7 +82,7 @@ class Converter():
                         options.append(option_element)
                     item_element = Item(title=title, desc=description, media=media_content,options=options).trim() 
                     item_elements.append(item_element)
-                message_content = MessageContent(items = item_elements, mandatory=1).trim()
+                message_content = MessageContent(items = item_elements, mandatory=0).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
 
@@ -106,7 +115,7 @@ class Converter():
         if (next_node_elem_options != []):
             next_node_elem_content = MessageContent(
                     inputType=next_node_elem_input_type,
-                    mandatory=1,
+                    mandatory=0,
                     options=next_node_elem_options
                     ).trim()
             next_node_message_data = MessageData(
@@ -115,24 +124,61 @@ class Converter():
                     ).trim()
             next_node_elem_message_data.append(next_node_message_data)
 
-        # other_elem_data = []
-        # for button in other_elements:
-            # button_type = button["ButtonType"]
-            # if button_type == "GetText":
-                # content = MessageContent(
-                        # inputType=InputType._NAMES_TO_VALUES["TEXT"],
-                        # mandatory=1,
-                        # )
-                # pass
-            # elif button_type == "GetNumber":
-                # pass
-            # elif button_type == "GetPhoneNumber":
-                # pass
-            # elif button_type == "GetEmail":
-                # pass
-            # else:
-                # print(e)
-                # raise
+        for button in other_elements:
+            button_type = button["ButtonType"]
+            if button_type == "GetText":
+                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+                input_type = InputType._NAMES_TO_VALUES["TEXT"] 
+                input_attr = TextInput(placeHolder= button["ButtonText"]).trim()
+                content = MessageContent(
+                        inputType=input_type,
+                        textInputAttr=input_attr,
+                        mandatory=1,
+                        ).trim()
+                message_data = MessageData(
+                        type=message_type,
+                        content=content
+                        ).trim()
+                other_elem_message_data.append(message_data)
+            elif button_type == "GetNumber":
+                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+                input_type = InputType._NAMES_TO_VALUES["NUMERIC"] 
+                content = MessageContent(
+                        inputType=input_type,
+                        mandatory=1,
+                        ).trim()
+                message_data = MessageData(
+                        type=message_type,
+                        content=content
+                        ).trim()
+                other_elem_message_data.append(message_data)
+            elif button_type == "GetPhoneNumber":
+                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+                input_type = InputType._NAMES_TO_VALUES["PHONE"] 
+                content = MessageContent(
+                        inputType=input_type,
+                        mandatory=1,
+                        ).trim()
+                message_data = MessageData(
+                        type=message_type,
+                        content=content
+                        ).trim()
+                other_elem_message_data.append(message_data)
+            elif button_type == "GetEmail":
+                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+                input_type = InputType._NAMES_TO_VALUES["EMAIL"] 
+                content = MessageContent(
+                        inputType=input_type,
+                        mandatory=1,
+                        ).trim()
+                message_data = MessageData(
+                        type=message_type,
+                        content=content
+                        ).trim()
+                other_elem_message_data.append(message_data)
+            else:
+                print(e)
+                raise
 
         messages_data = next_node_elem_message_data + other_elem_message_data
         # for next_node_elements
