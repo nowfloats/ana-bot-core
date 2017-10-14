@@ -51,7 +51,7 @@ class Converter():
                 preview_url = section.get("PreviewUrl","")
                 text = section["Title"]
                 media_content = Media(type=media_type, url=encoded_url, previewUrl=preview_url).trim() 
-                message_content = MessageContent(text=text, media=media_content, mandatory=0).trim()
+                message_content = MessageContent(text=text, media=media_content, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
 
@@ -82,7 +82,7 @@ class Converter():
                         options.append(option_element)
                     item_element = Item(title=title, desc=description, media=media_content,options=options).trim() 
                     item_elements.append(item_element)
-                message_content = MessageContent(items = item_elements, mandatory=0).trim()
+                message_content = MessageContent(items = item_elements, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
 
@@ -115,7 +115,7 @@ class Converter():
         if (next_node_elem_options != []):
             next_node_elem_content = MessageContent(
                     inputType=next_node_elem_input_type,
-                    mandatory=0,
+                    mandatory=1,
                     options=next_node_elem_options
                     ).trim()
             next_node_message_data = MessageData(
