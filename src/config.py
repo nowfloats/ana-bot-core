@@ -11,7 +11,7 @@ application_config = {
 
 default_business_id = os.environ.get("DEFAULT_BUSINESS_ID")
 default_flow_api = os.environ.get("DEFAULT_FLOW_API")
-default_flow_id = str(uuid.uuid4())
+default_flow_id = os.environ.get("DEFAULT_FLOW_ID")
 print(default_flow_id)
 print(default_flow_api)
 # each object represents config for one business

@@ -129,7 +129,7 @@ class Converter():
             if button_type == "GetText":
                 message_type = MessageType._NAMES_TO_VALUES["INPUT"]
                 input_type = InputType._NAMES_TO_VALUES["TEXT"] 
-                input_attr = TextInput(placeHolder= button["ButtonText"]).trim()
+                input_attr = TextInput(placeHolder= button.get("PlaceholderText", "")).trim()
                 content = MessageContent(
                         inputType=input_type,
                         textInputAttr=input_attr,
