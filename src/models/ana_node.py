@@ -9,6 +9,7 @@ class AnaNode():
     def get_contents(self, node_key):
         response = app.redis_client.get(node_key)
         if (response == None):
+            print("Data not found for", node_key)
             return {}
         try:
             response_dict = json.loads(response)
@@ -27,27 +28,31 @@ class AnaNode():
         # not really neat change it to objects once all buttons are handled
         if "val" in input_data.keys():
             button_contents = self._extract_button_elements(current_node_contents)
+            next_node_buttons = [button for button in button_contents if button.get("ButtonType") == "NextNode"]
             # button_contents = current_node_contents["Buttons"]
             for button in button_contents:
                 # checking both type and ButtonType to handle Carousel Buttons
                 button_type = button.get("ButtonType", button.get("Type"))
-                if button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
-                    var_name = current_node_contents["VariableName"]
-                    user_input[var_name] = input_data["val"]
-                    node_id = button["NextNodeId"]
-                    node_key = flow_id + "." + node_id
-                    break
-                elif button_type == "NextNode":
+                var_name = current_node_contents.get("VariableName")
+                if button_type == "NextNode":
                     current_node_id = input_data["val"]
                     if button["_id"] == current_node_id:  
+                        if (var_name):
+                            user_input[var_name] = button.get("VariableValue", "")
                         node_id = button["NextNodeId"]
                         node_key = flow_id + "." + node_id
                         break
+                elif button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
+                    if (var_name):
+                        user_input[var_name] = input_data["val"]
+                    node_id = button["NextNodeId"]
+                    node_key = flow_id + "." + node_id
+                    break
             if (node_key):
                 pass
             else:
                 node_key = self.node_key
-        else: 
+        elif "input" in input_data.keys(): 
             input_value = input_data["input"]
             button_contents = current_node_contents["Buttons"]
             node_id = ""
@@ -62,6 +67,8 @@ class AnaNode():
                 node_key = flow_id + "." + node_id
             else:
                 node_key = self.node_key
+        else:
+            raise("Unknown input data found", input_data)
         return {"node_id": node_key, "input_data": user_input}
 
     def _extract_button_elements(self,data):

@@ -31,22 +31,24 @@ class MessageProcessor(threading.Thread):
         messages = Converter.get_messages(node,self.meta_data, self.message_content)
         response = self._respond_with_messages(messages)
         if (response):
-            User(self.user_id, self.session_id).set_state(self.state)
+            User(self.user_id).set_state(self.session_id, self.state)
             print("User state updated with", self.state)
         else:
             print("Could not respond back")
 
     def _get_state(self):
         user_id = self.meta_data["sender"]["id"]
-        self.session_id = self.meta_data.get("sessionId", str(uuid.uuid4()))
+        session_id = self.meta_data.get("sessionId", str(uuid.uuid4()))
+        state = User(user_id).get_session_data(session_id)
+        self.session_id = state["session_id"]
         self.meta_data["sessionId"] = self.session_id
-        state = User(self.user_id, self.session_id).get_session_data()
         return state
 
     def _get_node(self):
 
         if bool(self.state):
-            node_id = self.state.get("current_node_id", flow_config["first_node_key"]) # give first_node as default
+            first_node_id = self.flow_id + "." + flow_config["first_node_key"]
+            node_id = self.state.get("current_node_id", first_node_id) # give first_node as default
             next_node_data = AnaNode(node_id).get_next_node_data(self.flow_id, self.message_content)
             next_node_id = next_node_data["node_id"]
             self.state["var_data"] = next_node_data["input_data"]
@@ -62,6 +64,9 @@ class MessageProcessor(threading.Thread):
     def _respond_with_messages(self, messages):
         url = application_config["GATEWAY_URL"]
         headers = {"Content-Type" : "application/json"}
+        if len(messages) == 0:
+            print("No messages to send")
+            return 1
         for message in messages:
             pprint(message)
             json_message = json.dumps(message)
