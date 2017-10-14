@@ -1,8 +1,8 @@
 import uuid
 import pdb
 import json
+import time
 from src import app
-
 
 class User():
 
@@ -34,11 +34,15 @@ class User():
         try:
             new_state = {}
             new_var_data = state.get("var_data", {})
-            # add timestamp to state here
+            timestamp = int(time.time()) 
             new_state["current_node_id"] = state["current_node_id"]
+            new_state["timestamp"] = timestamp
             for key in new_var_data.keys():
                 new_state[key] = new_var_data[key]
             app.redis_client.hmset(session_id, new_state)
+            db = app.couch["user_data"]
+            document = {"user_id" : self.user_id, "session_id": session_id, "data": new_state, "timestamp": timestamp}
+            db.save(document)
             # also persist data here
             return 1
         except Exception as e:

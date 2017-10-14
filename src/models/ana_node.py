@@ -34,9 +34,7 @@ class AnaNode():
                 # checking both type and ButtonType to handle Carousel Buttons
                 button_type = button.get("ButtonType", button.get("Type"))
                 var_name = current_node_contents.get("VariableName")
-                pdb.set_trace()
                 if button_type == "NextNode":
-                    pdb.set_trace()
                     current_node_id = input_data["val"]
                     if button["_id"] == current_node_id:  
                         if (var_name):
@@ -46,7 +44,6 @@ class AnaNode():
                         break
                 elif button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
                     if (var_name):
-                        pdb.set_trace()
                         user_input[var_name] = input_data["val"]
                     node_id = button["NextNodeId"]
                     node_key = flow_id + "." + node_id
