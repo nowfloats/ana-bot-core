@@ -28,7 +28,7 @@ class MessageProcessor(threading.Thread):
             print("Could not find flow")
             return 
         node = self._get_node()
-        messages = Converter.get_messages(node,self.meta_data, self.message_content)
+        messages = Converter(self.state).get_messages(node,self.meta_data, self.message_content)
         response = self._respond_with_messages(messages)
         if (response):
             User(self.user_id).set_state(self.session_id, self.state)
@@ -42,6 +42,7 @@ class MessageProcessor(threading.Thread):
         state = User(user_id).get_session_data(session_id)
         self.session_id = state["session_id"]
         self.meta_data["sessionId"] = self.session_id
+        state["flow_id"] = self.flow_id
         return state
 
     def _get_node(self):
@@ -51,7 +52,7 @@ class MessageProcessor(threading.Thread):
             node_id = self.state.get("current_node_id", first_node_id) # give first_node as default
             next_node_data = AnaNode(node_id).get_next_node_data(self.flow_id, self.message_content)
             next_node_id = next_node_data["node_id"]
-            self.state["var_data"] = next_node_data["input_data"]
+            self.state["new_var_data"] = next_node_data["input_data"]
             self.state["current_node_id"] = next_node_id
             node = AnaNode(next_node_id).get_contents(next_node_id)
         else:

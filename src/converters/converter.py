@@ -5,16 +5,16 @@ from src.models.message import MessageMeta, Message
 
 class Converter():
 
-    def __init__(self):
+    def __init__(self, state):
+        self.state = state
         pass
 
-    @classmethod
-    def get_messages(cls, node_data, meta_data, message_content, *args, **kwargs):
+    def get_messages(self, node_data, meta_data, message_content,*args, **kwargs):
         # pass to ana converter first
         # if ana responds with a message pass this message back
         # if not then pass to ai converter
         messages = []
-        messages_data = AnaConverter().get_messages_data(node_data, message_content)
+        messages_data = AnaConverter(self.state).get_messages_data(node_data, message_content)
         meta_data = MessageMeta(
                 sender=meta_data["recipient"],
                 recipient=meta_data["sender"],

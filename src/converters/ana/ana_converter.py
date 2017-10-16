@@ -1,19 +1,36 @@
 import json
 import urllib.parse
+import pdb
+import re
 from furl import furl
 from src.config import ana_config
-from src.thrift_models.ttypes import MessageType, InputType, MediaType
+from src.thrift_models.ttypes import MessageType, InputType, MediaType, ButtonType
 from src.models.message import MessageContent, MessageData, Message, Media
 from src.models.inputs import Option, Item, TextInput
 
 class Converter():
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, state,*args, **kwargs):
         self.messages = []
+        self.state = state
         # self.section_types = ana_config.section_types
         # self.node_types = ana_config.node_types
         # self.button_types = ana_config.button_types
         pass
+
+    def process_text(self, text):
+        data = self.state.get("var_data", "{}")
+        variable_data = json.loads(data)
+        current_variable_data = self.state["new_var_data"]
+        variable_data.update(current_variable_data)
+        matches = re.findall("\[~(.*?)\]", text)
+        variable_names = variable_data.keys()
+        final_text = text
+        for match in matches:
+            if match in variable_names:
+                key = "[~" + match + "]"
+                final_text = text.replace(key, variable_data[match])
+        return final_text
 
     def get_messages_data(self, node_data, message_content):
         if (node_data == {}): 
@@ -39,7 +56,8 @@ class Converter():
             if section_type == "Text":
                 message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
                 text = section["Text"]
-                message_content = MessageContent(text=text, mandatory=1).trim()
+                final_text = self.process_text(text)
+                message_content = MessageContent(text=final_text, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
 
@@ -49,9 +67,10 @@ class Converter():
                 url = section.get("Url","")
                 encoded_url = furl(url).url
                 preview_url = section.get("PreviewUrl","")
-                text = section["Title"]
+                text = section.get("Title", "")
+                final_text = self.process_text(text)
                 media_content = Media(type=media_type, url=encoded_url, previewUrl=preview_url).trim() 
-                message_content = MessageContent(text=text, media=media_content, mandatory=1).trim()
+                message_content = MessageContent(text=final_text, media=media_content, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
 
@@ -76,10 +95,18 @@ class Converter():
                     buttons = section_item["Buttons"]
                     options = []
                     for button in buttons:
-                        button_title = button["Text"]
-                        button_value = button["_id"]
-                        option_element = Option(title=button_title, value=button_value).trim()
+                        if button["Type"] == "OpenUrl":
+                            button_title = button["Text"]
+                            button_value = button["Url"]
+                            button_type = ButtonType._NAMES_TO_VALUES["URL"]
+                            pass
+                        else:
+                            button_title = button["Text"]
+                            button_value = button["_id"]
+                            button_type = ButtonType._NAMES_TO_VALUES["ACTION"]
+                        option_element = Option(title=button_title, value=button_value, type=button_type).trim()
                         options.append(option_element)
+
                     item_element = Item(title=title, desc=description, media=media_content,options=options).trim() 
                     item_elements.append(item_element)
                 message_content = MessageContent(items = item_elements, mandatory=1).trim()
@@ -92,6 +119,9 @@ class Converter():
         next_node_elem_message_data = []
         other_elem_message_data = []
         next_node_elements = []
+        open_url_elements = []
+        open_url_elem_message_data = []
+        open_url_elem_options = []
         other_elements = []
 
         for button in data:
@@ -99,16 +129,22 @@ class Converter():
                 next_node_elements.append(button)
             if button["ButtonType"] in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
                 other_elements.append(button)
+            if button["ButtonType"] == "OpenUrl":
+                open_url_elements.append(button)
 
         next_node_elem_message_type = MessageType._NAMES_TO_VALUES["INPUT"]
         next_node_elem_input_type = InputType._NAMES_TO_VALUES["OPTIONS"]
+
+        open_url_elem_message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+        open_url_elem_input_type = InputType._NAMES_TO_VALUES["OPTIONS"]
         next_node_elem_options = []
 
         # print(next_node_elements)
         for button in next_node_elements:
             option = {
                     "title": button["ButtonName"],
-                    "value": button.get("_id", "")
+                    "value": button.get("_id", ""),
+                    "type": ButtonType._NAMES_TO_VALUES["QUICK_REPLY"]
                     }
             next_node_elem_options.append(option)
 
@@ -123,6 +159,27 @@ class Converter():
                     content=next_node_elem_content
                     ).trim()
             next_node_elem_message_data.append(next_node_message_data)
+
+        for button in open_url_elements:
+            pdb.set_trace()
+            option = {
+                    "title": button["ButtonName"],
+                    "value": button["Url"],
+                    "type": ButtonType._NAMES_TO_VALUES["URL"]
+                    }
+            open_url_elem_options.append(option)
+
+        if (open_url_elem_options != []):
+            open_url_elem_content = MessageContent(
+                    inputType=open_url_elem_input_type,
+                    mandatory=1,
+                    options=open_url_elem_options
+                    ).trim()
+            open_url_message_data= MessageData(
+                    type=open_url_elem_message_type,
+                    content=open_url_elem_content
+                    ).trim()
+            open_url_elem_message_data.append(open_url_message_data)
 
         for button in other_elements:
             button_type = button["ButtonType"]
@@ -180,7 +237,8 @@ class Converter():
                 print(e)
                 raise
 
-        messages_data = next_node_elem_message_data + other_elem_message_data
+
+        messages_data = next_node_elem_message_data + open_url_elem_message_data + other_elem_message_data
         # for next_node_elements
         # take out nextnode elements and convert them into input.options
         # remaining element as another input element accordingly
