@@ -5,6 +5,7 @@ from flask import request
 from src import app
 from src.models.user import User
 from src.services.refresh_chatflows import RefreshChatFlows as ChatFlowController
+from src.services.session_service import SessionController
 from src.responder import MessageProcessor
 
 @app.route("/health-check")
@@ -20,6 +21,21 @@ def populate_ana_flows():
     json_data = json.dumps(data)
 
     response = Response(json_data, status=200, mimetype="application/json")
+    return response
+
+@app.route("/api/clearSessions")
+def clear_sessions():
+
+    user_id = request.args.get("user_id")
+
+    if (user_id is None):
+        message = json.dumps({"message": "user_id missing"}) 
+        response = Response(message, status=400, mimetype="application/json")
+    else:
+        session_response = SessionController().clear_sessions(user_id) 
+        json_response = json.dumps(session_response)
+        response = Response(json_response, status=200, mimetype="application/json")
+
     return response
 
 @app.route("/api/userData", methods = ["GET"])

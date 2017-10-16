@@ -34,7 +34,7 @@ class AnaNode():
                 # checking both type and ButtonType to handle Carousel Buttons
                 button_type = button.get("ButtonType", button.get("Type"))
                 var_name = current_node_contents.get("VariableName")
-                if button_type == "NextNode":
+                if button_type in ["NextNode", "OpenUrl"]:
                     current_node_id = input_data["val"]
                     if button["_id"] == current_node_id:  
                         if (var_name):
