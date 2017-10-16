@@ -97,9 +97,8 @@ class Converter():
                     for button in buttons:
                         if button["Type"] == "OpenUrl":
                             button_title = button["Text"]
-                            button_value = button["Url"]
+                            button_value = json.dumps({"url": button["Url"], "value": button["_id"]})
                             button_type = ButtonType._NAMES_TO_VALUES["URL"]
-                            pass
                         else:
                             button_title = button["Text"]
                             button_value = button["_id"]
@@ -161,10 +160,9 @@ class Converter():
             next_node_elem_message_data.append(next_node_message_data)
 
         for button in open_url_elements:
-            pdb.set_trace()
             option = {
                     "title": button["ButtonName"],
-                    "value": button["Url"],
+                    "value": json.dumps({"url": button["Url"], "value": button["_id"]}),
                     "type": ButtonType._NAMES_TO_VALUES["URL"]
                     }
             open_url_elem_options.append(option)
