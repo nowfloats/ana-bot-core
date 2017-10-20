@@ -67,7 +67,7 @@ class MessageProcessor(threading.Thread):
         headers = {"Content-Type" : "application/json"}
         if len(messages) == 0:
             print("No messages to send")
-            return 1
+            return 0
         for message in messages:
             pprint(message)
             json_message = json.dumps(message)

@@ -28,7 +28,7 @@ class AnaNode():
         # not really neat change it to objects once all buttons are handled
         if "val" in input_data.keys():
             button_contents = self._extract_button_elements(current_node_contents)
-            next_node_buttons = [button for button in button_contents if button.get("ButtonType") == "NextNode"]
+            next_node_buttons = [button for button in button_contents if button.get("ButtonType") in ["NextNode", "OpenUrl"]]
             # button_contents = current_node_contents["Buttons"]
             for button in button_contents:
                 # checking both type and ButtonType to handle Carousel Buttons
