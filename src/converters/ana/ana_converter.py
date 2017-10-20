@@ -32,11 +32,11 @@ class Converter():
     def get_messages_data(self, node_data, message_content):
         if (node_data == {}): 
             return []
-        node_type = node_data["NodeType"]
+        node_type = node_data.get("NodeType", "")
         messages = []
         if node_type == "Combination":
-            sections_data = node_data["Sections"]
-            buttons_data = node_data["Buttons"]
+            sections_data = node_data.get("Sections",[])
+            buttons_data = node_data.get("Buttons", [])
             sections_response = self.convert_sections(sections_data)
             buttons_response = self.convert_buttons(buttons_data)
             messages = sections_response + buttons_response
@@ -49,7 +49,7 @@ class Converter():
         # after the types are handled remove if else clauses
         # convert to objects, preferably using factory pattern
         for section in data:
-            section_type = section["SectionType"]
+            section_type = section.get("SectionType", "")
             if section_type == "Text":
                 message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
                 text = section["Text"]
@@ -80,24 +80,24 @@ class Converter():
 
             elif section_type == "Carousel":
                 message_type = MessageType._NAMES_TO_VALUES["CAROUSEL"]
-                section_items = section["Items"]
+                section_items = section.get("Items",[])
                 item_elements = []
                 for section_item in section_items:
                     media_type = MediaType._NAMES_TO_VALUES["IMAGE"]
-                    image_url = section_item["ImageUrl"]
-                    title = section_item["Title"]
-                    description = section_item["Caption"]
+                    image_url = section_item.get("ImageUrl", "")
+                    title = section_item.get("Title", "")
+                    description = section_item.get("Caption", "")
                     encoded_url = furl(image_url).url
                     media_content = Media(type=media_type, url=encoded_url).trim()
-                    buttons = section_item["Buttons"]
+                    buttons = section_item.get("Buttons",[])
                     options = []
                     for button in buttons:
                         if button["Type"] == "OpenUrl":
-                            button_title = button["Text"]
+                            button_title = button.get("Text","")
                             button_value = json.dumps({"url": button["Url"], "value": button["_id"]})
                             button_type = ButtonType._NAMES_TO_VALUES["URL"]
                         else:
-                            button_title = button["Text"]
+                            button_title = button.get("Text","")
                             button_value = button["_id"]
                             button_type = ButtonType._NAMES_TO_VALUES["ACTION"]
                         option_element = Option(title=button_title, value=button_value, type=button_type).trim()
