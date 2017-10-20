@@ -1,7 +1,10 @@
 import uuid
+import pdb
+import datetime
 import json
 import time
 from src import app
+from src.utils import Util
 
 class User():
 
@@ -32,31 +35,33 @@ class User():
         try:
             new_state = {}
             new_var_data = state.get("new_var_data", {})
-
-            timestamp = int(time.time()) 
-            self._persist_data(var_data=new_var_data, session_id = session_id, timestamp = timestamp)
-
             old_state = app.redis_client.hgetall(session_id)
             current_var_data = old_state.get("var_data", "{}")
-            new_var_data.update(json.loads(current_var_data))
+            final_var_data = Util.merge_dicts(new_var_data, json.loads(current_var_data))
 
+            timestamp = int(time.time()) 
             new_state["current_node_id"] = state["current_node_id"]
             new_state["timestamp"] = timestamp
-            new_state["var_data"] = json.dumps(new_var_data)
+            new_state["var_data"] = json.dumps(final_var_data)
 
             app.redis_client.hmset(session_id, new_state)
+            self._persist_data(var_data=new_var_data, session_id = session_id)
             return 1
         except Exception as e:
             print(e)
             raise
 
-    def _persist_data(self, var_data = {} , session_id = "", timestamp = int(time.time())):
+    def _persist_data(self, var_data = {} , session_id = ""):
+        # change this method to perform async
         if (var_data == {}):
             return 1
-        db = app.couch["user_data"]
-        document = {"user_id" : self.user_id, "session_id": session_id, "data": var_data, "timestamp": timestamp}
+        object_id = str(uuid.uuid4())
+        timestamp = datetime.datetime.utcnow()
+        collection = app.db["user_data"]
+        document = {"_id": object_id, "user_id" : self.user_id, "session_id": session_id, "data": var_data, "timestamp": timestamp}
         try:
-            db.save(document)
+            saved_document_id = collection.insert_one(document).inserted_id
+            print("Variable data saved with object_id", saved_document_id)
             return 1
         except Exception as e:
             print(e)
