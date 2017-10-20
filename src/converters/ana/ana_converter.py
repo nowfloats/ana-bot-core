@@ -10,15 +10,12 @@ from src.models.inputs import Option, Item, TextInput
 
 class Converter():
 
-    def __init__(self, state,*args, **kwargs):
-        self.messages = []
+    def __init__(self, state, *args, **kwargs):
         self.state = state
-        # self.section_types = ana_config.section_types
-        # self.node_types = ana_config.node_types
-        # self.button_types = ana_config.button_types
-        pass
+        self.click_inputs = ana_config["click_input_types"]
+        self.text_inputs = ana_config["text_input_types"]
 
-    def process_text(self, text):
+    def verb_replacer(self, text):
         data = self.state.get("var_data", "{}")
         variable_data = json.loads(data)
         current_variable_data = self.state["new_var_data"]
@@ -56,7 +53,7 @@ class Converter():
             if section_type == "Text":
                 message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
                 text = section["Text"]
-                final_text = self.process_text(text)
+                final_text = self.verb_replacer(text)
                 message_content = MessageContent(text=final_text, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
@@ -68,7 +65,7 @@ class Converter():
                 encoded_url = furl(url).url
                 preview_url = section.get("PreviewUrl","")
                 text = section.get("Title", "")
-                final_text = self.process_text(text)
+                final_text = self.verb_replacer(text)
                 media_content = Media(type=media_type, url=encoded_url, previewUrl=preview_url).trim() 
                 message_content = MessageContent(text=final_text, media=media_content, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
@@ -115,154 +112,110 @@ class Converter():
         return messages_data
         
     def convert_buttons(self,data):
+
         next_node_elem_message_data = []
-        other_elem_message_data = []
         next_node_elements = []
+        next_node_elem_options = []
+
         open_url_elements = []
         open_url_elem_message_data = []
         open_url_elem_options = []
+
         other_elements = []
+        other_elem_message_data = []
+
+        click_elements = [button for button in data if button["ButtonType"] in self.click_inputs]
+        text_elements = [button for button in data if button["ButtonType"] in self.text_inputs]
+
+        messages_data = []
+
+        if len(click_elements) !=0 and len(text_elements) == 0:
+            messages_data = self._process_click_inputs(click_elements, mandatory=1)
+        elif len(click_elements) !=0 and len(text_elements) != 0:
+            messages_data = self._process_click_inputs(click_elements, mandatory=0)
+        elif len(click_elements) ==0 and len(text_elements) != 0:
+            messages_data = self._process_text_inputs(text_elements)
+
+        return messages_data
+
+    def _process_click_inputs(self, data, mandatory):
+
+        button_heading = None
+        elem_message_data = []
+        elem_options = []
+
+        message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+        input_type = InputType._NAMES_TO_VALUES["OPTIONS"]
 
         for button in data:
-            if button["ButtonType"] == "NextNode":
-                next_node_elements.append(button)
-            if button["ButtonType"] in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
-                other_elements.append(button)
-            if button["ButtonType"] == "OpenUrl":
-                open_url_elements.append(button)
+            button_type = button.get("ButtonType","")
+            if (button_type == "OpenUrl"):
+                option = {
+                        "title": button.get("ButtonName", ""),
+                        "value": json.dumps({"url": button["Url"], "value": button["_id"]}),
+                        "type": ButtonType._NAMES_TO_VALUES["URL"]
+                        }
+            elif (button_type == "NextNode"):
+                button_heading = "Select one" # to be compatible with fb quick_replies 
+                option = {
+                        "title": button.get("ButtonName", ""),
+                        "value": button.get("_id", ""),
+                        "type": ButtonType._NAMES_TO_VALUES["QUICK_REPLY"]
+                        }
+            elem_options.append(option)
 
-        next_node_elem_message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-        next_node_elem_input_type = InputType._NAMES_TO_VALUES["OPTIONS"]
-
-        open_url_elem_message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-        open_url_elem_input_type = InputType._NAMES_TO_VALUES["OPTIONS"]
-        next_node_elem_options = []
-
-        # print(next_node_elements)
-        for button in next_node_elements:
-            option = {
-                    "title": button["ButtonName"],
-                    "value": button.get("_id", ""),
-                    "type": ButtonType._NAMES_TO_VALUES["QUICK_REPLY"]
-                    }
-            next_node_elem_options.append(option)
-
-        if (next_node_elem_options != []):
-            next_node_elem_content = MessageContent(
-                    inputType=next_node_elem_input_type,
-                    mandatory=1,
-                    options=next_node_elem_options
+        if (len(elem_options) != 0):
+            message_content = MessageContent(
+                    inputType=input_type,
+                    mandatory=mandatory,
+                    options=elem_options,
+                    text=button_heading
                     ).trim()
-            next_node_message_data = MessageData(
-                    type=next_node_elem_message_type,
-                    content=next_node_elem_content
+            message_data = MessageData(
+                    type=message_type,
+                    content=message_content
                     ).trim()
-            next_node_elem_message_data.append(next_node_message_data)
+            elem_message_data.append(message_data)
 
-        for button in open_url_elements:
-            option = {
-                    "title": button["ButtonName"],
-                    "value": json.dumps({"url": button["Url"], "value": button["_id"]}),
-                    "type": ButtonType._NAMES_TO_VALUES["URL"]
-                    }
-            open_url_elem_options.append(option)
+        return elem_message_data
 
-        if (open_url_elem_options != []):
-            open_url_elem_content = MessageContent(
-                    inputType=open_url_elem_input_type,
-                    mandatory=1,
-                    options=open_url_elem_options
-                    ).trim()
-            open_url_message_data= MessageData(
-                    type=open_url_elem_message_type,
-                    content=open_url_elem_content
-                    ).trim()
-            open_url_elem_message_data.append(open_url_message_data)
+    def _process_text_inputs(self, data):
 
-        for button in other_elements:
-            button_type = button["ButtonType"]
+        elem_message_data = []
+
+        for button in data:
+            button_type = button.get("ButtonType")
+            message_type = ""
+            input_type = ""
+            input_attr = None
+            content = None
+
             if button_type == "GetText":
                 message_type = MessageType._NAMES_TO_VALUES["INPUT"]
                 input_type = InputType._NAMES_TO_VALUES["TEXT"] 
                 input_attr = TextInput(placeHolder= button.get("PlaceholderText", "")).trim()
-                content = MessageContent(
-                        inputType=input_type,
-                        textInputAttr=input_attr,
-                        mandatory=1,
-                        ).trim()
-                message_data = MessageData(
-                        type=message_type,
-                        content=content
-                        ).trim()
-                other_elem_message_data.append(message_data)
             elif button_type == "GetNumber":
                 message_type = MessageType._NAMES_TO_VALUES["INPUT"]
                 input_type = InputType._NAMES_TO_VALUES["NUMERIC"] 
-                content = MessageContent(
-                        inputType=input_type,
-                        mandatory=1,
-                        ).trim()
-                message_data = MessageData(
-                        type=message_type,
-                        content=content
-                        ).trim()
-                other_elem_message_data.append(message_data)
             elif button_type == "GetPhoneNumber":
                 message_type = MessageType._NAMES_TO_VALUES["INPUT"]
                 input_type = InputType._NAMES_TO_VALUES["PHONE"] 
-                content = MessageContent(
-                        inputType=input_type,
-                        mandatory=1,
-                        ).trim()
-                message_data = MessageData(
-                        type=message_type,
-                        content=content
-                        ).trim()
-                other_elem_message_data.append(message_data)
             elif button_type == "GetEmail":
                 message_type = MessageType._NAMES_TO_VALUES["INPUT"]
                 input_type = InputType._NAMES_TO_VALUES["EMAIL"] 
-                content = MessageContent(
-                        inputType=input_type,
-                        mandatory=1,
-                        ).trim()
-                message_data = MessageData(
-                        type=message_type,
-                        content=content
-                        ).trim()
-                other_elem_message_data.append(message_data)
             else:
                 print(e)
                 raise
 
+            content = MessageContent(
+                    inputType=input_type,
+                    textInputAttr=input_attr,
+                    mandatory=1,
+                    ).trim()
+            message_data = MessageData(
+                    type=message_type,
+                    content=content
+                    ).trim()
+            elem_message_data.append(message_data)
 
-        messages_data = next_node_elem_message_data + open_url_elem_message_data + other_elem_message_data
-        # for next_node_elements
-        # take out nextnode elements and convert them into input.options
-        # remaining element as another input element accordingly
-        return messages_data
-
-# "ana_section_types" : ["Image", "Text", "Graph", "Gif", "Audio", "Video", "Link", "EmbeddedHtml","Carousel"],
-# "ana_node_types" : ["Combination", "ApiCall"],
-# "ana_button_types" : ["PostText", "OpenUrl","GetText", "GetAddress", "GetNumber", "GetPhoneNumber","GetEmail","GetImage","GetAudio","GetVideo","GetItemFromSource","NextNode","DeepLink","GetAgent","ApiCall","ShowConfirmation","FetchChatFlow","GetDate","GetTime","GetDateTime","GetLocation"]
-
-
-# Image, Audio, Video, Gif -> Simple Message with Media Content
-# Text, Link, EmbeddedHtml -> Simple Message with Text content ?? what for link and embeddedhtml 
-# Carousel -> Carousel Message
-
-# OpenUrl -> Input.Options
-# GetAddress -> Input.Address
-
-# GetText -> Input.Text
-# GetNumber -> Input.Numeric
-# GetPhoneNumber -> Input.Phone
-# GetEmail -> Input.Email
-
-# GetImage, GetAudio, GetVideo -> Input.Media
-# GetDate -> Input.Date
-# GetTime -> Input.Time
-# GetDateTime ??
-# GetLocation -> Input.Location
-# NextNode -> Input.options
-# GetItemFromSource,NextNode, GetAgent, DeepLink, GetAgent, ApiCall, ShowConfirmation, FetchChatFlow #handle with different scenario
+        return elem_message_data
