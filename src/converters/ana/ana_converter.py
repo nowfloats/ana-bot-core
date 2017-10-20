@@ -10,15 +10,12 @@ from src.models.inputs import Option, Item, TextInput
 
 class Converter():
 
-    def __init__(self, state,*args, **kwargs):
-        self.messages = []
+    def __init__(self, state, *args, **kwargs):
         self.state = state
-        # self.section_types = ana_config.section_types
-        # self.node_types = ana_config.node_types
-        # self.button_types = ana_config.button_types
-        pass
+        self.click_inputs = ana_config["click_input_types"]
+        self.text_inputs = ana_config["text_input_types"]
 
-    def process_text(self, text):
+    def verb_replacer(self, text):
         data = self.state.get("var_data", "{}")
         variable_data = json.loads(data)
         current_variable_data = self.state["new_var_data"]
@@ -56,7 +53,7 @@ class Converter():
             if section_type == "Text":
                 message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
                 text = section["Text"]
-                final_text = self.process_text(text)
+                final_text = self.verb_replacer(text)
                 message_content = MessageContent(text=final_text, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
@@ -68,7 +65,7 @@ class Converter():
                 encoded_url = furl(url).url
                 preview_url = section.get("PreviewUrl","")
                 text = section.get("Title", "")
-                final_text = self.process_text(text)
+                final_text = self.verb_replacer(text)
                 media_content = Media(type=media_type, url=encoded_url, previewUrl=preview_url).trim() 
                 message_content = MessageContent(text=final_text, media=media_content, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
@@ -127,23 +124,17 @@ class Converter():
         other_elements = []
         other_elem_message_data = []
 
-        click_inputs = ["NextNode", "OpenUrl", "GetFile", "GetAudio", "PostText", "GetImage", "GetAgent"]
-        text_inputs = ["GetText", "GetEmail", "GetNumber", "GetPhoneNumber", "GetItemFromSource"]
-
-        click_elements = [button for button in data if button["ButtonType"] in click_inputs]
-        text_elements = [button for button in data if button["ButtonType"] in text_inputs]
+        click_elements = [button for button in data if button["ButtonType"] in self.click_inputs]
+        text_elements = [button for button in data if button["ButtonType"] in self.text_inputs]
 
         messages_data = []
 
         if len(click_elements) !=0 and len(text_elements) == 0:
             messages_data = self._process_click_inputs(click_elements, mandatory=1)
-            pass
         elif len(click_elements) !=0 and len(text_elements) != 0:
             messages_data = self._process_click_inputs(click_elements, mandatory=0)
-            pass
         elif len(click_elements) ==0 and len(text_elements) != 0:
             messages_data = self._process_text_inputs(text_elements)
-            pass
 
         return messages_data
 
@@ -157,17 +148,17 @@ class Converter():
         input_type = InputType._NAMES_TO_VALUES["OPTIONS"]
 
         for button in data:
-            button_type = button["ButtonType"]
+            button_type = button.get("ButtonType","")
             if (button_type == "OpenUrl"):
                 option = {
-                        "title": button["ButtonName"],
+                        "title": button.get("ButtonName", ""),
                         "value": json.dumps({"url": button["Url"], "value": button["_id"]}),
                         "type": ButtonType._NAMES_TO_VALUES["URL"]
                         }
             elif (button_type == "NextNode"):
                 button_heading = "Select one" # to be compatible with fb quick_replies 
                 option = {
-                        "title": button["ButtonName"],
+                        "title": button.get("ButtonName", ""),
                         "value": button.get("_id", ""),
                         "type": ButtonType._NAMES_TO_VALUES["QUICK_REPLY"]
                         }
