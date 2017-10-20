@@ -156,7 +156,7 @@ class Converter():
                         "type": ButtonType._NAMES_TO_VALUES["URL"]
                         }
             elif (button_type == "NextNode"):
-                button_heading = "Select one" # to be compatible with fb quick_replies 
+                button_heading = "Choose an option" # to be compatible with fb quick_replies 
                 option = {
                         "title": button.get("ButtonName", ""),
                         "value": button.get("_id", ""),

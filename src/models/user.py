@@ -5,6 +5,7 @@ import json
 import time
 from src import app
 from src.utils import Util
+from src.thrift_models.ttypes import Medium
 
 class User():
 
@@ -31,13 +32,15 @@ class User():
 
         return response
 
-    def set_state(self, session_id, state):
+    def set_state(self, session_id, state, meta_data):
         try:
             new_state = {}
             new_var_data = state.get("new_var_data", {})
             old_state = app.redis_client.hgetall(session_id)
             current_var_data = old_state.get("var_data", "{}")
             final_var_data = Util.merge_dicts(new_var_data, json.loads(current_var_data))
+            channel_type = meta_data["sender"]["medium"]
+            channel = Medium._VALUES_TO_NAMES[channel_type]
 
             timestamp = int(time.time()) 
             new_state["current_node_id"] = state["current_node_id"]
@@ -45,20 +48,20 @@ class User():
             new_state["var_data"] = json.dumps(final_var_data)
 
             app.redis_client.hmset(session_id, new_state)
-            self._persist_data(var_data=new_var_data, session_id = session_id)
+            self._persist_data(var_data=new_var_data, session_id = session_id, channel = channel)
             return 1
         except Exception as e:
             print(e)
             raise
 
-    def _persist_data(self, var_data = {} , session_id = ""):
+    def _persist_data(self, var_data = {} , session_id = "", channel = ""):
         # change this method to perform async
         if (var_data == {}):
             return 1
         object_id = str(uuid.uuid4())
         timestamp = datetime.datetime.utcnow()
         collection = app.db["user_data"]
-        document = {"_id": object_id, "user_id" : self.user_id, "session_id": session_id, "data": var_data, "timestamp": timestamp}
+        document = {"_id": object_id, "user_id" : self.user_id, "session_id": session_id, "data": var_data, "timestamp": timestamp, "channel": channel}
         try:
             saved_document_id = collection.insert_one(document).inserted_id
             print("Variable data saved with object_id", saved_document_id)
