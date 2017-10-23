@@ -19,8 +19,8 @@ class MessageProcessor(threading.Thread):
         self.message_content = message["data"]
         self.user_id = self.meta_data["sender"]["id"]
         self.business_id = self.meta_data["recipient"]["id"]
-        flow_data = flow_config["flows"].get(self.business_id, {})
-        self.flow_id = flow_data.get("flow_id", flow_config["default_flow_id"])
+        self.flow_data = flow_config["flows"].get(self.business_id, {})
+        self.flow_id = self.flow_data.get("flow_id", flow_config["default_flow_id"])
         self.state = self._get_state()
 
     def run(self):
@@ -31,7 +31,7 @@ class MessageProcessor(threading.Thread):
         messages = Converter(self.state).get_messages(node,self.meta_data, self.message_content)
         response = self._respond_with_messages(messages)
         if (response):
-            User(self.user_id).set_state(self.session_id, self.state, self.meta_data)
+            User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
             print("User state updated with", self.state)
         else:
             print("Could not respond back")
