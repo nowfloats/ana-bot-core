@@ -25,7 +25,19 @@ flow_config = {
             default_business_id: {
                 "flow_id": default_flow_id,
                 "api": default_flow_api
-                }
+                },
+            "demo-automobiles": {
+                "flow_id": "demo-automobiles",
+                "api": "http://ria.nowfloatsdev.com/websitesamples/api/Conversation/chat?projectId=59ea2acab02a292edc83d5d2"
+            },
+            "demo-ecommerce": {
+                "flow_id": "demo-ecommerce",
+                "api": "http://ria.nowfloatsdev.com/websitesamples/api/Conversation/chat?projectId=59ea3dc7b02a292edc83d69d"
+            },
+            "demo-real-estate": {
+                "flow_id": "demo-real-estate",
+                "api": "http://ria.nowfloatsdev.com/websitesamples/api/Conversation/chat?projectId=59ea3d46b02a292edc83d670"
+            }
             }
         }
 
