@@ -28,17 +28,22 @@ flow_config = {
                 "business_name": "BLUME_VENTURES"
                 },
             "demo-automobiles": {
-                "flow_id": "demo-automobiles",
+                "flow_id": "e8f95226-f376-4e89-a8c5-a169b94bb18d",
                 "api": "http://ria.nowfloatsdev.com/websitesamples/api/Conversation/chat?projectId=59ea2acab02a292edc83d5d2",
                 "business_name": "DEMO_AUTOMOBILES"
             },
             "demo-ecommerce": {
-                "flow_id": "demo-ecommerce",
+                "flow_id": "22cf9e4a-46e3-46d2-a7f9-514d92bc3269",
                 "api": "http://ria.nowfloatsdev.com/websitesamples/api/Conversation/chat?projectId=59ea3dc7b02a292edc83d69d",
                 "business_name": "DEMO_ECOMMERCE",
             },
+            "713199095512917": {
+                "flow_id": "51a3a2e2-7387-4cfe-8cee-4715190891b6",
+                "api": "https://nfanabots.withfloats.com/nfbots/api/conversation/chat?projectid=59b2a49cc7d8bf405c4116f9",
+                "business_name": "getkitsune-com"
+                },
             "demo-real-estate": {
-                "flow_id": "demo-real-estate",
+                "flow_id": "3ce278ad-caec-44a1-8a97-d31394eadf97",
                 "api": "http://ria.nowfloatsdev.com/websitesamples/api/Conversation/chat?projectId=59ea3d46b02a292edc83d670",
                 "business_name": "DEMO_REALESTATE"
             }
