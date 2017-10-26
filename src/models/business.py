@@ -17,14 +17,21 @@ class Business():
         business_object = self.collection.find_one({"business_id": self.business_id})
         return business_object
 
-    def save_node_data_to_cache(self, flow_id = None, nodes = []):
+    def save_business_data_to_cache(self, business_data = {}, nodes = []):
 
-        if flow_id == None:
+        if business_data == {}:
             return False 
 
+        flow_id = business_data["flow_id"]
         redis_client = app.redis_client
         node_dict = {}
 
+        business_data_to_save = {
+                business_data["business_id"] : {
+                    "flow_id" : flow_id,
+                    "business_name" : business_data["business_name"]
+                    }
+                }
         for node in nodes:
             if node["Id"] not in config["archived_node_ids"]: 
                 if node["IsStartNode"] == True:
@@ -35,6 +42,9 @@ class Business():
 
         try: 
             redis_client.mset(node_dict)
+            print("Node data written to cache")
+            redis_client.mset(business_data_to_save)
+            print("Business data written to cache")
             return True
         except Exception as e:
             print("Error writing to cache")
@@ -67,4 +77,3 @@ class Business():
         except Exception as e:
             print(e)
             return False
-

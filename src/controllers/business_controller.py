@@ -17,7 +17,4 @@ class BusinessController():
         print("Created business details")
 
         data_saved_to_cache = ChatFlowController.populate_flows(business_id)
-        print("Data saved to cache") if data_saved_to_cache else print("Saving to cache failed")
-        # save other business details to cache
-
         return {"message": "success"} if create_business else {"message": "failure"} 

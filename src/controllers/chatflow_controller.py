@@ -26,5 +26,5 @@ class ChatFlowController():
             return {"message": "failure"}
 
         nodes = response.json()
-        data_saved_to_cache = Business(business_id).save_node_data_to_cache(flow_id = flow_id, nodes = nodes)
+        data_saved_to_cache = Business(business_id).save_business_data_to_cache(business_data = business_data, nodes = nodes)
         return {"message": "success"} if data_saved_to_cache else {"message": "failure"} 
