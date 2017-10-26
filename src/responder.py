@@ -4,7 +4,6 @@ import json
 import threading
 import pdb
 from furl import furl
-from pprint import pprint
 from src.models.user import User
 from src.models.ana_node import AnaNode
 from src.config import flow_config
@@ -69,7 +68,7 @@ class MessageProcessor(threading.Thread):
             print("No messages to send")
             return 0
         for message in messages:
-            pprint(message)
+            print(message)
             json_message = json.dumps(message)
             try:
                 response = requests.post(url, headers=headers, data=json_message)

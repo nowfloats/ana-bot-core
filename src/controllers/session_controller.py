@@ -1,13 +1,13 @@
 from src.models.user import User
 from src import app
-import pdb
 
 class SessionController():
     
     def __init__(self, *args, **kwargs):
         pass
 
-    def clear_sessions(self, user_id):
+    @staticmethod
+    def clear_sessions(user_id):
         user_key =  user_id + "." + "sessions"
         sessions = app.redis_client.lrange(user_key,0, -1)
         if (len(sessions) == 0):
