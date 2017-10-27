@@ -29,32 +29,47 @@ class MessageProcessor(threading.Thread):
         # self.flow_data = flow_config["flows"].get(self.business_id, {})
         self.flow_id = self.flow_data.get("flow_id", flow_config["default_flow_id"])
 
+        self.sender_type = SenderType._VALUES_TO_NAMES[self.message["meta"]["senderType"]]
         self.state = self._get_state()
 
     def run(self):
 
+        # convert this into objects
         if (self.flow_id == ""):
             print("Could not find flow")
             return 
-        # messages = [self.message]
-        # response = self._respond_with_messages(messages)
-        sender_type = SenderType._VALUES_TO_NAMES[self.message["meta"]["senderType"]]
-        if (sender_type == "AGENT"):
-            messages = [self.message]
+
+
+        if (self.sender_type == "AGENT"):
+            messages = Converter(self.state).get_agent_messages(self.meta_data, self.message_content)
             response = self._respond_with_messages(messages)
         else:
             node = self._get_node()
-            messages = Converter(self.state).get_messages(node,self.meta_data, self.message_content)
-            response = self._respond_with_messages(messages)
-            if (response):
-                User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
-                print("User state updated with", self.state)
+            messages_data = Converter(self.state).get_messages(node,self.meta_data, self.message_content)
+            messages = messages_data.get("messages")
+
+            if (messages_data.get("send_to") == "AGENT"):
+                response = self._send_to_agent(messages)
+                if (response):
+                    User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
+                    print("User state updated with", self.state)
+                else:
+                    print("Could not respond back")
             else:
-                print("Could not respond back")
+                response = self._respond_with_messages(messages)
+                if (response):
+                    User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
+                    print("User state updated with", self.state)
+                else:
+                    print("Could not respond back")
 
     def _get_state(self):
 
-        user_id = self.meta_data["sender"]["id"]
+        if (self.sender_type == "AGENT"):
+            user_id = self.business_id
+        else:
+            user_id = self.user_id
+
         session_id = self.meta_data.get("sessionId", str(uuid.uuid4()))
 
         state = User(user_id).get_session_data(session_id)
@@ -77,6 +92,7 @@ class MessageProcessor(threading.Thread):
             self.state["current_node_id"] = next_node_id
             node = AnaNode(next_node_id).get_contents(next_node_id)
         else:
+            first_node_id = self.flow_id + "." + flow_config["first_node_key"]
             next_node_id =  self.flow_id + "." + flow_config["first_node_key"]
             self.state["current_node_id"] = next_node_id
             node = AnaNode(next_node_id).get_contents(next_node_id)
@@ -99,3 +115,21 @@ class MessageProcessor(threading.Thread):
                 print(e)
                 return 0
         return 1
+
+    def _send_to_agent(self, messages):
+        url = application_config["AGENT_URL"]
+        headers = {"Content-Type" : "application/json"}
+        if len(messages) == 0:
+            print("No messages to send to agent")
+            return 0
+        for message in messages:
+            print(message)
+            json_message = json.dumps(message)
+            try:
+                response = requests.post(url, headers=headers, data=json_message)
+                print(response)
+            except Exception as e:
+                print(e)
+                return 0
+        return 1
+

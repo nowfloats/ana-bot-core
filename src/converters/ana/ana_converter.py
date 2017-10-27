@@ -42,6 +42,8 @@ class Converter():
             messages = sections_response + buttons_response
         elif node_type == "ApiCall":
             pass
+        elif node_type == "HandoffToAgent":
+            return None
         return messages
 
     def convert_sections(self,data):
