@@ -150,6 +150,7 @@ class Converter():
         for button in data:
             button_type = button.get("ButtonType","")
             if (button_type == "OpenUrl"):
+                button_heading = "Choose an option" # to be compatible with fb quick_replies 
                 option = {
                         "title": button.get("ButtonName", ""),
                         "value": json.dumps({"url": button["Url"], "value": button["_id"]}),
