@@ -9,9 +9,16 @@ class Business():
     def __init__(self, business_id, *args, **kwargs):
 
         self.business_id = business_id
+        self.redis_client = app.redis_client
         self.created_at = datetime.datetime.now()
         self.updated_at = datetime.datetime.now()
         self.collection = app.db.business_data
+
+    # all cache and db methods should merge together
+    # have persistent layer load cache if not found in cache
+    def get_business_data(self, *args, **kwargs):
+        business_object = self.redis_client.hgetall(self.business_id)
+        return business_object
 
     def get_details(self, *args, **kwargs):
         business_object = self.collection.find_one({"business_id": self.business_id})
@@ -26,12 +33,9 @@ class Business():
         redis_client = app.redis_client
         node_dict = {}
 
-        business_data_to_save = {
-                business_data["business_id"] : {
-                    "flow_id" : flow_id,
-                    "business_name" : business_data["business_name"]
-                    }
-                }
+        business_keys = ["flow_id", "business_name"] 
+        business_data_to_save = {key : business_data[key] for key in business_keys}
+
         for node in nodes:
             if node["Id"] not in config["archived_node_ids"]: 
                 if node["IsStartNode"] == True:
@@ -43,7 +47,7 @@ class Business():
         try: 
             redis_client.mset(node_dict)
             print("Node data written to cache")
-            redis_client.mset(business_data_to_save)
+            redis_client.hmset(self.business_id, business_data_to_save)
             print("Business data written to cache")
             return True
         except Exception as e:

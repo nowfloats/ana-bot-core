@@ -72,9 +72,11 @@ class AnaNode():
         return {"node_id": node_key, "input_data": user_input}
 
     def _extract_button_elements(self,data):
-        node_buttons = data["Buttons"]
+
+        node_buttons = data.get("Buttons",[])
+        sections = data.get("Sections",[])
         section_buttons = []
-        sections = data["Sections"]
+
         for section in sections:
             if section["SectionType"] == "Carousel":
                 section_items = section["Items"]

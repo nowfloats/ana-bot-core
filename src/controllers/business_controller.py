@@ -18,3 +18,8 @@ class BusinessController():
 
         data_saved_to_cache = ChatFlowController.populate_flows(business_id)
         return {"message": "success"} if create_business else {"message": "failure"} 
+
+    @staticmethod
+    def get_business(business_id):
+        business_data = Business(business_id).get_business_data()
+        return business_data

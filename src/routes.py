@@ -2,6 +2,7 @@ import json
 import os
 from flask import Response
 from flask import request
+from functools import wraps
 from src import app
 from src.models.user import User
 from src.controllers.chatflow_controller import ChatFlowController
@@ -38,6 +39,7 @@ def populate_ana_flows():
     return response
 
 def validate_session_params(func):
+    @wraps(func)
     def validate_session(*args, **kwargs):
         user_id = request.args.get("user_id")
         if user_id is None:
@@ -47,7 +49,7 @@ def validate_session_params(func):
         return func(*args, *kwargs)
     return validate_session
 
-@app.route("/api/clearSessions")
+@app.route("/api/clearSessions", endpoint="clear_sessions")
 @validate_session_params
 def clear_sessions():
 
@@ -67,6 +69,19 @@ def message_handler():
     print("****************")
     response = MessageProcessor(message).start()
     return "OK"
+
+@app.route("/api/business", endpoint="get_business")
+@validate_business_params
+def get_business():
+    business_id = request.args.get("business_id")
+    data = BusinessController.get_business(business_id)
+
+    if (data == {}):
+        response = Response(status="404", mimetype="application/json")
+    else:
+        json_data = json.dumps(data)
+        response = Response(json_data, status=200, mimetype="application/json")
+    return response
 
 @app.route("/api/business", methods=["POST"])
 def business_handler():
