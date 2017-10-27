@@ -25,8 +25,8 @@ class MessageProcessor(threading.Thread):
         self.user_id = self.meta_data["sender"]["id"]
         self.business_id = self.meta_data["recipient"]["id"]
 
-        # self.flow_data = Business(self.business_id).get_business_data()
-        self.flow_data = flow_config["flows"].get(self.business_id, {})
+        self.flow_data = Business(self.business_id).get_business_data()
+        # self.flow_data = flow_config["flows"].get(self.business_id, {})
         self.flow_id = self.flow_data.get("flow_id", flow_config["default_flow_id"])
 
         self.state = self._get_state()
