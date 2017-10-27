@@ -45,23 +45,32 @@ class MessageProcessor(threading.Thread):
             response = self._respond_with_messages(messages)
         else:
             node = self._get_node()
-            messages_data = Converter(self.state).get_messages(node,self.meta_data, self.message_content)
-            messages = messages_data.get("messages")
+            messages = Converter(self.state).get_messages(node,self.meta_data, self.message_content)
+            # messages = messages_data.get("messages")
+            agent_messages = [message["message"] for message in messages if message["send_to"] == "AGENT"]
+            user_messages = [message["message"] for message in messages if message["send_to"] == "USER"]
 
-            if (messages_data.get("send_to") == "AGENT"):
-                response = self._send_to_agent(messages)
-                if (response):
-                    User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
-                    print("User state updated with", self.state)
-                else:
-                    print("Could not respond back")
-            else:
-                response = self._respond_with_messages(messages)
-                if (response):
-                    User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
-                    print("User state updated with", self.state)
-                else:
-                    print("Could not respond back")
+            agent_response = self._send_to_agent(agent_messages)
+            user_response = self._respond_with_messages(user_messages)
+
+            if (agent_response and user_response):
+                User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
+                print("User state updated with", self.state)
+
+            # if (messages_data.get("send_to") == "AGENT"):
+                # response = self._send_to_agent(messages)
+                # if (response):
+                    # User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
+                    # print("User state updated with", self.state)
+                # else:
+                    # print("Could not respond back")
+            # else:
+                # response = self._respond_with_messages(messages)
+                # if (response):
+                    # User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
+                    # print("User state updated with", self.state)
+                # else:
+                    # print("Could not respond back")
 
     def _get_state(self):
 

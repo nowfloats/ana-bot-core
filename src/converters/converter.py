@@ -2,6 +2,11 @@ import time
 import pdb
 from src.converters.ana.ana_converter import Converter as AnaConverter
 from src.converters.agent.agent_converter import Converter as AgentConverter
+
+from src.thrift_models.ttypes import MessageType, InputType, MediaType, ButtonType
+from src.models.message import MessageContent, MessageData, Message, Media
+from src.models.inputs import Option, Item, TextInput
+
 from src.models.message import MessageMeta, Message
 
 class Converter():
@@ -19,8 +24,32 @@ class Converter():
 
         if messages_data == None:
             incoming_message = Message(meta=meta_data, data=message_content).trim()
-            messages.append(incoming_message)
-            return {"messages": messages, "send_to": "AGENT"}
+            messages.append({"message" :incoming_message, "send_to": "AGENT"})
+
+            message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+            input_type = InputType._NAMES_TO_VALUES["TEXT"] 
+            input_attr = TextInput(placeHolder="Talk to our Agent").trim()
+
+            user_meta_data = MessageMeta(
+                    sender=meta_data["recipient"],
+                    recipient=meta_data["sender"],
+                    sessionId=meta_data["sessionId"],
+                    responseTo=meta_data["id"],
+                    senderType=1 #change this hardcoded
+                    ).trim()
+            content = MessageContent(
+                    inputType=input_type,
+                    textInputAttr=input_attr,
+                    mandatory=1,
+                    ).trim()
+            input_message_data = MessageData(
+                    type=message_type,
+                    content=content
+                    ).trim()
+            input_message = Message(meta=user_meta_data, data=input_message_data).trim()
+            messages.append({"message" : input_message, "send_to": "USER"})
+
+            return messages
         else:
             meta_data = MessageMeta(
                     sender=meta_data["recipient"],
@@ -31,8 +60,8 @@ class Converter():
                     ).trim()
             for message_data in messages_data: 
                 message = Message(meta=meta_data, data=message_data).trim()
-                messages.append(message)
-            return {"messages": messages, "send_to": "USER"}
+                messages.append({"message" :message, "send_to": "USER"})
+            return messages
 
     def get_agent_messages(self, meta_data, message_content):
 
