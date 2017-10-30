@@ -53,7 +53,7 @@ class MessageProcessor(threading.Thread):
             agent_response = self._send_to_agent(agent_messages)
             user_response = self._respond_with_messages(user_messages)
 
-            if (agent_response and user_response):
+            if (agent_response or user_response):
                 User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
                 print("User state updated with", self.state)
 
