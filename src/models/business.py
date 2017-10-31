@@ -61,7 +61,7 @@ class Business():
 
         update_document = {}
         flow_id = str(uuid.uuid4())
-        update_document["flow_url"] = data["flow_url"]
+        update_document["flow"] = data["flow"]
         update_document["business_name"] = data["business_name"]
         update_document["updated_at"] = self.updated_at
 
