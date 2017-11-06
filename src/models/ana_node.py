@@ -25,6 +25,11 @@ class AnaNode():
         input_data = message_content["content"]["input"]
         user_input = {}
         node_key = ""
+
+        node_type = current_node_contents.get("NodeType")
+        if node_type == "HandoffToAgent":
+            return {"node_id": self.node_key, "input_data": user_input}
+
         # not really neat change it to objects once all buttons are handled
         if "val" in input_data.keys():
             button_contents = self._extract_button_elements(current_node_contents)

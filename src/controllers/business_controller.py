@@ -11,7 +11,7 @@ class BusinessController():
 
         business_id = data["business_id"]
         business_data = {}
-        business_data["flow_url"] = data["flow_url"]
+        business_data["flow"] = data["flow"]
         business_data["business_name"] = data["business_name"]
         create_business = Business(business_id).save(business_data)
         print("Created business details")
