@@ -53,13 +53,19 @@ class AnaNode():
                                 "node_data": current_node_contents,
                                 "event_data": button
                                 }
-                        # EventLogger.log(node_data = current_node_contents, type_of_event = "click", event_data = button)
                         break
                 elif button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
                     if (var_name):
                         user_input[var_name] = input_data["val"]
                     node_id = button["NextNodeId"]
                     node_key = flow_id + "." + node_id
+
+                    event_data = {
+                            "type_of_event": "click",
+                            "node_data": current_node_contents,
+                            "event_data": button
+                            }
+
                     break
             if (node_key):
                 pass
@@ -75,6 +81,11 @@ class AnaNode():
                     var_name = current_node_contents["VariableName"]
                     user_input[var_name] = input_data["input"]
                     node_id = button["NextNodeId"]
+                    event_data = {
+                            "type_of_event": "click",
+                            "node_data": current_node_contents,
+                            "event_data": button
+                            }
                     break
             if node_id != "":
                 node_key = flow_id + "." + node_id

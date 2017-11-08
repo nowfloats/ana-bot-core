@@ -18,6 +18,7 @@ class EventLogger(KinesisHelper):
         click_data = data.get("event_data")
         event_channel_type = meta_data["sender"]["medium"]
         event_channel = Medium._VALUES_TO_NAMES[event_channel_type]
+        pdb.set_trace()
 
         final_event_data = {
                 "business_name" : flow_data.get("business_name"),
@@ -29,12 +30,12 @@ class EventLogger(KinesisHelper):
                 "node_name": node_data.get("Name"),
                 "node_type": node_data.get("NodeType"),
                 "button_id": click_data.get("_id"),
-                "button_type": click_data.get("ButtonType"),
+                "button_type": click_data.get("ButtonType", click_data.get("Type")),
                 "button_name": click_data.get("ButtonName"),
                 "timestamp": int(time.time()) 
                 }
 
         self.log_message(data = final_event_data)
-        print("Event logged with data", final_event_data)
+        print(event_type, "event logged with data", final_event_data)
 
         return
