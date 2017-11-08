@@ -4,6 +4,7 @@ import pdb
 import re
 from furl import furl
 from src.config import ana_config
+from src.event_logger import EventLogger
 from src.thrift_models.ttypes import MessageType, InputType, MediaType, ButtonType
 from src.models.message import MessageContent, MessageData, Message, Media
 from src.models.inputs import Option, Item, TextInput
@@ -33,18 +34,29 @@ class Converter():
         if (node_data == {}): 
             return []
         node_type = node_data.get("NodeType", "")
+
+
         messages = []
         if node_type == "Combination":
+
             sections_data = node_data.get("Sections",[])
             buttons_data = node_data.get("Buttons", [])
             sections_response = self.convert_sections(sections_data)
             buttons_response = self.convert_buttons(buttons_data)
             messages = sections_response + buttons_response
+
+            event_log_data = {
+                    "node_data" : node_data,
+                    "type_of_event": "view",
+                    "event_data" : sections_data
+                    } 
+            # EventLogger.log(node_data = node_data, type_of_event = "view", event_data = sections_data)
+
         elif node_type == "ApiCall":
             pass
         elif node_type == "HandoffToAgent":
             return None
-        return messages
+        return { "messages": messages, "events": event_log_data }
 
     def convert_sections(self,data):
         messages_data = []

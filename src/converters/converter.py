@@ -6,6 +6,7 @@ from src.converters.agent.agent_converter import Converter as AgentConverter
 from src.thrift_models.ttypes import MessageType, InputType, MediaType, ButtonType
 from src.models.message import MessageContent, MessageData, Message, Media
 from src.models.inputs import Option, Item, TextInput
+from src.event_logger import EventLogger
 
 from src.models.message import MessageMeta, Message
 
@@ -19,10 +20,13 @@ class Converter():
         # pass to ana converter first
         # if ana responds with a message pass this message back
         # if not then pass to ai converter
-        messages = []
-        messages_data = AnaConverter(self.state).get_messages_data(node_data, message_content)
+        outgoing_messages = []
+        messages = AnaConverter(self.state).get_messages_data(node_data, message_content)
+        messages_data = messages.get("messages", [])
+        event_data = messages.get("events", {})
 
-        if messages_data == None:
+        if messages_data == []:
+            # empty messages from flow, construct agent message
             incoming_message = Message(meta=meta_data, data=message_content).trim()
             messages.append({"message" :incoming_message, "send_to": "AGENT"})
 
@@ -47,9 +51,8 @@ class Converter():
                     content=content
                     ).trim()
             input_message = Message(meta=user_meta_data, data=input_message_data).trim()
-            messages.append({"message" : input_message, "send_to": "USER"})
+            outgoing_messages.append({"message" : input_message, "send_to": "USER"})
 
-            return messages
         else:
             meta_data = MessageMeta(
                     sender=meta_data["recipient"],
@@ -60,8 +63,9 @@ class Converter():
                     ).trim()
             for message_data in messages_data: 
                 message = Message(meta=meta_data, data=message_data).trim()
-                messages.append({"message" :message, "send_to": "USER"})
-            return messages
+                outgoing_messages.append({"message" :message, "send_to": "USER"})
+            
+        return {"messages": outgoing_messages, "event_data": event_data}
 
     def get_agent_messages(self, meta_data, message_content):
 

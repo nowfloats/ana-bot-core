@@ -16,7 +16,7 @@ if __name__ == "__main__":
     port = os.environ.get("PORT") or 5000
     db_connection = os.environ.get("DB_CONNECTION") or "mongodb://localhost:27017"
 
-    mongo_client = MongoClient(host=db_connection, maxPoolSize=None, serverSelectionTimeoutMS=10, connectTimeoutMS=20000)
+    mongo_client = MongoClient(host=db_connection, maxPoolSize=None, serverSelectionTimeoutMS=100, connectTimeoutMS=20000)
 
     try:
         mongo_client.server_info()

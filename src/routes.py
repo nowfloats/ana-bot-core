@@ -1,10 +1,9 @@
 import json
 import os
+from src import app
 from flask import Response
 from flask import request
 from functools import wraps
-from src import app
-from src.models.user import User
 from src.controllers.chatflow_controller import ChatFlowController
 from src.controllers.session_controller import SessionController
 from src.controllers.business_controller import BusinessController
@@ -24,7 +23,7 @@ def validate_business_params(func):
             message = json.dumps({"message": "business_id missing"}) 
             response = Response(message, status=400, mimetype="application/json")
             return response
-        return func(*args, *kwargs)
+        return func(*args, **kwargs)
     return validate_business
 
 @app.route("/api/refreshChatFlows")
@@ -46,7 +45,7 @@ def validate_session_params(func):
             message = json.dumps({"message": "user_id missing"}) 
             response = Response(message, status=400, mimetype="application/json")
             return response
-        return func(*args, *kwargs)
+        return func(*args, **kwargs)
     return validate_session
 
 @app.route("/api/clearSessions", endpoint="clear_sessions")
@@ -70,7 +69,18 @@ def message_handler():
     response = MessageProcessor(message).start()
     return "OK"
 
-@app.route("/api/business", endpoint="get_business")
+
+@app.route("/api/business", methods=["POST"])
+def business_handler():
+
+    business_data = request.get_json()
+    business_response = BusinessController.create_business(business_data) 
+    json_response = json.dumps(business_response)
+    response = Response(json_response, status=200, mimetype="application/json")
+
+    return response
+
+@app.route("/api/business", methods = ["GET"], endpoint="get_business")
 @validate_business_params
 def get_business():
     business_id = request.args.get("business_id")
@@ -81,14 +91,4 @@ def get_business():
     else:
         json_data = json.dumps(data)
         response = Response(json_data, status=200, mimetype="application/json")
-    return response
-
-@app.route("/api/business", methods=["POST"])
-def business_handler():
-
-    business_data = request.get_json()
-    business_response = BusinessController.create_business(business_data) 
-    json_response = json.dumps(business_response)
-    response = Response(json_response, status=200, mimetype="application/json")
-
     return response

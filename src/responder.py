@@ -8,6 +8,7 @@ from src.thrift_models.ttypes import SenderType
 from src.models.user import User
 from src.models.business import Business
 from src.models.ana_node import AnaNode
+from src.event_logger import EventLogger
 from src.config import flow_config
 from src.config import application_config
 from src.converters.converter import Converter
@@ -43,10 +44,13 @@ class MessageProcessor(threading.Thread):
         if (self.sender_type == "AGENT"):
             messages = Converter(self.state).get_agent_messages(self.meta_data, self.message_content)
             response = self._respond_with_messages(messages)
+            return
         else:
             node = self._get_node()
-            messages = Converter(self.state).get_messages(node,self.meta_data, self.message_content)
-            # messages = messages_data.get("messages")
+            messages_data = Converter(self.state).get_messages(node,self.meta_data, self.message_content)
+            messages = messages_data.get("messages")
+            event_data = messages_data.get("event_data")
+
             agent_messages = [message["message"] for message in messages if message["send_to"] == "AGENT"]
             user_messages = [message["message"] for message in messages if message["send_to"] == "USER"]
 
@@ -55,22 +59,10 @@ class MessageProcessor(threading.Thread):
 
             if (agent_response or user_response):
                 User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
+                EventLogger().log(meta_data = self.meta_data, event_data = event_data, flow_data = self.flow_data)
                 print("User state updated with", self.state)
+            return
 
-            # if (messages_data.get("send_to") == "AGENT"):
-                # response = self._send_to_agent(messages)
-                # if (response):
-                    # User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
-                    # print("User state updated with", self.state)
-                # else:
-                    # print("Could not respond back")
-            # else:
-                # response = self._respond_with_messages(messages)
-                # if (response):
-                    # User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
-                    # print("User state updated with", self.state)
-                # else:
-                    # print("Could not respond back")
 
     def _get_state(self):
 

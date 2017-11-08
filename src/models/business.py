@@ -1,6 +1,7 @@
 import datetime
 import uuid
 import json
+import pdb
 from src import app
 from src.config import flow_config as config
 
@@ -17,12 +18,15 @@ class Business():
     # all cache and db methods should merge together
     # have persistent layer load cache if not found in cache
     def get_business_data(self, *args, **kwargs):
+
         business_object = self.redis_client.hgetall(self.business_id)
         return business_object
 
     def get_details(self, *args, **kwargs):
         business_object = self.collection.find_one({"business_id": self.business_id})
-        return business_object
+        response_keys = ["business_id", "flow", "business_name", "flow_id"]
+        business_details = {key: value for key, value in business_object.items() if key in response_keys}
+        return business_details
 
     def save_business_data_to_cache(self, business_data = {}, nodes = []):
 

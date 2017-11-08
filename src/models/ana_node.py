@@ -1,6 +1,7 @@
 import json
 import pdb
 from src import app
+from src.event_logger import EventLogger
 
 class AnaNode():
     def __init__(self, node_key, *args, **kwargs):
@@ -46,6 +47,7 @@ class AnaNode():
                             user_input[var_name] = button.get("VariableValue", "")
                         node_id = button["NextNodeId"]
                         node_key = flow_id + "." + node_id
+                        # EventLogger.log(node_data = current_node_contents, type_of_event = "click", event_data = button)
                         break
                 elif button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
                     if (var_name):

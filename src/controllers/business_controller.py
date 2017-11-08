@@ -21,5 +21,5 @@ class BusinessController():
 
     @staticmethod
     def get_business(business_id):
-        business_data = Business(business_id).get_business_data()
+        business_data = Business(business_id).get_details()
         return business_data
