@@ -30,7 +30,7 @@ class EventLogger(KinesisHelper):
                 "node_type": node_data.get("NodeType"),
                 "button_id": click_data.get("_id"),
                 "button_type": click_data.get("ButtonType", click_data.get("Type")),
-                "button_name": click_data.get("ButtonName"),
+                "button_name": click_data.get("ButtonName", click_data.get("Text")),
                 "timestamp": int(time.time()) 
                 }
 
