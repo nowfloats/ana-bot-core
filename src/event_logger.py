@@ -18,7 +18,6 @@ class EventLogger(KinesisHelper):
         click_data = data.get("event_data")
         event_channel_type = meta_data["sender"]["medium"]
         event_channel = Medium._VALUES_TO_NAMES[event_channel_type]
-        pdb.set_trace()
 
         final_event_data = {
                 "business_name" : flow_data.get("business_name"),
