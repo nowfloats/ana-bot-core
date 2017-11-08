@@ -48,7 +48,7 @@ class Converter():
             event_log_data = {
                     "node_data" : node_data,
                     "type_of_event": "view",
-                    "event_data" : sections_data
+                    "event_data" : {}
                     } 
             # EventLogger.log(node_data = node_data, type_of_event = "view", event_data = sections_data)
 

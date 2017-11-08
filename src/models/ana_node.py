@@ -24,6 +24,7 @@ class AnaNode():
     def get_next_node_data(self, flow_id, message_content):
         current_node_contents = self.get_contents(self.node_key)
         input_data = message_content["content"]["input"]
+        event_data = {}
         user_input = {}
         node_key = ""
 
@@ -47,6 +48,11 @@ class AnaNode():
                             user_input[var_name] = button.get("VariableValue", "")
                         node_id = button["NextNodeId"]
                         node_key = flow_id + "." + node_id
+                        event_data = {
+                                "type_of_event": "click",
+                                "node_data": current_node_contents,
+                                "event_data": button
+                                }
                         # EventLogger.log(node_data = current_node_contents, type_of_event = "click", event_data = button)
                         break
                 elif button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
@@ -76,7 +82,8 @@ class AnaNode():
                 node_key = self.node_key
         else:
             raise("Unknown input data found", input_data)
-        return {"node_id": node_key, "input_data": user_input}
+
+        return {"node_id": node_key, "input_data": user_input, "event_data": event_data}
 
     def _extract_button_elements(self,data):
 

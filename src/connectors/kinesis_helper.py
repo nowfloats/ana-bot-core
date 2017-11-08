@@ -36,5 +36,7 @@ class KinesisHelper():
                 ],
                 StreamName = self.stream_name
             )
-        print(response)
+        # check response and handle error
+        return
+        # print(response)
 

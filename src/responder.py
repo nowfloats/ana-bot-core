@@ -59,7 +59,7 @@ class MessageProcessor(threading.Thread):
 
             if (agent_response or user_response):
                 User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
-                EventLogger().log(meta_data = self.meta_data, event_data = event_data, flow_data = self.flow_data)
+                EventLogger().log(meta_data = self.meta_data, data = event_data, flow_data = self.flow_data)
                 print("User state updated with", self.state)
             return
 
@@ -88,6 +88,11 @@ class MessageProcessor(threading.Thread):
             first_node_id = self.flow_id + "." + flow_config["first_node_key"]
             node_id = self.state.get("current_node_id", first_node_id) # give first_node as default
             next_node_data = AnaNode(node_id).get_next_node_data(self.flow_id, self.message_content)
+
+            event_data = next_node_data.get("event_data", {})
+            if (event_data != {}):
+                EventLogger().log(meta_data = self.meta_data, data = event_data, flow_data = self.flow_data)
+
             next_node_id = next_node_data["node_id"]
             self.state["new_var_data"] = next_node_data["input_data"]
             self.state["current_node_id"] = next_node_id
