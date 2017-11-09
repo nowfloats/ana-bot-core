@@ -21,6 +21,7 @@ class EventLogger(KinesisHelper):
 
         final_event_data = {
                 "business_name" : flow_data.get("business_name"),
+                "business_id": meta_data["recipient"]["id"],
                 "event_channel": event_channel,
                 "user_id": meta_data["sender"]["id"],
                 "session_id": meta_data.get("sessionId"),
