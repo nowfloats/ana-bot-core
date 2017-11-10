@@ -3,3 +3,5 @@
 *.pyc
 dump.rdb
 .idea/
+.vscode/
+chatCore/*
