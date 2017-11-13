@@ -4,7 +4,7 @@ Model for business entity, one bot is one business
 import datetime
 import uuid
 import json
-from src import app
+from src import CACHE, DB
 from src.config import flow_config as config
 
 class Business():
@@ -12,16 +12,16 @@ class Business():
     def __init__(self, business_id):
 
         self.business_id = business_id
-        self.redis_client = app.redis_client
+        self.CACHE = CACHE
         self.created_at = datetime.datetime.now()
         self.updated_at = datetime.datetime.now()
-        self.collection = app.db.business_data
+        self.collection = DB.business_data
 
     # all cache and db methods should merge together
     # have persistent layer load cache if not found in cache
     def get_business_data(self):
 
-        business_object = self.redis_client.hgetall(self.business_id)
+        business_object = self.CACHE.hgetall(self.business_id)
         return business_object
 
     def get_details(self):
@@ -52,9 +52,9 @@ class Business():
                 node_dict[key] = json.dumps(node)
 
         try:
-            self.redis_client.mset(node_dict)
+            self.CACHE.mset(node_dict)
             print("Node data written to cache")
-            self.redis_client.hmset(self.business_id, business_data_to_save)
+            self.CACHE.hmset(self.business_id, business_data_to_save)
             print("Business data written to cache")
             return True
         except Exception as err:

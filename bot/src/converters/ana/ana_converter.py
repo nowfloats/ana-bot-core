@@ -4,6 +4,7 @@ Author: https://github.com/velutha
 """
 import json
 import re
+import pdb
 from furl import furl
 from src.config import ana_config
 from src.thrift_models.ttypes import MessageType, InputType, MediaType, ButtonType
@@ -32,12 +33,12 @@ class Converter():
         return final_text
 
     def get_messages_data(self, node_data, message_content):
-        if node_data == {}:
-            return []
+
         node_type = node_data.get("NodeType", "")
 
-
         messages = []
+        event_log_data = {}
+
         if node_type == "Combination":
 
             sections_data = node_data.get("Sections", [])
@@ -56,6 +57,8 @@ class Converter():
             pass
         elif node_type == "HandoffToAgent":
             return None
+
+
         return {"messages": messages, "events": event_log_data}
 
     def convert_sections(self, data):

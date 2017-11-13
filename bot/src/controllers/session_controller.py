@@ -1,5 +1,5 @@
-# from src.models.user import User
-from src import app
+from flask import jsonify
+from src import CACHE
 
 class SessionController():
 
@@ -10,13 +10,15 @@ class SessionController():
     def clear_sessions(user_id):
         # shift this to user model
         user_key = user_id + "." + "sessions"
-        sessions = app.redis_client.lrange(user_key, 0, -1)
+        sessions = CACHE.lrange(user_key, 0, -1)
 
         if sessions == []:
-            return {"message": "no_sessions_found"}
+            return jsonify(message="no_sessions_found")
 
         sessions.append(user_key)
-        clear_sessions = app.redis_client.delete(*sessions)
+        clear_sessions = CACHE.delete(*sessions)
 
         if clear_sessions:
-            return {"message": "sessions_cleared"}
+            return jsonify(message="sessions_cleared")
+
+        return jsonify(message="could_not_clear_sessions"), 500

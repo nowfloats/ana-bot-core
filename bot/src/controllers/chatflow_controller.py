@@ -1,3 +1,4 @@
+from flask import jsonify
 from src.models.business import Business
 
 class ChatFlowController():
@@ -14,4 +15,4 @@ class ChatFlowController():
 
         nodes = business_data["flow"]
         data_saved_to_cache = Business(business_id).save_business_data_to_cache(business_data=business_data, nodes=nodes)
-        return {"message": "success"} if data_saved_to_cache else {"message": "failure"}
+        return jsonify(message="success") if data_saved_to_cache else jsonify(message="failure")

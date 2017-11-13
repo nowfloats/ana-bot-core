@@ -2,7 +2,7 @@ import uuid
 import datetime
 import json
 import time
-from src import app
+from src import CACHE, DB
 from src.utils import Util
 from src.thrift_models.ttypes import Medium
 
@@ -15,15 +15,15 @@ class User():
 
         response = {}
         user_session_key = self.user_id + "." + "sessions"
-        user_sessions = app.redis_client.lrange(user_session_key, 0, -1)
+        user_sessions = CACHE.lrange(user_session_key, 0, -1)
 
         if session_id in user_sessions:
             self.session_id = session_id
-            self.session_data = app.redis_client.hgetall(session_id)
+            self.session_data = CACHE.hgetall(session_id)
         else:
             self.session_id = str(uuid.uuid4())
             # create session
-            app.redis_client.lpush(user_session_key, self.session_id)
+            CACHE.lpush(user_session_key, self.session_id)
             self.session_data = {}
 
         response["session_id"] = self.session_id
@@ -36,7 +36,7 @@ class User():
     def set_state(self, session_id, state, meta_data, flow_data):
         try:
             new_state = {}
-            current_state = app.redis_client.hgetall(session_id)
+            current_state = CACHE.hgetall(session_id)
 
             new_var_data = state.get("new_var_data", {})
             current_var_data = current_state.get("var_data", "{}")
@@ -51,7 +51,7 @@ class User():
             new_state["timestamp"] = timestamp
             new_state["var_data"] = json.dumps(final_var_data)
 
-            app.redis_client.hmset(session_id, new_state)
+            CACHE.hmset(session_id, new_state)
             self._persist_data(var_data=new_var_data, session_id=session_id, channel=channel, business_name=business_name)
 
             return 1
@@ -65,7 +65,7 @@ class User():
             return 1
         object_id = str(uuid.uuid4())
         timestamp = datetime.datetime.utcnow()
-        collection = app.db["user_data"]
+        collection = DB["user_data"]
         document = {
             "_id": object_id,
             "user_id" : self.user_id,

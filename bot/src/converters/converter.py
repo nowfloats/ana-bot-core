@@ -1,6 +1,7 @@
 """
 Module which constructs messages to send
 """
+import pdb
 from src.converters.ana.ana_converter import Converter as AnaConverter
 from src.converters.agent.agent_converter import Converter as AgentConverter
 
@@ -25,7 +26,7 @@ class Converter():
         if messages_data == []:
             # empty messages from flow, construct agent message
             incoming_message = Message(meta=meta_data, data=message_content).trim()
-            messages.append({"message" :incoming_message, "send_to": "AGENT"})
+            outgoing_messages.append({"message" :incoming_message, "send_to": "AGENT"})
 
             message_type = MessageType._NAMES_TO_VALUES["INPUT"]
             input_type = InputType._NAMES_TO_VALUES["TEXT"]

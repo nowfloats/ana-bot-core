@@ -2,7 +2,7 @@
 Model for output from ana studio
 """
 import json
-from src import app
+from src import CACHE
 
 class AnaNode():
 
@@ -11,7 +11,7 @@ class AnaNode():
 
     def get_contents(self, node_key):
 
-        response = app.redis_client.get(node_key)
+        response = CACHE.get(node_key)
 
         if response is None:
             print("Data not found for", node_key)

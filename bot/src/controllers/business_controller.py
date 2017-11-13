@@ -2,7 +2,7 @@
 Business data controller
 Author: https:github.com/velutha
 """
-
+from flask import jsonify
 from src.models.business import Business
 from src.controllers.chatflow_controller import ChatFlowController
 
@@ -20,12 +20,19 @@ class BusinessController():
         business_data["business_name"] = data["business_name"]
         create_business = Business(business_id).save(business_data)
         print("Created business details")
-
         # save data to cache
         ChatFlowController.populate_flows(business_id)
-        return {"message": "success"} if create_business else {"message": "failure"}
+
+        if create_business:
+            return jsonify(message="success")
+
+        return jsonify(message="failure"), 500
 
     @staticmethod
     def get_business(business_id):
         business_data = Business(business_id).get_details()
-        return business_data
+
+        if business_data == {}:
+            return jsonify(message="business not found"), 404
+
+        return jsonify(business_data)

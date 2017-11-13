@@ -1,44 +1,71 @@
 """
-This is the entry point bot-core server
+This is the entry point to bot-core server
 Author: https://github.com/velutha
 """
 import os
-import redis
-import pymongo
-from pymongo import MongoClient
-from settings import *
-from src import app, routes
-from src.connectors.redis_helper import RedisHelper
+from src import app
+from src.validator import Validator
+from flask import request, jsonify
+from src.controllers.chatflow_controller import ChatFlowController
+from src.controllers.session_controller import SessionController
+from src.controllers.business_controller import BusinessController
+from src.responder import MessageProcessor
 
-app.redis_client = RedisHelper().redis_client
+@app.route("/health-check")
+def hello_world():
+    status_message = {"status": "UP"}
+    return jsonify(status_message)
+
+@app.route("/api/refreshChatFlows")
+@Validator.validate_business_params
+def populate_ana_flows():
+
+    business_id = request.args.get("business_id")
+    response = ChatFlowController.populate_flows(business_id)
+
+    return response
+
+@app.route("/api/clearSessions", endpoint="clear_sessions")
+@Validator.validate_session_params
+def clear_sessions():
+
+    user_id = request.args.get("user_id")
+    response = SessionController.clear_sessions(user_id)
+
+    return response
+
+@app.route("/api/message", methods=["POST"])
+def message_handler():
+
+    message = request.get_json()
+
+    print("Message Received")
+    print(message)
+    print("****************")
+
+    MessageProcessor(message).start()
+    return jsonify(status="received")
+
+
+@app.route("/api/business", methods=["POST"])
+def business_handler():
+
+    business_data = request.get_json()
+    response = BusinessController.create_business(business_data)
+
+    return response
+
+@app.route("/api/business", methods=["GET"], endpoint="get_business")
+@Validator.validate_business_params
+def get_business():
+    business_id = request.args.get("business_id")
+    response = BusinessController.get_business(business_id)
+
+    return response
 
 if __name__ == "__main__":
 
     HOST = os.environ.get("HOST") or "0.0.0.0"
     PORT = os.environ.get("PORT") or 5000
-    DB_CONNECTION = os.environ.get("DB_CONNECTION") or "mongodb://localhost:27017"
 
-    MONGO_CLIENT = MongoClient(
-        host=DB_CONNECTION,
-        maxPoolSize=None,
-        serverSelectionTimeoutMS=100,
-        connectTimeoutMS=20000
-        )
-
-    try:
-        MONGO_CLIENT.server_info()
-        app.db = MONGO_CLIENT["anachatdb"]
-        print("Connected to anachatdb")
-        app.redis_client.get("None")
-        print("Connected to Redis")
-        app.run(host=HOST, port=PORT)
-
-    except redis.exceptions.ConnectionError as err:
-        print("Error connecting to redis\n", err)
-
-    except pymongo.errors.ServerSelectionTimeoutError as err:
-        print("Error connecting to mongodb\n", err)
-
-    except:
-        print("Server could not start.\n Unexpected error occured")
-        raise
+    app.run(host=HOST, port=PORT)
