@@ -1,22 +1,26 @@
+"""
+Model for output from ana studio
+"""
 import json
-import pdb
 from src import app
-from src.event_logger import EventLogger
 
 class AnaNode():
-    def __init__(self, node_key, *args, **kwargs):
+
+    def __init__(self, node_key):
         self.node_key = node_key
 
     def get_contents(self, node_key):
+
         response = app.redis_client.get(node_key)
-        if (response == None):
+
+        if response is None:
             print("Data not found for", node_key)
             return {}
         try:
             response_dict = json.loads(response)
             return response_dict
-        except Exception as e:
-            print(e)
+        except Exception as err:
+            print(err)
             raise
 
         # handle response not found or empty ideally this should never happen
@@ -35,7 +39,7 @@ class AnaNode():
         # not really neat change it to objects once all buttons are handled
         if "val" in input_data.keys():
             button_contents = self._extract_button_elements(current_node_contents)
-            next_node_buttons = [button for button in button_contents if button.get("ButtonType") in ["NextNode", "OpenUrl"]]
+            # next_node_buttons = [button for button in button_contents if button.get("ButtonType") in ["NextNode", "OpenUrl"]]
             # button_contents = current_node_contents["Buttons"]
             for button in button_contents:
                 # checking both type and ButtonType to handle Carousel Buttons
@@ -43,36 +47,37 @@ class AnaNode():
                 var_name = current_node_contents.get("VariableName")
                 if button_type in ["NextNode", "OpenUrl"]:
                     current_node_id = input_data["val"]
-                    if button["_id"] == current_node_id:  
-                        if (var_name):
+                    if button["_id"] == current_node_id:
+                        if var_name:
                             user_input[var_name] = button.get("VariableValue", "")
                         node_id = button["NextNodeId"]
                         node_key = flow_id + "." + node_id
                         event_data = {
-                                "type_of_event": "click",
-                                "node_data": current_node_contents,
-                                "event_data": button
-                                }
+                            "type_of_event": "click",
+                            "node_data": current_node_contents,
+                            "event_data": button
+                            }
                         break
                 elif button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
-                    if (var_name):
+                    if var_name:
                         user_input[var_name] = input_data["val"]
                     node_id = button["NextNodeId"]
                     node_key = flow_id + "." + node_id
 
                     event_data = {
-                            "type_of_event": "click",
-                            "node_data": current_node_contents,
-                            "event_data": button
-                            }
+                        "type_of_event": "click",
+                        "node_data": current_node_contents,
+                        "event_data": button
+                        }
 
                     break
-            if (node_key):
+            if node_key:
                 pass
             else:
                 node_key = self.node_key
-        elif "input" in input_data.keys(): 
-            input_value = input_data["input"]
+
+        elif "input" in input_data.keys():
+            # input_value = input_data["input"]
             button_contents = current_node_contents["Buttons"]
             node_id = ""
             for button in button_contents:
@@ -82,24 +87,25 @@ class AnaNode():
                     user_input[var_name] = input_data["input"]
                     node_id = button["NextNodeId"]
                     event_data = {
-                            "type_of_event": "click",
-                            "node_data": current_node_contents,
-                            "event_data": button
-                            }
+                        "type_of_event": "click",
+                        "node_data": current_node_contents,
+                        "event_data": button
+                        }
                     break
             if node_id != "":
                 node_key = flow_id + "." + node_id
             else:
                 node_key = self.node_key
         else:
-            raise("Unknown input data found", input_data)
+            print("Unknown input data found", input_data)
 
         return {"node_id": node_key, "input_data": user_input, "event_data": event_data}
 
-    def _extract_button_elements(self,data):
+    @classmethod
+    def _extract_button_elements(cls, data):
 
-        node_buttons = data.get("Buttons",[])
-        sections = data.get("Sections",[])
+        node_buttons = data.get("Buttons", [])
+        sections = data.get("Sections", [])
         section_buttons = []
 
         for section in sections:

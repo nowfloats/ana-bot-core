@@ -1,13 +1,15 @@
+"""
+Model for business entity, one bot is one business
+"""
 import datetime
 import uuid
 import json
-import pdb
 from src import app
 from src.config import flow_config as config
 
 class Business():
 
-    def __init__(self, business_id, *args, **kwargs):
+    def __init__(self, business_id):
 
         self.business_id = business_id
         self.redis_client = app.redis_client
@@ -17,51 +19,52 @@ class Business():
 
     # all cache and db methods should merge together
     # have persistent layer load cache if not found in cache
-    def get_business_data(self, *args, **kwargs):
+    def get_business_data(self):
 
         business_object = self.redis_client.hgetall(self.business_id)
         return business_object
 
-    def get_details(self, *args, **kwargs):
+    def get_details(self):
         business_object = self.collection.find_one({"business_id": self.business_id})
+        if business_object is None:
+            return {}
         response_keys = ["business_id", "flow", "business_name", "flow_id"]
         business_details = {key: value for key, value in business_object.items() if key in response_keys}
         return business_details
 
-    def save_business_data_to_cache(self, business_data = {}, nodes = []):
+    def save_business_data_to_cache(self, business_data={}, nodes=[]):
 
         if business_data == {}:
-            return False 
+            return False
 
         flow_id = business_data["flow_id"]
-        redis_client = app.redis_client
         node_dict = {}
 
-        business_keys = ["flow_id", "business_name"] 
+        business_keys = ["flow_id", "business_name"]
         business_data_to_save = {key : business_data[key] for key in business_keys}
 
         for node in nodes:
-            if node["Id"] not in config["archived_node_ids"]: 
-                if node["IsStartNode"] == True:
+            if node["Id"] not in config["archived_node_ids"]:
+                if node["IsStartNode"]:
                     key = flow_id + "." + config["first_node_key"]
-                else: 
+                else:
                     key = flow_id + "." + node["Id"]
                 node_dict[key] = json.dumps(node)
 
-        try: 
-            redis_client.mset(node_dict)
+        try:
+            self.redis_client.mset(node_dict)
             print("Node data written to cache")
-            redis_client.hmset(self.business_id, business_data_to_save)
+            self.redis_client.hmset(self.business_id, business_data_to_save)
             print("Business data written to cache")
             return True
-        except Exception as e:
+        except Exception as err:
             print("Error writing to cache")
-            print(e)
+            print(err)
             return False
 
     def save(self, data):
 
-        match_query = { "business_id" : self.business_id }
+        match_query = {"business_id" : self.business_id}
 
         update_document = {}
         flow_id = str(uuid.uuid4())
@@ -70,7 +73,7 @@ class Business():
         update_document["updated_at"] = self.updated_at
 
         try:
-            business_object = self.collection.update_one(
+            self.collection.update_one(
                 match_query,
                 {
                     "$set": update_document,
@@ -82,6 +85,6 @@ class Business():
                 upsert=True)
 
             return True
-        except Exception as e:
-            print(e)
+        except Exception as err:
+            print(err)
             return False

@@ -1,3 +1,8 @@
+"""
+Business data controller
+Author: https:github.com/velutha
+"""
+
 from src.models.business import Business
 from src.controllers.chatflow_controller import ChatFlowController
 
@@ -16,8 +21,9 @@ class BusinessController():
         create_business = Business(business_id).save(business_data)
         print("Created business details")
 
-        data_saved_to_cache = ChatFlowController.populate_flows(business_id)
-        return {"message": "success"} if create_business else {"message": "failure"} 
+        # save data to cache
+        ChatFlowController.populate_flows(business_id)
+        return {"message": "success"} if create_business else {"message": "failure"}
 
     @staticmethod
     def get_business(business_id):

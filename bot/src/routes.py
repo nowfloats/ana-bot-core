@@ -1,9 +1,12 @@
+"""
+All application routes are defined here
+Author: https://github.com/velutha
+"""
 import json
-import os
+from functools import wraps
 from src import app
 from flask import Response
 from flask import request
-from functools import wraps
 from src.controllers.chatflow_controller import ChatFlowController
 from src.controllers.session_controller import SessionController
 from src.controllers.business_controller import BusinessController
@@ -20,7 +23,7 @@ def validate_business_params(func):
     def validate_business(*args, **kwargs):
         business_id = request.args.get("business_id")
         if business_id is None:
-            message = json.dumps({"message": "business_id missing"}) 
+            message = json.dumps({"message": "business_id missing"})
             response = Response(message, status=400, mimetype="application/json")
             return response
         return func(*args, **kwargs)
@@ -42,7 +45,7 @@ def validate_session_params(func):
     def validate_session(*args, **kwargs):
         user_id = request.args.get("user_id")
         if user_id is None:
-            message = json.dumps({"message": "user_id missing"}) 
+            message = json.dumps({"message": "user_id missing"})
             response = Response(message, status=400, mimetype="application/json")
             return response
         return func(*args, **kwargs)
@@ -53,7 +56,7 @@ def validate_session_params(func):
 def clear_sessions():
 
     user_id = request.args.get("user_id")
-    session_response = SessionController.clear_sessions(user_id) 
+    session_response = SessionController.clear_sessions(user_id)
     json_response = json.dumps(session_response)
     response = Response(json_response, status=200, mimetype="application/json")
 
@@ -66,7 +69,7 @@ def message_handler():
     print("Message Received")
     print(message)
     print("****************")
-    response = MessageProcessor(message).start()
+    MessageProcessor(message).start()
     return "OK"
 
 
@@ -74,19 +77,19 @@ def message_handler():
 def business_handler():
 
     business_data = request.get_json()
-    business_response = BusinessController.create_business(business_data) 
+    business_response = BusinessController.create_business(business_data)
     json_response = json.dumps(business_response)
     response = Response(json_response, status=200, mimetype="application/json")
 
     return response
 
-@app.route("/api/business", methods = ["GET"], endpoint="get_business")
+@app.route("/api/business", methods=["GET"], endpoint="get_business")
 @validate_business_params
 def get_business():
     business_id = request.args.get("business_id")
     data = BusinessController.get_business(business_id)
 
-    if (data == {}):
+    if data == {}:
         response = Response(status="404", mimetype="application/json")
     else:
         json_data = json.dumps(data)

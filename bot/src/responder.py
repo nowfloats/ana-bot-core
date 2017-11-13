@@ -1,9 +1,11 @@
-import requests
+"""
+Message lifecycle goes here, receving to responding
+Author: https://github.com/velutha
+"""
 import uuid
 import json
 import threading
-import pdb
-from furl import furl
+import requests
 from src.thrift_models.ttypes import SenderType
 from src.models.user import User
 from src.models.business import Business
@@ -36,37 +38,37 @@ class MessageProcessor(threading.Thread):
     def run(self):
 
         # convert this into objects
-        if (self.flow_id == ""):
+        if self.flow_id == "":
             print("Could not find flow")
-            return 
-
-
-        if (self.sender_type == "AGENT"):
-            messages = Converter(self.state).get_agent_messages(self.meta_data, self.message_content)
-            response = self._respond_with_messages(messages)
             return
+
+
+        if self.sender_type == "AGENT":
+            messages = Converter(self.state).get_agent_messages(self.meta_data, self.message_content)
+            response = self.__respond_with_messages(messages)
+            return response
         else:
             node = self._get_node()
-            messages_data = Converter(self.state).get_messages(node,self.meta_data, self.message_content)
+            messages_data = Converter(self.state).get_messages(node, self.meta_data, self.message_content)
             messages = messages_data.get("messages")
             event_data = messages_data.get("event_data")
 
             agent_messages = [message["message"] for message in messages if message["send_to"] == "AGENT"]
             user_messages = [message["message"] for message in messages if message["send_to"] == "USER"]
 
-            agent_response = self._send_to_agent(agent_messages)
-            user_response = self._respond_with_messages(user_messages)
+            agent_response = self.__send_to_agent(agent_messages)
+            user_response = self.__respond_with_messages(user_messages)
 
-            if (agent_response or user_response):
+            if agent_response or user_response:
                 User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
-                EventLogger().log(meta_data = self.meta_data, data = event_data, flow_data = self.flow_data)
+                EventLogger().log(meta_data=self.meta_data, data=event_data, flow_data=self.flow_data)
                 print("User state updated with", self.state)
             return
 
 
     def _get_state(self):
 
-        if (self.sender_type == "AGENT"):
+        if self.sender_type == "AGENT":
             user_id = self.business_id
         else:
             user_id = self.user_id
@@ -90,8 +92,8 @@ class MessageProcessor(threading.Thread):
             next_node_data = AnaNode(node_id).get_next_node_data(self.flow_id, self.message_content)
 
             event_data = next_node_data.get("event_data", {})
-            if (event_data != {}):
-                EventLogger().log(meta_data = self.meta_data, data = event_data, flow_data = self.flow_data)
+            if event_data != {}:
+                EventLogger().log(meta_data=self.meta_data, data=event_data, flow_data=self.flow_data)
 
             next_node_id = next_node_data["node_id"]
             self.state["new_var_data"] = next_node_data["input_data"]
@@ -99,16 +101,17 @@ class MessageProcessor(threading.Thread):
             node = AnaNode(next_node_id).get_contents(next_node_id)
         else:
             first_node_id = self.flow_id + "." + flow_config["first_node_key"]
-            next_node_id =  self.flow_id + "." + flow_config["first_node_key"]
+            next_node_id = self.flow_id + "." + flow_config["first_node_key"]
             self.state["current_node_id"] = next_node_id
             node = AnaNode(next_node_id).get_contents(next_node_id)
 
         return node
 
-    def _respond_with_messages(self, messages):
+    @staticmethod
+    def __respond_with_messages(messages):
         url = application_config["GATEWAY_URL"]
         headers = {"Content-Type" : "application/json"}
-        if len(messages) == 0:
+        if messages == []:
             print("No messages to send")
             return 0
         for message in messages:
@@ -117,15 +120,16 @@ class MessageProcessor(threading.Thread):
             try:
                 response = requests.post(url, headers=headers, data=json_message)
                 print(response)
-            except Exception as e:
-                print(e)
+            except Exception as err:
+                print(err)
                 return 0
         return 1
 
-    def _send_to_agent(self, messages):
+    @staticmethod
+    def __send_to_agent(messages):
         url = application_config["AGENT_URL"]
         headers = {"Content-Type" : "application/json"}
-        if len(messages) == 0:
+        if messages == []:
             print("No messages to send to agent")
             return 0
         for message in messages:
@@ -134,8 +138,7 @@ class MessageProcessor(threading.Thread):
             try:
                 response = requests.post(url, headers=headers, data=json_message)
                 print(response)
-            except Exception as e:
-                print(e)
+            except Exception as err:
+                print(err)
                 return 0
         return 1
-

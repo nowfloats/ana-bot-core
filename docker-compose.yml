@@ -1,8 +1,6 @@
-version: '2'
-
-services:
-  api:
-    image: 'anacore:latest'
-    build: .
-    ports:
-      - '9500:9500'
+bot:
+  build: ./bot
+  expose:
+    - "9500"
+  env_file: .env
+  command: /usr/local/bin/gunicorn -w 2 :8500 app:app
