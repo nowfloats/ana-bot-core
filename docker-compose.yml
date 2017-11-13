@@ -1,6 +1,6 @@
 bot:
   build: ./bot
-  expose:
-    - "9500"
+  ports:
+    - "9500:9500"
   env_file: .env
-  command: /usr/local/bin/gunicorn -w 2 :8500 app:app
+  command: /usr/local/bin/gunicorn -w 2 app:app
