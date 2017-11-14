@@ -6,12 +6,13 @@ import redis
 import pymongo
 from pymongo import MongoClient
 from flask import Flask
-from settings import *
-from src.connectors.redis_helper import RedisHelper
+from bot.src.connectors.redis_helper import RedisHelper
 
 app = Flask(__name__)
 
 CACHE = RedisHelper().redis_client
+
+DB_CONNECTION = os.environ.get("DB_CONNECTION") or "mongodb://localhost:27027/anachatdb"
 
 MONGO_CLIENT = MongoClient(
     host=os.environ.get("DB_CONNECTION"),
