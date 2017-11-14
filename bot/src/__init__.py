@@ -6,7 +6,7 @@ import redis
 import pymongo
 from pymongo import MongoClient
 from flask import Flask
-from bot.src.connectors.redis_helper import RedisHelper
+from src.connectors.redis_helper import RedisHelper
 
 app = Flask(__name__)
 

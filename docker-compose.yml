@@ -5,8 +5,14 @@ services:
     build: ./bot
     ports:
       - "9500:9500"
-    environment:
-      - "HOST_IP:192.168.0.69"
     env_file:
       - .env
     command: /usr/local/bin/gunicorn -w 2 app:app --access-logfile -
+
+  nginx:
+    restart: always
+    build: ./nginx/
+    ports:
+      - "80:80"
+    links:
+      - bot:bot
