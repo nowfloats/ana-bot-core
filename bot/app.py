@@ -3,7 +3,7 @@ This is the entry point to bot-core server
 Author: https://github.com/velutha
 """
 import os
-from src import app
+from src import app, message_pool
 from src.validator import Validator
 from flask import request, jsonify
 from src.controllers.chatflow_controller import ChatFlowController
@@ -43,7 +43,7 @@ def message_handler():
     print(message)
     print("****************")
 
-    MessageProcessor(message).start()
+    message_pool.submit(MessageProcessor(message).respond_to_message)
     return jsonify(status="received")
 
 

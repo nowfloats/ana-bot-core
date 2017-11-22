@@ -4,7 +4,6 @@ Author: https://github.com/velutha
 """
 import uuid
 import json
-import threading
 import requests
 from src.thrift_models.ttypes import SenderType
 from src.models.user import User
@@ -15,13 +14,10 @@ from src.config import flow_config
 from src.config import application_config
 from src.converters.converter import Converter
 
-class MessageProcessor(threading.Thread):
+class MessageProcessor():
 
-    def __init__(self, message, *args, **kwargs):
+    def __init__(self, message):
 
-        threading.Thread.__init__(self)
-
-        self.message = message
         self.meta_data = message["meta"]
         self.message_content = message["data"]
 
@@ -32,10 +28,10 @@ class MessageProcessor(threading.Thread):
         # self.flow_data = flow_config["flows"].get(self.business_id, {})
         self.flow_id = self.flow_data.get("flow_id", flow_config["default_flow_id"])
 
-        self.sender_type = SenderType._VALUES_TO_NAMES[self.message["meta"]["senderType"]]
+        self.sender_type = SenderType._VALUES_TO_NAMES[message["meta"]["senderType"]]
         self.state = self._get_state()
 
-    def run(self):
+    def respond_to_message(self):
 
         # convert this into objects
         if self.flow_id == "":

@@ -2,6 +2,7 @@
 Application init file
 """
 import os
+import concurrent.futures
 import redis
 import pymongo
 from pymongo import MongoClient
@@ -20,6 +21,8 @@ MONGO_CLIENT = MongoClient(
     serverSelectionTimeoutMS=100,
     connectTimeoutMS=20000
     )
+
+message_pool = concurrent.futures.ThreadPoolExecutor(max_workers=20)
 
 try:
     MONGO_CLIENT.server_info()
