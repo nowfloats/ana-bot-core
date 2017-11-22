@@ -1,3 +1,7 @@
+import json
+import requests
+from src.config import application_config
+
 class Util(object):
 
     @staticmethod
@@ -6,3 +10,26 @@ class Util(object):
         for dictionary in args:
             result.update(dictionary)
         return result
+
+    @staticmethod
+    def send_messages(messages, sending_to):
+
+        # change whoever is passing sending_to to accept from common sender_type
+        endpoints = {"AGENT": application_config["GATEWAY_URL"], \
+                "USER": application_config["AGENT_URL"]}
+
+        url = endpoints[sending_to]
+        headers = {"Content-Type" : "application/json"}
+        if messages == []:
+            print("No messages to send")
+            return 0
+        for message in messages:
+            print(message)
+            json_message = json.dumps(message)
+            try:
+                response = requests.post(url, headers=headers, data=json_message)
+                print(response)
+            except Exception as err:
+                print(err)
+                return 0
+        return 1

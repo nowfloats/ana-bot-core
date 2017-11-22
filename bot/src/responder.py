@@ -1,17 +1,15 @@
 """
 Message lifecycle goes here, receving to responding
-Author: https://github.com/velutha
+__author__: https://github.com/velutha
 """
 import uuid
-import json
-import requests
+from src.utils import Util
 from src.thrift_models.ttypes import SenderType
 from src.models.user import User
 from src.models.business import Business
 from src.models.ana_node import AnaNode
 from src.event_logger import EventLogger
 from src.config import flow_config
-from src.config import application_config
 from src.converters.converter import Converter
 
 class MessageProcessor():
@@ -25,7 +23,6 @@ class MessageProcessor():
         self.business_id = self.meta_data["recipient"]["id"]
 
         self.flow_data = Business(self.business_id).get_business_data()
-        # self.flow_data = flow_config["flows"].get(self.business_id, {})
         self.flow_id = self.flow_data.get("flow_id", flow_config["default_flow_id"])
 
         self.sender_type = SenderType._VALUES_TO_NAMES[message["meta"]["senderType"]]
@@ -40,8 +37,9 @@ class MessageProcessor():
 
 
         if self.sender_type == "AGENT":
-            messages = Converter(self.state).get_agent_messages(self.meta_data, self.message_content)
-            response = self.__respond_with_messages(messages)
+            agent_messages = Converter(self.state).get_agent_messages(self.meta_data, self.message_content)
+            # response = self.__respond_with_messages(messages)
+            response = Util.send_messages(messages=agent_messages, sending_to="AGENT")
             return response
         else:
             node = self._get_node()
@@ -52,8 +50,10 @@ class MessageProcessor():
             agent_messages = [message["message"] for message in messages if message["send_to"] == "AGENT"]
             user_messages = [message["message"] for message in messages if message["send_to"] == "USER"]
 
-            agent_response = self.__send_to_agent(agent_messages)
-            user_response = self.__respond_with_messages(user_messages)
+            agent_response = Util.send_messages(messages=agent_messages, sending_to="AGENT")
+            user_response = Util.send_messages(messages=user_messages, sending_to="USER")
+            # agent_response = self.__send_to_agent(agent_messages)
+            # user_response = self.__respond_with_messages(user_messages)
 
             if agent_response or user_response:
                 User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
@@ -90,7 +90,6 @@ class MessageProcessor():
             event_data = next_node_data.get("event_data", {})
             if event_data != {}:
                 EventLogger().log(meta_data=self.meta_data, data=event_data, flow_data=self.flow_data)
-
             next_node_id = next_node_data["node_id"]
             self.state["new_var_data"] = next_node_data["input_data"]
             self.state["current_node_id"] = next_node_id
@@ -102,39 +101,3 @@ class MessageProcessor():
             node = AnaNode(next_node_id).get_contents(next_node_id)
 
         return node
-
-    @staticmethod
-    def __respond_with_messages(messages):
-        url = application_config["GATEWAY_URL"]
-        headers = {"Content-Type" : "application/json"}
-        if messages == []:
-            print("No messages to send")
-            return 0
-        for message in messages:
-            print(message)
-            json_message = json.dumps(message)
-            try:
-                response = requests.post(url, headers=headers, data=json_message)
-                print(response)
-            except Exception as err:
-                print(err)
-                return 0
-        return 1
-
-    @staticmethod
-    def __send_to_agent(messages):
-        url = application_config["AGENT_URL"]
-        headers = {"Content-Type" : "application/json"}
-        if messages == []:
-            print("No messages to send to agent")
-            return 0
-        for message in messages:
-            print(message)
-            json_message = json.dumps(message)
-            try:
-                response = requests.post(url, headers=headers, data=json_message)
-                print(response)
-            except Exception as err:
-                print(err)
-                return 0
-        return 1
