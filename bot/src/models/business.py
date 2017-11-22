@@ -53,9 +53,9 @@ class Business():
 
         try:
             self.CACHE.mset(node_dict)
-            print("Node data written to cache")
+            print("Node data written to cache for flow ", flow_id)
             self.CACHE.hmset(self.business_id, business_data_to_save)
-            print("Business data written to cache")
+            print("Business data written to cache for flow ", flow_id )
             return True
         except Exception as err:
             print("Error writing to cache")

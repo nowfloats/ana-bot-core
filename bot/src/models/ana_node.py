@@ -96,6 +96,82 @@ class AnaNode():
                 node_key = flow_id + "." + node_id
             else:
                 node_key = self.node_key
+        elif "location" in input_data.keys():
+            button_contents = current_node_contents["Buttons"]
+            node_id = ""
+            for button in button_contents:
+                button_type = button.get("ButtonType", button.get("Type"))
+                if button_type == "GetLocation":
+                    var_name = current_node_contents["VariableName"]
+                    user_input[var_name] = input_data["location"]
+                    node_id = button["NextNodeId"]
+                    event_data = {
+                        "type_of_event": "click",
+                        "node_data": current_node_contents,
+                        "event_data": button
+                        }
+                    break
+            if node_id != "":
+                node_key = flow_id + "." + node_id
+            else:
+                node_key = self.node_key
+        elif "address" in input_data.keys():
+            button_contents = current_node_contents["Buttons"]
+            node_id = ""
+            for button in button_contents:
+                button_type = button.get("ButtonType", button.get("Type"))
+                if button_type == "GetLocation":
+                    var_name = current_node_contents["VariableName"]
+                    user_input[var_name] = input_data["address"]
+                    node_id = button["NextNodeId"]
+                    event_data = {
+                        "type_of_event": "click",
+                        "node_data": current_node_contents,
+                        "event_data": button
+                        }
+                    break
+            if node_id != "":
+                node_key = flow_id + "." + node_id
+            else:
+                node_key = self.node_key
+        elif "date" in input_data.keys():
+            button_contents = current_node_contents["Buttons"]
+            node_id = ""
+            for button in button_contents:
+                button_type = button.get("ButtonType", button.get("Type"))
+                if button_type == "GetLocation":
+                    var_name = current_node_contents["VariableName"]
+                    user_input[var_name] = input_data["address"]
+                    node_id = button["NextNodeId"]
+                    event_data = {
+                        "type_of_event": "click",
+                        "node_data": current_node_contents,
+                        "event_data": button
+                        }
+                    break
+            if node_id != "":
+                node_key = flow_id + "." + node_id
+            else:
+                node_key = self.node_key
+        elif "time" in input_data.keys():
+            button_contents = current_node_contents["Buttons"]
+            node_id = ""
+            for button in button_contents:
+                button_type = button.get("ButtonType", button.get("Type"))
+                if button_type == "GetLocation":
+                    var_name = current_node_contents["VariableName"]
+                    user_input[var_name] = input_data["address"]
+                    node_id = button["NextNodeId"]
+                    event_data = {
+                        "type_of_event": "click",
+                        "node_data": current_node_contents,
+                        "event_data": button
+                        }
+                    break
+            if node_id != "":
+                node_key = flow_id + "." + node_id
+            else:
+                node_key = self.node_key
         else:
             print("Unknown input data found", input_data)
 

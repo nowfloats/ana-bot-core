@@ -1,10 +1,9 @@
 """
-Module whcih converts output from ana studio to platform's message format
+Module which converts output from ana studio to platform's message format
 Author: https://github.com/velutha
 """
 import json
 import re
-import pdb
 from furl import furl
 from src.config import ana_config
 from src.thrift_models.ttypes import MessageType, InputType, MediaType, ButtonType
@@ -55,9 +54,10 @@ class Converter():
 
         elif node_type == "ApiCall":
             pass
+        elif node_type == "Condition":
+            pass
         elif node_type == "HandoffToAgent":
             return None
-
 
         return {"messages": messages, "events": event_log_data}
 
@@ -95,6 +95,22 @@ class Converter():
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
 
+            elif section_type == "Graph":
+                pass
+
+            elif section_type == "Video":
+                message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
+                media_type = MediaType._NAMES_TO_VALUES["VIDEO"]
+                url = section.get("Url", "")
+                encoded_url = furl(url).url
+                preview_url = section.get("PreviewUrl", "")
+                text = section.get("Title", "")
+                final_text = self.verb_replacer(text)
+                media_content = Media(type=media_type, url=encoded_url, previewUrl=preview_url).trim()
+                message_content = MessageContent(text=final_text, media=media_content, mandatory=1).trim()
+                message_data = MessageData(type=message_type, content=message_content).trim()
+                messages_data.append(message_data)
+
             elif section_type == "Carousel":
                 message_type = MessageType._NAMES_TO_VALUES["CAROUSEL"]
                 section_items = section.get("Items", [])
@@ -125,6 +141,8 @@ class Converter():
                 message_content = MessageContent(items=item_elements, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
+            else:
+                print("Unknown section_type found", section_type)
 
         return messages_data
 
@@ -134,6 +152,7 @@ class Converter():
         text_elements = [button for button in data if button["ButtonType"] in self.text_inputs]
 
         messages_data = []
+
 
         if click_elements != [] and text_elements == []:
             messages_data = self._process_click_inputs(click_elements, mandatory=1)
@@ -170,6 +189,7 @@ class Converter():
                     "value": button.get("_id", ""),
                     "type": ButtonType._NAMES_TO_VALUES["QUICK_REPLY"]
                     }
+
             elem_options.append(option)
 
         if elem_options != []:
@@ -212,6 +232,20 @@ class Converter():
             elif button_type == "GetEmail":
                 message_type = MessageType._NAMES_TO_VALUES["INPUT"]
                 input_type = InputType._NAMES_TO_VALUES["EMAIL"]
+            elif button_type == "GetLocation":
+                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+                input_type = InputType._NAMES_TO_VALUES["LOCATION"]
+            elif button_type == "GetAddress":
+                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+                input_type = InputType._NAMES_TO_VALUES["ADDRESS"]
+            elif button_type == "GetDate":
+                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+                input_type = InputType._NAMES_TO_VALUES["DATE"]
+            elif button_type == "GetTime":
+                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
+                input_type = InputType._NAMES_TO_VALUES["TIME"]
+            elif button_type == "GetItemFromSource":
+                pass
             else:
                 print("Undefined Text Input Type")
 
@@ -225,5 +259,6 @@ class Converter():
                 content=content
                 ).trim()
             elem_message_data.append(message_data)
+
 
         return elem_message_data

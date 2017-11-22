@@ -24,7 +24,7 @@ flow_config = {
 
 ana_config = {
     "click_input_types" : ["NextNode", "OpenUrl", "GetFile", "GetAudio", "PostText", "GetImage", "GetAgent"],
-    "text_input_types" : ["GetText", "GetEmail", "GetNumber", "GetPhoneNumber", "GetItemFromSource"],
+    "text_input_types" : ["GetText", "GetEmail", "GetNumber", "GetPhoneNumber", "GetItemFromSource", "GetLocation", "GetAddress", "GetDate", "GetDateTime", "GetTime"],
     "ana_section_types" : ["Image", "Text", "Graph", "Gif", "Audio", "Video", "Link", "EmbeddedHtml", "Carousel"],
     "ana_node_types" : ["Combination", "ApiCall"],
     "ana_button_types" : ["PostText", "OpenUrl", "GetText", "GetAddress", "GetNumber", "GetPhoneNumber", "GetEmail", "GetImage", "GetAudio", "GetVideo", "GetItemFromSource", "NextNode", "DeepLink", "GetAgent", "ApiCall", "ShowConfirmation", "FetchChatFlow", "GetDate", "GetTime", "GetDateTime", "GetLocation"]

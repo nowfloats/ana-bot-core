@@ -66,6 +66,6 @@ def get_business():
 if __name__ == "__main__":
 
     HOST = os.environ.get("HOST") or "0.0.0.0"
-    PORT = os.environ.get("PORT") or 5000
+    PORT = os.environ.get("PORT") or 9500
 
     app.run(host=HOST, port=PORT)
