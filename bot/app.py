@@ -6,9 +6,9 @@ import os
 from src import app, message_pool
 from src.validator import Validator
 from flask import request, jsonify
+from src.controllers.business_controller import BusinessController
 from src.controllers.chatflow_controller import ChatFlowController
 from src.controllers.session_controller import SessionController
-from src.controllers.business_controller import BusinessController
 from src.responder import MessageProcessor
 
 @app.route("/health-check")
@@ -43,9 +43,9 @@ def message_handler():
     print(message)
     print("****************")
 
-    message_pool.submit(MessageProcessor(message).respond_to_message)
+    handle_message = message_pool.submit(MessageProcessor(message).respond_to_message)
+    print(handle_message.exception())
     return jsonify(status="received")
-
 
 @app.route("/api/business", methods=["POST"])
 def business_handler():

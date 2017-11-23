@@ -7,11 +7,11 @@ class EventLogger(KinesisHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def log(self, meta_data={}, data={}, flow_data={}):
+    def log(self, meta_data, data, state):
 
         event_type = data.get("type_of_event")
         if data == {}:
-            return
+            return 0
 
         node_data = data.get("node_data")
         click_data = data.get("event_data")
@@ -19,7 +19,7 @@ class EventLogger(KinesisHelper):
         event_channel = Medium._VALUES_TO_NAMES[event_channel_type]
 
         final_event_data = {
-            "business_name" : flow_data.get("business_name"),
+            "business_name" : state.get("business_name"),
             "business_id": meta_data["recipient"]["id"],
             "event_channel": event_channel,
             "user_id": meta_data["sender"]["id"],
@@ -36,4 +36,4 @@ class EventLogger(KinesisHelper):
 
         self.log_message(data=final_event_data)
         print(event_type, "event logged with data", final_event_data)
-        return
+        return 1

@@ -20,7 +20,7 @@ class Converter():
     def verb_replacer(self, text):
         data = self.state.get("var_data", "{}")
         variable_data = json.loads(data)
-        current_variable_data = self.state["new_var_data"]
+        current_variable_data = self.state.get("new_var_data", {})
         variable_data.update(current_variable_data)
         matches = re.findall("\[~(.*?)\]", text)
         variable_names = variable_data.keys()
@@ -31,7 +31,8 @@ class Converter():
                 final_text = text.replace(key, variable_data[match])
         return final_text
 
-    def get_messages_data(self, node_data, message_content):
+    def get_messages_data(self, node_data):
+
 
         node_type = node_data.get("NodeType", "")
 
@@ -58,6 +59,7 @@ class Converter():
             pass
         elif node_type == "HandoffToAgent":
             return None
+
 
         return {"messages": messages, "events": event_log_data}
 

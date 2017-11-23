@@ -33,7 +33,7 @@ class User():
 
         return response
 
-    def set_state(self, session_id, state, meta_data, flow_data):
+    def set_state(self, session_id, state, meta_data):
         try:
             new_state = {}
             current_state = CACHE.hgetall(session_id)
@@ -44,7 +44,7 @@ class User():
 
             channel_type = meta_data["sender"]["medium"]
             channel = Medium._VALUES_TO_NAMES[channel_type]
-            business_name = flow_data.get("business_name", "")
+            business_name = state.get("business_name", "")
             timestamp = int(time.time())
 
             new_state["current_node_id"] = state["current_node_id"]

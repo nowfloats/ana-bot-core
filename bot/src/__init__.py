@@ -2,12 +2,12 @@
 Application init file
 """
 import os
-import concurrent.futures
 import redis
 import pymongo
 from pymongo import MongoClient
 from flask import Flask
 from src.connectors.redis_helper import RedisHelper
+from src.thread_pool import ThreadPoolExecutorStackTraced
 
 app = Flask(__name__)
 
@@ -22,7 +22,7 @@ MONGO_CLIENT = MongoClient(
     connectTimeoutMS=20000
     )
 
-message_pool = concurrent.futures.ThreadPoolExecutor(max_workers=20)
+message_pool = ThreadPoolExecutorStackTraced(max_workers=20)
 
 try:
     MONGO_CLIENT.server_info()
