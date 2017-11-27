@@ -71,7 +71,7 @@ class Converter():
             section_type = section.get("SectionType", "")
             if section_type == "Text":
                 message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
-                text = section["Text"]
+                text = section.get("Text", "")
                 final_text = self.verb_replacer(text)
                 message_content = MessageContent(text=final_text, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()

@@ -82,8 +82,8 @@ class AnaNode():
             node_id = ""
             for button in button_contents:
                 button_type = button.get("ButtonType", button.get("Type"))
-                if button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
-                    var_name = current_node_contents["VariableName"]
+                if button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail", "GetDate"]:
+                    var_name = current_node_contents.get("VariableName", "DEFAULT_VAR")
                     user_input[var_name] = input_data["input"]
                     node_id = button["NextNodeId"]
                     event_data = {
@@ -102,7 +102,7 @@ class AnaNode():
             for button in button_contents:
                 button_type = button.get("ButtonType", button.get("Type"))
                 if button_type == "GetLocation":
-                    var_name = current_node_contents["VariableName"]
+                    var_name = current_node_contents.get("VariableName", "DEFAULT_VAR")
                     user_input[var_name] = input_data["location"]
                     node_id = button["NextNodeId"]
                     event_data = {
@@ -120,8 +120,8 @@ class AnaNode():
             node_id = ""
             for button in button_contents:
                 button_type = button.get("ButtonType", button.get("Type"))
-                if button_type == "GetLocation":
-                    var_name = current_node_contents["VariableName"]
+                if button_type == "GetAddress":
+                    var_name = current_node_contents.get("VariableName", "DEFAULT_VAR")
                     user_input[var_name] = input_data["address"]
                     node_id = button["NextNodeId"]
                     event_data = {
@@ -139,9 +139,9 @@ class AnaNode():
             node_id = ""
             for button in button_contents:
                 button_type = button.get("ButtonType", button.get("Type"))
-                if button_type == "GetLocation":
-                    var_name = current_node_contents["VariableName"]
-                    user_input[var_name] = input_data["address"]
+                if button_type == "GetDate":
+                    var_name = current_node_contents.get("VariableName", "DEFAULT_VAR")
+                    user_input[var_name] = input_data["date"]
                     node_id = button["NextNodeId"]
                     event_data = {
                         "type_of_event": "click",
@@ -158,9 +158,9 @@ class AnaNode():
             node_id = ""
             for button in button_contents:
                 button_type = button.get("ButtonType", button.get("Type"))
-                if button_type == "GetLocation":
-                    var_name = current_node_contents["VariableName"]
-                    user_input[var_name] = input_data["address"]
+                if button_type == "GetTime":
+                    var_name = current_node_contents.get("VariableName", "DEFAULT_VAR")
+                    user_input[var_name] = input_data["time"]
                     node_id = button["NextNodeId"]
                     event_data = {
                         "type_of_event": "click",
