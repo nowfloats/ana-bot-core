@@ -8,11 +8,3 @@ services:
     env_file:
       - .env
     command: /usr/local/bin/gunicorn -w 2 app:app --access-logfile -
-
-  nginx:
-    restart: always
-    build: ./nginx/
-    ports:
-      - "80:80"
-    links:
-      - bot:bot
