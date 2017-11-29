@@ -2,7 +2,7 @@ import uuid
 import datetime
 import json
 import time
-from src import CACHE, DB
+from src import SESSION_CACHE, DB
 from src.utils import Util
 from src.thrift_models.ttypes import Medium
 
@@ -10,20 +10,21 @@ class User():
 
     def __init__(self, user_id):
         self.user_id = user_id
+        self.CACHE = SESSION_CACHE
 
     def get_session_data(self, session_id):
 
         response = {}
         user_session_key = self.user_id + "." + "sessions"
-        user_sessions = CACHE.lrange(user_session_key, 0, -1)
+        user_sessions = self.CACHE.lrange(user_session_key, 0, -1)
 
         if session_id in user_sessions:
             self.session_id = session_id
-            self.session_data = CACHE.hgetall(session_id)
+            self.session_data = self.CACHE.hgetall(session_id)
         else:
             self.session_id = str(uuid.uuid4())
             # create session
-            CACHE.lpush(user_session_key, self.session_id)
+            self.CACHE.lpush(user_session_key, self.session_id)
             self.session_data = {}
 
         response["session_id"] = self.session_id
@@ -36,7 +37,7 @@ class User():
     def set_state(self, session_id, state, meta_data):
         try:
             new_state = {}
-            current_state = CACHE.hgetall(session_id)
+            current_state = self.CACHE.hgetall(session_id)
 
             new_var_data = state.get("new_var_data", {})
             current_var_data = current_state.get("var_data", "{}")
@@ -51,7 +52,7 @@ class User():
             new_state["timestamp"] = timestamp
             new_state["var_data"] = json.dumps(final_var_data)
 
-            CACHE.hmset(session_id, new_state)
+            self.CACHE.hmset(session_id, new_state)
             self._persist_data(var_data=new_var_data, session_id=session_id, channel=channel, business_name=business_name)
 
             return 1

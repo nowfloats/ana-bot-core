@@ -11,7 +11,9 @@ from src.thread_pool import ThreadPoolExecutorStackTraced
 
 app = Flask(__name__)
 
-CACHE = RedisHelper().redis_client
+SESSION_CACHE = RedisHelper().session_redis_client
+
+ANA_CACHE = RedisHelper().ana_redis_client
 
 DB_CONNECTION = os.environ.get("DB_CONNECTION") or "mongodb://localhost:27027/anachatdb"
 
@@ -28,8 +30,10 @@ try:
     MONGO_CLIENT.server_info()
     DB = MONGO_CLIENT["anachatdb"]
     print("Connected to anachatdb")
-    CACHE.get("None")
-    print("Connected to Redis")
+    SESSION_CACHE.get("None")
+    print("Connected to Session Redis")
+    ANA_CACHE.get("None")
+    print("Connected to Ana Redis")
 
 except redis.exceptions.ConnectionError as err:
     print("Error connecting to redis\n", err)
