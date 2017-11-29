@@ -29,7 +29,7 @@ class Converter():
             "ApiCall": ApiCallProcessor,
             "Condition": ConditionProcessor,
             "Card": CardProcessor,
-            "HandoffToAgent": AgentHandOffProcessor
+            "HandOffToAgent": AgentHandOffProcessor
             }
 
         Processor = node_processor_map.get(node_type, None)
