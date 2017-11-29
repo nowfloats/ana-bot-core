@@ -32,7 +32,7 @@ class Business():
         business_details = {key: value for key, value in business_object.items() if key in response_keys}
         return business_details
 
-    def save_business_data_to_cache(self, business_data={}, nodes=[]):
+    def save_business_data_to_cache(self, business_data, nodes):
 
         if business_data == {}:
             return False
@@ -45,17 +45,17 @@ class Business():
 
         for node in nodes:
             if node["Id"] not in config["archived_node_ids"]:
-                if node["IsStartNode"]:
-                    key = flow_id + "." + config["first_node_key"]
-                else:
-                    key = flow_id + "." + node["Id"]
+                if node.get("IsStartNode", False):
+                    get_started_key = flow_id + "." + config["first_node_key"]
+                    node_dict[get_started_key] = json.dumps(node)
+                key = flow_id + "." + node["Id"]
                 node_dict[key] = json.dumps(node)
 
         try:
             self.CACHE.mset(node_dict)
             print("Node data written to cache for flow ", flow_id)
             self.CACHE.hmset(self.business_id, business_data_to_save)
-            print("Business data written to cache for flow ", flow_id )
+            print("Business data written to cache for flow ", flow_id)
             return True
         except Exception as err:
             print("Error writing to cache")
