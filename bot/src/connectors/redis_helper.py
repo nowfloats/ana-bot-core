@@ -11,6 +11,6 @@ class RedisHelper():
 
             ana_redis_host = os.environ.get("ANA_REDIS_HOST") or "0.0.0.0"
             ana_redis_port = os.environ.get("ANA_REDIS_PORT") or 6379
-            self.ana_redis_client = redis.StrictRedis(host=ana_redis_host, port=ana_redis_port, encoding="utf-8", decode_responses=True)
+            self.ana_redis_client = redis.StrictRedis(host=ana_redis_host, db=1, port=ana_redis_port, encoding="utf-8", decode_responses=True)
         except Exception as err:
             print(err)
