@@ -1,6 +1,7 @@
 import time
 from src.thrift_models.ttypes import Medium
 from src.connectors.kinesis_helper import KinesisHelper
+from src.logger import logger
 
 class EventLogger(KinesisHelper):
 
@@ -35,5 +36,5 @@ class EventLogger(KinesisHelper):
             }
 
         self.log_message(data=final_event_data)
-        print(event_type, "event logged with data", final_event_data)
+        logger.info(str(event_type) + " event logged with data" + str(final_event_data))
         return 1

@@ -5,6 +5,7 @@ Author: https://github.com/velutha
 import json
 import re
 from furl import furl
+from src.logger import logger
 from src.config import ana_config
 from src.thrift_models.ttypes import MessageType, InputType, MediaType, ButtonType
 from src.models.message import MessageContent, MessageData, Media
@@ -128,7 +129,7 @@ class CombinationProcessor():
                 message_data = MessageData(type=message_type, content=message_content).trim()
                 messages_data.append(message_data)
             else:
-                print("Unknown section_type found", section_type)
+                logger.warning("Unknown section_type found"+str(section_type))
 
         return messages_data
 
@@ -233,7 +234,7 @@ class CombinationProcessor():
             elif button_type == "GetItemFromSource":
                 pass
             else:
-                print("Undefined Text Input Type")
+                logger.warning("Undefined Text Input Type" + str(button_type))
 
             content = MessageContent(
                 inputType=input_type,

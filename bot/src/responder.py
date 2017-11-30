@@ -7,6 +7,7 @@ from src.utils import Util
 from src.models.sender_type import SenderTypeCustom as SenderType
 from src.converters.converter import Converter
 from src.event_logger import EventLogger
+from src.logger import logger
 from src.models.user import User
 from src.models.business import Business
 
@@ -38,7 +39,7 @@ class MessageProcessor():
         if agent_response or user_response:
             self.__update_state(meta_data=self.meta_data, state=self.state)
             self.__log_event(meta_data=self.meta_data, state=self.state, data=event_data)
-            print("User state updated with", self.state)
+            logger.info("User state updated with" + str(self.state))
 
         return
 

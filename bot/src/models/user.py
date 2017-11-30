@@ -3,6 +3,7 @@ import datetime
 import json
 import time
 from src import SESSION_CACHE, DB
+from src.logger import logger
 from src.utils import Util
 from src.thrift_models.ttypes import Medium
 
@@ -57,10 +58,10 @@ class User():
 
             return 1
         except Exception as err:
-            print(err)
+            logger.error(err)
             raise
 
-    def _persist_data(self, var_data={} , session_id="", channel="", business_name=""):
+    def _persist_data(self, var_data, session_id="", channel="", business_name=""):
         # change this method to perform async
         if var_data == {}:
             return 1
@@ -78,8 +79,8 @@ class User():
             }
         try:
             saved_document_id = collection.insert_one(document).inserted_id
-            print("Variable data saved with object_id", saved_document_id)
+            logger.info("Variable data saved with object_id" + str(saved_document_id))
             return 1
         except Exception as err:
-            print(err)
+            logger.error(err)
             raise

@@ -3,6 +3,7 @@ Business data controller
 Author: https:github.com/velutha
 """
 from flask import jsonify
+from src.logger import logger
 from src.models.business import Business
 from src.controllers.chatflow_controller import ChatFlowController
 
@@ -19,7 +20,7 @@ class BusinessController():
         business_data["flow"] = data["flow"]
         business_data["business_name"] = data["business_name"]
         create_business = Business(business_id).save(business_data)
-        print("Created business details")
+        logger.info("Created business details")
         # save data to cache
         ChatFlowController.populate_flows(business_id)
 

@@ -6,6 +6,7 @@ import uuid
 import json
 from src import ANA_CACHE, DB
 from src.config import flow_config as config
+from src.logger import logger
 
 class Business():
 
@@ -53,13 +54,13 @@ class Business():
 
         try:
             self.CACHE.mset(node_dict)
-            print("Node data written to cache for flow ", flow_id)
+            logger.info("Node data written to cache for flow " + str(flow_id))
             self.CACHE.hmset(self.business_id, business_data_to_save)
-            print("Business data written to cache for flow ", flow_id)
+            logger.info("Business data written to cache for flow " + str(flow_id))
             return True
         except Exception as err:
-            print("Error writing to cache")
-            print(err)
+            logger.error("Error writing to cache")
+            logger.error(err)
             return False
 
     def save(self, data):
@@ -86,5 +87,5 @@ class Business():
 
             return True
         except Exception as err:
-            print(err)
+            logger.error(err)
             return False

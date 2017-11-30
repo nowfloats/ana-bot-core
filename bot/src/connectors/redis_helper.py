@@ -1,6 +1,7 @@
 import os
 from redis import StrictRedis, exceptions as RedisExceptions
 from rediscluster import StrictRedisCluster, exceptions as RedisClusterExceptions
+from src.logger import logger
 
 class RedisHelper():
 
@@ -15,15 +16,15 @@ class RedisHelper():
             self.ana_redis_client = StrictRedis(host=ana_redis_host, db=1, port=ana_redis_port, encoding="utf-8", decode_responses=True)
 
             self.session_redis_client.get("None")
-            print("Connected to session redis cluster")
+            logger.info("Connected to session redis cluster")
 
             self.ana_redis_client.get("None")
-            print("Connected to ana redis")
+            logger.info("Connected to ana redis")
 
         except RedisExceptions.ConnectionError as err:
-            print("Error connecting to redis\n", err)
+            logger.error("Error connecting to redis\n" + str(err))
             raise
 
         except RedisClusterExceptions.RedisClusterException as err:
-            print("Error connecting to redis cluster\n", err)
+            logger.error("Error connecting to redis cluster\n" + str(err))
             raise

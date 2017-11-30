@@ -3,6 +3,7 @@ Model for output from ana studio
 """
 import json
 from src import ANA_CACHE
+from src.logger import logger
 
 class AnaNode():
 
@@ -14,13 +15,13 @@ class AnaNode():
         response = ANA_CACHE.get(node_key)
 
         if response is None:
-            print("Data not found for", node_key)
+            logger.warning("Data not found for" + str(node_key))
             return {}
         try:
             response_dict = json.loads(response)
             return response_dict
         except Exception as err:
-            print(err)
+            logger.error(err)
             raise
 
         # handle response not found or empty ideally this should never happen
@@ -173,7 +174,7 @@ class AnaNode():
             else:
                 node_key = self.node_key
         else:
-            print("Unknown input data found", input_data)
+            logger.warning("Unknown input data found" + str(input_data))
 
         return {"node_id": node_key, "input_data": user_input, "event_data": event_data}
 

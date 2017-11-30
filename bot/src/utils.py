@@ -1,7 +1,7 @@
 import json
 import requests
-import pdb
 from src.config import application_config
+from src.logger import logger
 
 class Util(object):
 
@@ -22,15 +22,15 @@ class Util(object):
 
         headers = {"Content-Type" : "application/json"}
         if messages == []:
-            print("No messages to send to", sending_to)
+            logger.info("No messages to send to" + str(sending_to))
             return 0
         for message in messages:
-            print(message)
+            logger.info(message)
             json_message = json.dumps(message)
             try:
                 response = requests.post(url, headers=headers, data=json_message)
-                print(response)
+                logger.info(response)
             except Exception as err:
-                print(err)
+                logger.error(err)
                 return 0
         return 1

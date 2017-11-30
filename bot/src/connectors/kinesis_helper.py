@@ -1,5 +1,6 @@
 import json
 import boto3
+from src.logger import logger
 from src.config import application_config as config
 
 class KinesisHelper():
@@ -18,7 +19,7 @@ class KinesisHelper():
                 )
         except Exception as err:
             # handle this case
-            print(err)
+            logger.error(err)
             raise
 
     def log_message(self, data=None, key="core-chat-events"):
