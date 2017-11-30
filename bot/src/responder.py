@@ -4,7 +4,7 @@ __author__: https://github.com/velutha
 """
 import uuid
 from src.utils import Util
-from src.thrift_models.ttypes import SenderType
+from src.models.sender_type import SenderTypeCustom as SenderType
 from src.converters.converter import Converter
 from src.event_logger import EventLogger
 from src.models.user import User
@@ -38,30 +38,14 @@ class MessageProcessor():
         if agent_response or user_response:
             self.__update_state(meta_data=self.meta_data, state=self.state)
             self.__log_event(meta_data=self.meta_data, state=self.state, data=event_data)
-            # User(self.user_id).set_state(self.session_id, self.state, self.meta_data, self.flow_data)
-            # EventLogger().log(meta_data=self.meta_data, data=event_data, flow_data=self.flow_data)
             print("User state updated with", self.state)
+
         return
-
-        # sender_type = SenderType._VALUES_TO_NAMES[self.meta_data["senderType"]]
-
-        # if sender_type == "AGENT":
-            # user_messages = Converter(self.state).get_agent_messages(self.meta_data, self.message_data)
-            # response = Util.send_messages(messages=user_messages, sending_to="USER")
-            # return response
-        # else:
-            # node = self._get_node()
-            # messages_data = Converter(self.state).get_messages(node, self.meta_data, self.message_data)
-            # messages = messages_data.get("messages")
-            # event_data = messages_data.get("event_data")
-
-            # agent_messages = [message["message"] for message in messages if message["send_to"] == "AGENT"]
-            # user_messages = [message["message"] for message in messages if message["send_to"] == "USER"]
 
     @classmethod
     def __get_current_state(cls, meta_data):
 
-        sender_type = SenderType._VALUES_TO_NAMES[meta_data["senderType"]]
+        sender_type = SenderType.get_name(meta_data["senderType"])
 
         if sender_type == "AGENT":
             user_id = meta_data["recipient"]["id"]
@@ -81,7 +65,7 @@ class MessageProcessor():
     @classmethod
     def __update_state(cls, state, meta_data):
 
-        sender_type = SenderType._VALUES_TO_NAMES[meta_data["senderType"]]
+        sender_type = SenderType.get_name(meta_data["senderType"])
 
         if sender_type == "AGENT":
             # no need to update user state
@@ -94,7 +78,7 @@ class MessageProcessor():
     @classmethod
     def __log_event(cls, meta_data, state, data):
 
-        sender_type = SenderType._VALUES_TO_NAMES[meta_data["senderType"]]
+        sender_type = SenderType.get_name(meta_data["senderType"])
 
         if sender_type == "AGENT":
             # no need to log any event as of now

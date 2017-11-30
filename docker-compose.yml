@@ -3,6 +3,7 @@ version: "3"
 services:
   bot:
     build: ./bot
+    image: projectana/anacore
     ports:
       - "9500:9500"
     env_file:

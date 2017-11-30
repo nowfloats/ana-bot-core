@@ -30,16 +30,10 @@ try:
     MONGO_CLIENT.server_info()
     DB = MONGO_CLIENT["anachatdb"]
     print("Connected to anachatdb")
-    SESSION_CACHE.get("None")
-    print("Connected to Session Redis")
-    ANA_CACHE.get("None")
-    print("Connected to Ana Redis")
-
-except redis.exceptions.ConnectionError as err:
-    print("Error connecting to redis\n", err)
 
 except pymongo.errors.ServerSelectionTimeoutError as err:
     print("Error connecting to mongodb\n", err)
+    raise
 
 except:
     print("Server could not start.\n Unexpected error occured")

@@ -7,7 +7,8 @@ from src.config import flow_config
 from src.converters.ana.ana_converter import Converter as AnaConverter
 from src.converters.agent.agent_converter import Converter as AgentConverter
 
-from src.thrift_models.ttypes import MessageType, InputType, SenderType
+from src.thrift_models.ttypes import MessageType, InputType
+from src.models.sender_type import SenderTypeCustom as SenderType
 from src.models.message import MessageContent, MessageData, Message, MessageMeta
 from src.models.inputs import TextInput
 
@@ -19,7 +20,7 @@ class Converter():
     def get_messages(self, meta_data, message_data):
 
         messages = {}
-        sender_type = SenderType._VALUES_TO_NAMES[meta_data["senderType"]]
+        sender_type = SenderType.get_name(meta_data["senderType"])
 
         if sender_type == "AGENT":
             messages = self.get_agent_messages(meta_data, message_data=message_data)
