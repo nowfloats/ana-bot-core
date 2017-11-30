@@ -2,13 +2,6 @@
 Module which converts output from ana studio to platform's message format
 Author: https://github.com/velutha
 """
-import json
-import re
-from furl import furl
-from src.config import ana_config
-from src.thrift_models.ttypes import MessageType, InputType, MediaType, ButtonType
-from src.models.message import MessageContent, MessageData, Media
-from src.models.inputs import Option, Item, TextInput
 from .node_processors.combination_processor import CombinationProcessor
 from .node_processors.api_call_processor import ApiCallProcessor
 from .node_processors.condition_processor import ConditionProcessor
@@ -29,7 +22,7 @@ class Converter():
             "ApiCall": ApiCallProcessor,
             "Condition": ConditionProcessor,
             "Card": CardProcessor,
-            "HandOffToAgent": AgentHandOffProcessor
+            "HandoffToAgent": AgentHandOffProcessor
             }
 
         Processor = node_processor_map.get(node_type, None)

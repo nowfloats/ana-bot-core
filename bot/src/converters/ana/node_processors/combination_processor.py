@@ -1,3 +1,7 @@
+"""
+This module handles combination node of ana studio output
+Author: https://github.com/velutha
+"""
 import json
 import re
 from furl import furl
