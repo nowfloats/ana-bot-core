@@ -31,7 +31,7 @@ message_pool = ThreadPoolExecutorStackTraced(max_workers=20)
 try:
     MONGO_CLIENT.server_info()
     DB = MONGO_CLIENT["anachatdb"]
-    logger.debug("Connected to anachatdb")
+    logger.info("Connected to anachatdb")
 
 except pymongo.errors.ServerSelectionTimeoutError as err:
     logger.error("Error connecting to mongodb\n" + str(err))
