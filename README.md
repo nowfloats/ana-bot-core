@@ -10,7 +10,7 @@ Environment Variables used can be found in .env.example
 
 These environment variables should be set before running the app
 
-They can set by creaeting the file .env in root directory or plain environment variables
+They can be set by creating the file .env in root directory or plain environment variables
 
 From the root directory of the project run
 
