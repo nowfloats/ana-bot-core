@@ -1,15 +1,15 @@
-Install docker on your machine
+Install docker on your machine.
 
-Environment settings can be found in .env
-.env is not included in source code
-copy .env.example to make a new file .env
-Edit settings according to your need
+Instructions to install docker can be found here https://docs.docker.com/engine/installation/
+
+Environment Variables used can be found in .env.example
+
+These environment variables should be set before running the app.
+
+They can set using the file .env or plain environment variables
 
 From the root directory of the project run
 
 docker-compose build
-docker-compose up
 
-On a linux system, you might have to change 
-permissions of docker executable to execute 
-commands without 'sudo'
+docker-compose up
