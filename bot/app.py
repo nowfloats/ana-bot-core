@@ -12,12 +12,12 @@ from src.controllers.chatflow_controller import ChatFlowController
 from src.controllers.session_controller import SessionController
 from src.responder import MessageProcessor
 
-@app.route("/health-check")
+@app.route("/bot/health")
 def hello_world():
     status_message = {"status": "UP"}
     return jsonify(status_message)
 
-@app.route("/api/refreshChatFlows")
+@app.route("/bot/refresh")
 @Validator.validate_business_params
 def populate_ana_flows():
 
@@ -26,7 +26,7 @@ def populate_ana_flows():
 
     return response
 
-@app.route("/api/clearSessions", endpoint="clear_sessions")
+@app.route("/bot/clear", endpoint="clear_sessions")
 @Validator.validate_session_params
 def clear_sessions():
 
@@ -35,7 +35,7 @@ def clear_sessions():
 
     return response
 
-@app.route("/api/message", methods=["POST"])
+@app.route("/bot/message", methods=["POST"])
 def message_handler():
 
     message = request.get_json()
@@ -48,7 +48,7 @@ def message_handler():
     logger.debug(handle_message.exception())
     return jsonify(status="received")
 
-@app.route("/api/business", methods=["POST"])
+@app.route("/bot/business", methods=["POST"])
 def business_handler():
 
     business_data = request.get_json()
@@ -56,7 +56,7 @@ def business_handler():
 
     return response
 
-@app.route("/api/business", methods=["GET"], endpoint="get_business")
+@app.route("/bot/business", methods=["GET"], endpoint="get_business")
 @Validator.validate_business_params
 def get_business():
     business_id = request.args.get("business_id")

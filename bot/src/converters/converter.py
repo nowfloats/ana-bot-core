@@ -7,8 +7,7 @@ from src.config import flow_config
 from src.converters.ana.ana_converter import Converter as AnaConverter
 from src.converters.agent.agent_converter import Converter as AgentConverter
 
-from src.thrift_models.ttypes import MessageType, InputType
-from src.models.sender_type import SenderTypeCustom as SenderType
+from src.models.types import SenderTypeWrapper as SenderType, MessageTypeWrapper as MessageType, InputTypeWrapper as InputType
 from src.models.message import MessageContent, MessageData, Message, MessageMeta
 from src.models.inputs import TextInput
 
@@ -42,8 +41,8 @@ class Converter():
             incoming_message = Message(meta=meta_data, data=message_content).trim()
             outgoing_messages.append({"message" :incoming_message, "sending_to": "AGENT"})
 
-            message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-            input_type = InputType._NAMES_TO_VALUES["TEXT"]
+            message_type = MessageType.get_value("INPUT")
+            input_type = InputType.get_value("TEXT")
             input_attr = TextInput(placeHolder="Talk to our Agent").trim()
 
             user_meta_data = MessageMeta(
