@@ -33,7 +33,7 @@ class CombinationProcessor():
             "event_data" : {}
             }
 
-        return {"messages": messages, "events": event_log_data}
+        return {"messages": messages, "events": [event_log_data]}
 
     def verb_replacer(self, text):
         data = self.state.get("var_data", "{}")

@@ -23,8 +23,11 @@ class Converter():
         if sender_type == "AGENT":
             messages = self.get_agent_messages(meta_data, message_data)
         else:
-            node_data = self.__get_node(message_data=message_data)
+            data = self.__get_node_and_events(message_data=message_data)
+            node_data = data.get("node")
+            node_events = data.get("events")
             messages = self.get_user_messages(node_data, meta_data, message_data)
+            messages["events"] = messages["events"] + node_events
 
         return messages
 
@@ -36,7 +39,7 @@ class Converter():
 
         messages = AnaConverter(self.state).get_messages_data(node_data)
         messages_data = messages.get("messages", [])
-        events_data = messages.get("events", {})
+        events_data = messages.get("events", [])
 
         if messages_data == []:
             # no messages from ana flow, send incoming message to agent
@@ -74,26 +77,26 @@ class Converter():
 
         return messages
 
-    def __get_node(self, message_data):
+    def __get_node_and_events(self, message_data):
 
         get_started_node = self.state["flow_id"] + "." + flow_config["first_node_key"]
         next_node_id = get_started_node
+        event_data = []
 
         if bool(self.state.get("current_node_id")):
             # user already in ana flow
             current_node_id = self.state.get("current_node_id", get_started_node) # give first_node as default
             next_node_data = AnaNode(current_node_id).get_next_node_data(self.state["flow_id"], message_data)
 
-            # event_data = next_node_data.get("event_data", {})
-            # if event_data != {}:
-                # EventLogger().log(meta_data=self.meta_data, data=event_data, flow_data=self.flow_data)
+            event_data = next_node_data.get("events", [])
+
             next_node_id = next_node_data["node_id"]
             self.state["new_var_data"] = next_node_data["input_data"]
 
         self.state["current_node_id"] = next_node_id
         node = AnaNode(next_node_id).get_contents()
 
-        return node
+        return {"node": node, "events": event_data}
 
     @classmethod
     def __construct_user_messages(cls, meta_data, messages_data):

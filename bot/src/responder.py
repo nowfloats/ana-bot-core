@@ -27,7 +27,7 @@ class MessageProcessor():
 
         messages_data = Converter(self.state).get_messages_and_events(meta_data=self.meta_data, message_data=self.message_data)
         messages = messages_data.get("messages", [])
-        event_data = messages_data.get("events", {})
+        event_data = messages_data.get("events", [])
 
         agent_messages = [message["message"] for message in messages if message["sending_to"] == "AGENT"]
         user_messages = [message["message"] for message in messages if message["sending_to"] == "USER"]
@@ -83,4 +83,4 @@ class MessageProcessor():
         if sender_type == "AGENT":
             # no need to log any event as of now
             return
-        EventLogger().log(meta_data=meta_data, data=data, state=state)
+        EventLogger().log(meta_data=meta_data, events=data, state=state)

@@ -65,12 +65,10 @@ class AnaNode():
     def __get_next_node_data(cls, input_data, node_content):
 
         next_node_id = ""
-        event_data = {}
+        event_data = []
         user_input = {}
 
         button_contents = cls._extract_button_elements(node_content)
-
-
         input_key = list(input_data.keys())[0]
 
         if input_key == "val":
@@ -83,22 +81,21 @@ class AnaNode():
                         if var_name:
                             user_input[var_name] = button.get("VariableValue", "")
                         next_node_id = button["NextNodeId"]
-                        event_data = {
+                        event_data.append({
                             "type_of_event": "click",
                             "node_data": node_content,
                             "event_data": button
-                            }
+                            })
                         break
                 elif button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
                     if var_name:
                         user_input[var_name] = input_data["val"]
                     next_node_id = button["NextNodeId"]
-
-                    event_data = {
+                    event_data.append({
                         "type_of_event": "click",
                         "node_data": node_content,
                         "event_data": button
-                        }
+                        })
 
                     break
         else:
@@ -111,11 +108,11 @@ class AnaNode():
                     var_name = node_content.get("VariableName", "DEFAULT_VAR")
                     user_input[var_name] = input_data[input_key]
                     next_node_id = button["NextNodeId"]
-                    event_data = {
+                    event_data.append({
                         "type_of_event": "click",
                         "node_data": node_content,
                         "event_data": button
-                        }
+                        })
                     break
 
 
