@@ -2,7 +2,6 @@
 Message lifecycle goes here, receiving to responding
 __author__: https://github.com/velutha
 """
-import uuid
 from src.utils import Util
 from src.models.sender_type import SenderTypeCustom as SenderType
 from src.converters.converter import Converter
@@ -26,9 +25,9 @@ class MessageProcessor():
 
     def respond_to_message(self):
 
-        messages_data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data)
+        messages_data = Converter(self.state).get_messages_and_events(meta_data=self.meta_data, message_data=self.message_data)
         messages = messages_data.get("messages", [])
-        event_data = messages_data.get("event_data", {})
+        event_data = messages_data.get("events", {})
 
         agent_messages = [message["message"] for message in messages if message["sending_to"] == "AGENT"]
         user_messages = [message["message"] for message in messages if message["sending_to"] == "USER"]
@@ -55,7 +54,7 @@ class MessageProcessor():
             user_id = meta_data["sender"]["id"]
             business_id = meta_data["recipient"]["id"]
 
-        session_id = meta_data.get("sessionId", str(uuid.uuid4()))
+        session_id = meta_data.get("sessionId")
         state = User(user_id).get_session_data(session_id)
 
         flow_data = Business(business_id).get_business_data()

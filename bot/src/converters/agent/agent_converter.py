@@ -2,23 +2,32 @@
 Messages being sent to agent are constructed here
 Author: https://github.com/velutha
 """
-from src.thrift_models.ttypes import MessageType, InputType
 from src.models.message import MessageContent, MessageData
 from src.models.inputs import TextInput
+from src.models.types import MessageTypeWrapper as MessageType, InputTypeWrapper as InputType
 
 class Converter():
 
     def __init__(self, state):
         self.state = state
 
-    def get_messages_data(self, message_data):
+    @classmethod
+    def get_messages_data(cls, message_data):
 
         messages_data = []
         messages_data.append(message_data)
 
-        # construct input element
-        message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-        input_type = InputType._NAMES_TO_VALUES["TEXT"]
+        other_messages_data = cls.get_agent_connected_messages()
+        messages_data = messages_data + other_messages_data
+
+        return messages_data
+
+    @staticmethod
+    def get_agent_connected_messages():
+        messages_data = []
+
+        message_type = MessageType.get_value("INPUT")
+        input_type = InputType.get_value("TEXT")
         input_attr = TextInput(placeHolder="Talk to our Agent").trim()
 
         content = MessageContent(
@@ -30,5 +39,6 @@ class Converter():
             type=message_type,
             content=content
             ).trim()
+
         messages_data.append(input_message_data)
         return messages_data

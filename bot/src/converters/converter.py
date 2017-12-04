@@ -7,76 +7,53 @@ from src.config import flow_config
 from src.converters.ana.ana_converter import Converter as AnaConverter
 from src.converters.agent.agent_converter import Converter as AgentConverter
 
-from src.models.types import SenderTypeWrapper as SenderType, MessageTypeWrapper as MessageType, InputTypeWrapper as InputType
-from src.models.message import MessageContent, MessageData, Message, MessageMeta
-from src.models.inputs import TextInput
+from src.models.types import SenderTypeWrapper as SenderType
+from src.models.message import Message, MessageMeta
 
 class Converter():
 
     def __init__(self, state):
         self.state = state
 
-    def get_messages(self, meta_data, message_data):
+    def get_messages_and_events(self, meta_data, message_data):
 
         messages = {}
         sender_type = SenderType.get_name(meta_data["senderType"])
 
         if sender_type == "AGENT":
-            messages = self.get_agent_messages(meta_data, message_data=message_data)
+            messages = self.get_agent_messages(meta_data, message_data)
         else:
-            node = self._get_node(message_data=message_data)
-            messages = self.get_user_messages(node, meta_data, message_data)
+            node_data = self.__get_node(message_data=message_data)
+            messages = self.get_user_messages(node_data, meta_data, message_data)
 
         return messages
 
-    def get_user_messages(self, node_data, meta_data, message_content):
+    def get_user_messages(self, node_data, meta_data, message_data):
 
         outgoing_messages = []
+        user_messages = []
+        agent_messages = []
+
         messages = AnaConverter(self.state).get_messages_data(node_data)
         messages_data = messages.get("messages", [])
-        event_data = messages.get("events", {})
+        events_data = messages.get("events", {})
 
         if messages_data == []:
-            # empty messages from flow, construct agent message
-            incoming_message = Message(meta=meta_data, data=message_content).trim()
-            outgoing_messages.append({"message" :incoming_message, "sending_to": "AGENT"})
+            # no messages from ana flow, send incoming message to agent
+            incoming_message = Message(meta=meta_data, data=message_data).trim()
+            agent_messages = [{"message" :incoming_message, "sending_to": "AGENT"}]
 
-            message_type = MessageType.get_value("INPUT")
-            input_type = InputType.get_value("TEXT")
-            input_attr = TextInput(placeHolder="Talk to our Agent").trim()
-
-            user_meta_data = MessageMeta(
-                sender=meta_data["recipient"],
-                recipient=meta_data["sender"],
-                sessionId=meta_data["sessionId"],
-                responseTo=meta_data["id"],
-                senderType=1 #change this hardcoded
-                ).trim()
-            content = MessageContent(
-                inputType=input_type,
-                textInputAttr=input_attr,
-                mandatory=1,
-                ).trim()
-            input_message_data = MessageData(
-                type=message_type,
-                content=content
-                ).trim()
-            input_message = Message(meta=user_meta_data, data=input_message_data).trim()
-            outgoing_messages.append({"message" : input_message, "sending_to": "USER"})
-
+            # get messages to send to user when agent is connected
+            user_messages_data = AgentConverter.get_agent_connected_messages()
         else:
-            meta_data = MessageMeta(
-                sender=meta_data["recipient"],
-                recipient=meta_data["sender"],
-                sessionId=meta_data["sessionId"],
-                responseTo=meta_data["id"],
-                senderType=1 #change this hardcoded
-                ).trim()
-            for message_data in messages_data:
-                message = Message(meta=meta_data, data=message_data).trim()
-                outgoing_messages.append({"message" :message, "sending_to": "USER"})
+            user_messages_data = messages_data
 
-        return {"messages": outgoing_messages, "event_data": event_data}
+        messages = self.__construct_user_messages(meta_data=meta_data, messages_data=user_messages_data)
+        user_messages = [{"message": message, "sending_to": "USER"} for message in messages]
+
+        outgoing_messages = user_messages + agent_messages
+
+        return {"messages": outgoing_messages, "events": events_data}
 
     def get_agent_messages(self, meta_data, message_data):
 
@@ -88,33 +65,48 @@ class Converter():
             sender=meta_data["sender"],
             sessionId=meta_data["sessionId"],
             responseTo=meta_data["id"],
-            senderType=3 #change this hardcoded
+            senderType=SenderType.get_value("AGENT")
             ).trim()
+
         for data in messages_data:
             message = Message(meta=meta_data, data=data).trim()
             messages.append({"message": message, "sending_to": "USER"})
 
         return messages
 
-    def _get_node(self, message_data):
+    def __get_node(self, message_data):
 
         get_started_node = self.state["flow_id"] + "." + flow_config["first_node_key"]
+        next_node_id = get_started_node
 
         if bool(self.state.get("current_node_id")):
-
-            node_id = self.state.get("current_node_id", get_started_node) # give first_node as default
-            next_node_data = AnaNode(node_id).get_next_node_data(self.state["flow_id"], message_data)
+            # user already in ana flow
+            current_node_id = self.state.get("current_node_id", get_started_node) # give first_node as default
+            next_node_data = AnaNode(current_node_id).get_next_node_data(self.state["flow_id"], message_data)
 
             # event_data = next_node_data.get("event_data", {})
             # if event_data != {}:
                 # EventLogger().log(meta_data=self.meta_data, data=event_data, flow_data=self.flow_data)
             next_node_id = next_node_data["node_id"]
             self.state["new_var_data"] = next_node_data["input_data"]
-            self.state["current_node_id"] = next_node_id
-            node = AnaNode(next_node_id).get_contents(next_node_id)
-        else:
-            next_node_id = get_started_node
-            self.state["current_node_id"] = next_node_id
-            node = AnaNode(next_node_id).get_contents(next_node_id)
+
+        self.state["current_node_id"] = next_node_id
+        node = AnaNode(next_node_id).get_contents()
 
         return node
+
+    @classmethod
+    def __construct_user_messages(cls, meta_data, messages_data):
+
+        outgoing_messages = []
+        message_meta_data = MessageMeta(
+            sender=meta_data["recipient"],
+            recipient=meta_data["sender"],
+            sessionId=meta_data["sessionId"],
+            responseTo=meta_data["id"],
+            senderType=SenderType.get_value("ANA")
+            ).trim()
+        for message_data in messages_data:
+            message = Message(meta=message_meta_data, data=message_data).trim()
+            outgoing_messages.append(message)
+        return outgoing_messages

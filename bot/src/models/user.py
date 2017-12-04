@@ -4,8 +4,8 @@ import json
 import time
 from src import SESSION_CACHE, DB
 from src.logger import logger
+from src.models.types import MediumWrapper as Medium
 from src.utils import Util
-from src.thrift_models.ttypes import Medium
 
 class User():
 
@@ -16,21 +16,22 @@ class User():
     def get_session_data(self, session_id):
 
         response = {}
+        session_data = {}
         user_session_key = self.user_id + "." + "sessions"
         user_sessions = self.CACHE.lrange(user_session_key, 0, -1)
 
+        # initializing session if it does not exist
+        session_id = str(uuid.uuid4()) if session_id is None else session_id
+
         if session_id in user_sessions:
-            self.session_id = session_id
-            self.session_data = self.CACHE.hgetall(session_id)
+            session_data = self.CACHE.hgetall(session_id)
         else:
-            self.session_id = str(uuid.uuid4())
-            # create session
-            self.CACHE.lpush(user_session_key, self.session_id)
-            self.session_data = {}
+            # create session in cache
+            self.CACHE.lpush(user_session_key, session_id)
 
-        response["session_id"] = self.session_id
+        response["session_id"] = session_id
 
-        for key, value in self.session_data.items():
+        for key, value in session_data.items():
             response[key] = value
 
         return response
@@ -45,7 +46,7 @@ class User():
             final_var_data = Util.merge_dicts(new_var_data, json.loads(current_var_data))
 
             channel_type = meta_data["sender"]["medium"]
-            channel = Medium._VALUES_TO_NAMES[channel_type]
+            channel = Medium.get_name(channel_type)
             business_name = state.get("business_name", "")
             timestamp = int(time.time())
 
