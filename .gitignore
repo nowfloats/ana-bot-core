@@ -102,3 +102,6 @@ ENV/
 
 #editor
 *.swp
+
+#reddit dump
+dump.rdb

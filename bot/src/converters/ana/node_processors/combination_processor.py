@@ -7,7 +7,8 @@ import re
 from furl import furl
 from src.logger import logger
 from src.config import ana_config
-from src.thrift_models.ttypes import MessageType, InputType, MediaType, ButtonType
+from src.models.types import MessageTypeWrapper as MessageType, InputTypeWrapper as InputType, MediaTypeWrapper as MediaType,\
+        ButtonTypeWrapper as ButtonType
 from src.models.message import MessageContent, MessageData, Media
 from src.models.inputs import Option, Item, TextInput
 
@@ -55,7 +56,7 @@ class CombinationProcessor():
         for section in data:
             section_type = section.get("SectionType", "")
             if section_type == "Text":
-                message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
+                message_type = MessageType.get_value("SIMPLE")
                 text = section.get("Text", "")
                 final_text = self.verb_replacer(text)
                 message_content = MessageContent(text=final_text, mandatory=1).trim()
@@ -63,8 +64,8 @@ class CombinationProcessor():
                 messages_data.append(message_data)
 
             elif section_type in ["Image", "Gif"]:
-                message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
-                media_type = MediaType._NAMES_TO_VALUES["IMAGE"]
+                message_type = MessageType.get_value("SIMPLE")
+                media_type = MediaType.get_value("IMAGE")
                 url = section.get("Url", "")
                 encoded_url = furl(url).url
                 preview_url = section.get("PreviewUrl", "")
@@ -76,7 +77,7 @@ class CombinationProcessor():
                 messages_data.append(message_data)
 
             elif section_type in ["EmbeddedHtml", "Link"]:
-                message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
+                message_type = MessageType.get_value("SIMPLE")
                 text = section["Url"]
                 message_content = MessageContent(text=text, mandatory=1).trim()
                 message_data = MessageData(type=message_type, content=message_content).trim()
@@ -86,8 +87,8 @@ class CombinationProcessor():
                 pass
 
             elif section_type == "Video":
-                message_type = MessageType._NAMES_TO_VALUES["SIMPLE"]
-                media_type = MediaType._NAMES_TO_VALUES["VIDEO"]
+                message_type = MessageType.get_value("SIMPLE")
+                media_type = MediaType.get_value("VIDEO")
                 url = section.get("Url", "")
                 encoded_url = furl(url).url
                 preview_url = section.get("PreviewUrl", "")
@@ -99,11 +100,11 @@ class CombinationProcessor():
                 messages_data.append(message_data)
 
             elif section_type == "Carousel":
-                message_type = MessageType._NAMES_TO_VALUES["CAROUSEL"]
+                message_type = MessageType.get_value("CAROUSEL")
                 section_items = section.get("Items", [])
                 item_elements = []
                 for section_item in section_items:
-                    media_type = MediaType._NAMES_TO_VALUES["IMAGE"]
+                    media_type = MediaType.get_value("IMAGE")
                     image_url = section_item.get("ImageUrl", "")
                     title = section_item.get("Title", "")
                     description = section_item.get("Caption", "")
@@ -115,11 +116,11 @@ class CombinationProcessor():
                         if button["Type"] == "OpenUrl":
                             button_title = button.get("Text", "")
                             button_value = json.dumps({"url": button["Url"], "value": button["_id"]})
-                            button_type = ButtonType._NAMES_TO_VALUES["URL"]
+                            button_type = ButtonType.get_value("URL")
                         else:
                             button_title = button.get("Text", "")
                             button_value = button["_id"]
-                            button_type = ButtonType._NAMES_TO_VALUES["ACTION"]
+                            button_type = ButtonType.get_value("ACTION")
                         option_element = Option(title=button_title, value=button_value, type=button_type).trim()
                         options.append(option_element)
 
@@ -157,8 +158,8 @@ class CombinationProcessor():
         elem_message_data = []
         elem_options = []
 
-        message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-        input_type = InputType._NAMES_TO_VALUES["OPTIONS"]
+        message_type = MessageType.get_value("INPUT")
+        input_type = InputType.get_value("OPTIONS")
 
         for button in data:
             button_type = button.get("ButtonType", "")
@@ -167,14 +168,14 @@ class CombinationProcessor():
                 option = {
                     "title": button.get("ButtonName", ""),
                     "value": json.dumps({"url": button["Url"], "value": button["_id"]}),
-                    "type": ButtonType._NAMES_TO_VALUES["URL"]
+                    "type": ButtonType.get_value("URL")
                     }
             elif button_type == "NextNode":
                 button_heading = "Choose an option" # to be compatible with fb quick_replies
                 option = {
                     "title": button.get("ButtonName", button.get("ButtonText", "")),
                     "value": button.get("_id", ""),
-                    "type": ButtonType._NAMES_TO_VALUES["QUICK_REPLY"]
+                    "type": ButtonType.get_value("QUICK_REPLY")
                     }
 
             elem_options.append(option)
@@ -207,30 +208,30 @@ class CombinationProcessor():
             content = None
 
             if button_type == "GetText":
-                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-                input_type = InputType._NAMES_TO_VALUES["TEXT"]
+                message_type = MessageType.get_value("INPUT")
+                input_type = InputType.get_value("TEXT")
                 input_attr = TextInput(placeHolder=button.get("PlaceholderText", "")).trim()
             elif button_type == "GetNumber":
-                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-                input_type = InputType._NAMES_TO_VALUES["NUMERIC"]
+                message_type = MessageType.get_value("INPUT")
+                input_type = InputType.get_value("NUMERIC")
             elif button_type == "GetPhoneNumber":
-                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-                input_type = InputType._NAMES_TO_VALUES["PHONE"]
+                message_type = MessageType.get_value("INPUT")
+                input_type = InputType.get_value("PHONE")
             elif button_type == "GetEmail":
-                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-                input_type = InputType._NAMES_TO_VALUES["EMAIL"]
+                message_type = MessageType.get_value("INPUT")
+                input_type = InputType.get_value("EMAIL")
             elif button_type == "GetLocation":
-                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-                input_type = InputType._NAMES_TO_VALUES["LOCATION"]
+                message_type = MessageType.get_value("INPUT")
+                input_type = InputType.get_value("LOCATION")
             elif button_type == "GetAddress":
-                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-                input_type = InputType._NAMES_TO_VALUES["ADDRESS"]
+                message_type = MessageType.get_value("INPUT")
+                input_type = InputType.get_value("ADDRESS")
             elif button_type == "GetDate":
-                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-                input_type = InputType._NAMES_TO_VALUES["DATE"]
+                message_type = MessageType.get_value("INPUT")
+                input_type = InputType.get_value("DATE")
             elif button_type == "GetTime":
-                message_type = MessageType._NAMES_TO_VALUES["INPUT"]
-                input_type = InputType._NAMES_TO_VALUES["TIME"]
+                message_type = MessageType.get_value("INPUT")
+                input_type = InputType.get_value("TIME")
             elif button_type == "GetItemFromSource":
                 pass
             else:

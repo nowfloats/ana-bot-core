@@ -1,5 +1,5 @@
 import time
-from src.thrift_models.ttypes import Medium
+from src.models.types import MediumWrapper as Medium
 from src.connectors.kinesis_helper import KinesisHelper
 from src.logger import logger
 
@@ -17,7 +17,7 @@ class EventLogger(KinesisHelper):
         node_data = data.get("node_data")
         click_data = data.get("event_data")
         event_channel_type = meta_data["sender"]["medium"]
-        event_channel = Medium._VALUES_TO_NAMES[event_channel_type]
+        event_channel = Medium.get_name(event_channel_type)
 
         final_event_data = {
             "business_name" : state.get("business_name"),

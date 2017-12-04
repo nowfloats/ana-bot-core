@@ -6,10 +6,10 @@ import os
 from src import app, message_pool
 from src.validator import Validator
 from flask import request, jsonify
-from src.logger import logger
 from src.controllers.business_controller import BusinessController
 from src.controllers.chatflow_controller import ChatFlowController
 from src.controllers.session_controller import SessionController
+from src.logger import logger
 from src.responder import MessageProcessor
 
 @app.route("/bot/health")
@@ -40,12 +40,15 @@ def message_handler():
 
     message = request.get_json()
 
-    logger.debug("Message Received")
-    logger.debug(message)
-    logger.debug("****************")
+    logger.info("Message Received")
+    logger.info(message)
+    logger.info("****************")
 
     handle_message = message_pool.submit(MessageProcessor(message).respond_to_message)
-    logger.debug(handle_message.exception())
+    exception = handle_message.exception()
+    if exception:
+        logger.error(exception)
+
     return jsonify(status="received")
 
 @app.route("/bot/business", methods=["POST"])
