@@ -115,7 +115,6 @@ class AnaNode():
                         })
                     break
 
-
         return {"node_id": next_node_id, "event_data": event_data, "user_input": user_input}
 
     @classmethod

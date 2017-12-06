@@ -24,14 +24,19 @@ class Converter():
             "Card": CardProcessor,
             "HandoffToAgent": AgentHandOffProcessor
             }
+
         if node_type in ["Combination"]:
             Processor = node_processor_map.get(node_type, None)
             data = Processor(self.state).process_node(node_data)
 
         elif node_type in ["ApiCall", "Condition"]:
             Processor = node_processor_map.get(node_type, None)
-            next_node_data = Processor(self.state).process_node(node_data)
-            data = self.get_messages_data(next_node_data)
+            next_node_data = Processor(self.state).get_next_node(node_data)
+            data = self.get_messages_data(next_node_data.get("data"))
+            # this should ideally not happen here this
+            # change current_node_id thing in converter
+            # both should use the same method
+            self.state["current_node_id"] = next_node_data.get("id")
 
         elif node_type == "HandoffToAgent":
             data = {}
