@@ -26,7 +26,8 @@ MONGO_CLIENT = MongoClient(
     connectTimeoutMS=20000
     )
 
-message_pool = ThreadPoolExecutorStackTraced(max_workers=20)
+MessageHandlerPool = ThreadPoolExecutorStackTraced(max_workers=20)
+EventLogPool = ThreadPoolExecutorStackTraced(max_workers=2)
 
 try:
     MONGO_CLIENT.server_info()

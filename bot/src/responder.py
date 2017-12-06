@@ -2,6 +2,7 @@
 Message lifecycle goes here, receiving to responding
 __author__: https://github.com/velutha
 """
+from src import EventLogPool
 from src.utils import Util
 from src.models.sender_type import SenderTypeCustom as SenderType
 from src.converters.converter import Converter
@@ -26,8 +27,9 @@ class MessageProcessor():
     def respond_to_message(self):
 
         messages_data = Converter(self.state).get_messages_and_events(meta_data=self.meta_data, message_data=self.message_data)
+
         messages = messages_data.get("messages", [])
-        event_data = messages_data.get("events", [])
+        events = messages_data.get("events", [])
 
         agent_messages = [message["message"] for message in messages if message["sending_to"] == "AGENT"]
         user_messages = [message["message"] for message in messages if message["sending_to"] == "USER"]
@@ -36,11 +38,11 @@ class MessageProcessor():
         user_response = Util.send_messages(messages=user_messages, sending_to="USER")
 
         if agent_response or user_response:
-            self.__update_state(meta_data=self.meta_data, state=self.state)
-            self.__log_event(meta_data=self.meta_data, state=self.state, data=event_data)
-            logger.info("User state updated with" + str(self.state))
 
-        return
+            self.__update_state(meta_data=self.meta_data, state=self.state)
+            self.__log_events(meta_data=self.meta_data, state=self.state, events=events)
+
+        return 1
 
     @classmethod
     def __get_current_state(cls, meta_data):
@@ -70,17 +72,23 @@ class MessageProcessor():
         if sender_type == "AGENT":
             # no need to update user state
             return
+
         user_id = meta_data["sender"]["id"]
         session_id = meta_data["sessionId"]
         state_saved = User(user_id).set_state(session_id, state, meta_data)
+
         return state_saved
 
     @classmethod
-    def __log_event(cls, meta_data, state, data):
+    def __log_events(cls, meta_data, state, events):
 
         sender_type = SenderType.get_name(meta_data["senderType"])
 
         if sender_type == "AGENT":
             # no need to log any event as of now
             return
-        EventLogger().log(meta_data=meta_data, events=data, state=state)
+
+        for event in events:
+            EventLogPool.submit(EventLogger().log(meta_data=meta_data, event=event, state=state))
+
+        return 1

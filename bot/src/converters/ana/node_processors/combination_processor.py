@@ -36,10 +36,7 @@ class CombinationProcessor():
         return {"messages": messages, "events": [event_log_data]}
 
     def verb_replacer(self, text):
-        data = self.state.get("var_data", "{}")
-        variable_data = json.loads(data)
-        current_variable_data = self.state.get("new_var_data", {})
-        variable_data.update(current_variable_data)
+        variable_data = self.state.get("var_data", {})
         matches = re.findall("\[~(.*?)\]", text)
         variable_names = variable_data.keys()
         final_text = text

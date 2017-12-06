@@ -1,8 +1,10 @@
 """
 Module which constructs messages to send
 """
-from src.models.ana_node import AnaNode
+import json
 from src.config import flow_config
+from src.models.ana_node import AnaNode
+from src.utils import Util
 
 from src.converters.ana.ana_converter import Converter as AnaConverter
 from src.converters.agent.agent_converter import Converter as AgentConverter
@@ -26,6 +28,7 @@ class Converter():
             data = self.__get_node_and_events(message_data=message_data)
             node_data = data.get("node")
             node_events = data.get("events")
+
             messages = self.get_user_messages(node_data, meta_data, message_data)
             messages["events"] = messages["events"] + node_events
 
@@ -38,10 +41,10 @@ class Converter():
         agent_messages = []
 
         messages = AnaConverter(self.state).get_messages_data(node_data)
-        messages_data = messages.get("messages", [])
+        outgoing_messages_data = messages.get("messages", [])
         events_data = messages.get("events", [])
 
-        if messages_data == []:
+        if outgoing_messages_data == []:
             # no messages from ana flow, send incoming message to agent
             incoming_message = Message(meta=meta_data, data=message_data).trim()
             agent_messages = [{"message" :incoming_message, "sending_to": "AGENT"}]
@@ -49,7 +52,7 @@ class Converter():
             # get messages to send to user when agent is connected
             user_messages_data = AgentConverter.get_agent_connected_messages()
         else:
-            user_messages_data = messages_data
+            user_messages_data = outgoing_messages_data
 
         messages = self.__construct_user_messages(meta_data=meta_data, messages_data=user_messages_data)
         user_messages = [{"message": message, "sending_to": "USER"} for message in messages]
@@ -89,9 +92,13 @@ class Converter():
             next_node_data = AnaNode(current_node_id).get_next_node_data(self.state["flow_id"], message_data)
 
             event_data = next_node_data.get("events", [])
-
             next_node_id = next_node_data["node_id"]
-            self.state["new_var_data"] = next_node_data["input_data"]
+
+            var_data = json.loads(self.state.get("var_data", "{}"))
+            new_var_data = next_node_data.get("input_data", {})
+            final_var_data = Util.merge_dicts(var_data, new_var_data)
+            self.state["var_data"] = final_var_data
+            self.state["new_var_data"] = new_var_data
 
         self.state["current_node_id"] = next_node_id
         node = AnaNode(next_node_id).get_contents()

@@ -3,7 +3,7 @@ This is the entry point to bot-core server
 Author: https://github.com/velutha
 """
 import os
-from src import app, message_pool
+from src import app, MessageHandlerPool
 from src.validator import Validator
 from flask import request, jsonify
 from src.controllers.business_controller import BusinessController
@@ -40,11 +40,12 @@ def message_handler():
 
     message = request.get_json()
 
+    logger.info("****************")
     logger.info("Message Received")
     logger.info(message)
     logger.info("****************")
 
-    handle_message = message_pool.submit(MessageProcessor(message).respond_to_message)
+    handle_message = MessageHandlerPool.submit(MessageProcessor(message).respond_to_message)
     exception = handle_message.exception()
     if exception:
         logger.error(exception)

@@ -5,7 +5,6 @@ import time
 from src import SESSION_CACHE, DB
 from src.logger import logger
 from src.models.types import MediumWrapper as Medium
-from src.utils import Util
 
 class User():
 
@@ -39,11 +38,8 @@ class User():
     def set_state(self, session_id, state, meta_data):
         try:
             new_state = {}
-            current_state = self.CACHE.hgetall(session_id)
-
+            final_var_data = state.get("var_data", {})
             new_var_data = state.get("new_var_data", {})
-            current_var_data = current_state.get("var_data", "{}")
-            final_var_data = Util.merge_dicts(new_var_data, json.loads(current_var_data))
 
             channel_type = meta_data["sender"]["medium"]
             channel = Medium.get_name(channel_type)
@@ -55,6 +51,7 @@ class User():
             new_state["var_data"] = json.dumps(final_var_data)
 
             self.CACHE.hmset(session_id, new_state)
+            logger.info(f"User state with session_id {session_id} updated with state {new_state}")
             self._persist_data(var_data=new_var_data, session_id=session_id, channel=channel, business_name=business_name)
 
             return 1
@@ -80,7 +77,7 @@ class User():
             }
         try:
             saved_document_id = collection.insert_one(document).inserted_id
-            logger.info("Variable data saved with object_id" + str(saved_document_id))
+            logger.info(f"Variable data saved with object_id {saved_document_id}")
             return 1
         except Exception as err:
             logger.error(err)

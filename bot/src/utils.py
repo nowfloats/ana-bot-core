@@ -24,6 +24,7 @@ class Util(object):
         if messages == []:
             logger.info("No messages to send to" + str(sending_to))
             return 0
+        #This is deliberately synchronous to maintain order of messages being sent
         for message in messages:
             logger.info(message)
             json_message = json.dumps(message)
