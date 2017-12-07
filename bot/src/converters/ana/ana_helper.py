@@ -2,31 +2,38 @@ from src.logger import logger
 
 class AnaHelper():
 
-    @classmethod
-    def is_condition_match(cls, left_operand, operator, right_operand):
+    @staticmethod
+    def is_condition_match(left_operand, operator, right_operand):
 
         match = 0
 
+        if left_operand is None or right_operand is None:
+            return match
+
+        if isinstance(left_operand, int) or isinstance(right_operand, int):
+            left_operand = int(left_operand)
+            right_operand = int(right_operand)
+
         if operator == "EqualTo":
-            match = int(left_operand) == int(right_operand)
+            match = left_operand == right_operand
 
         elif operator == "NotEqualTo":
-            match = int(left_operand) != int(right_operand)
+            match = left_operand != right_operand
 
         elif operator == "GreaterThan":
-            match = int(left_operand) > int(right_operand)
+            match = left_operand > right_operand
 
         elif operator == "LessThan":
-            match = int(left_operand) < int(right_operand)
+            match = left_operand < right_operand
 
         elif operator == "GreaterThanOrEqualTo":
-            match = int(left_operand) >= int(right_operand)
+            match = left_operand >= right_operand
 
         elif operator == "LessThanOrEqualTo":
-            match = int(left_operand) <= int(right_operand)
+            match = left_operand <= right_operand
 
         elif operator == "Mod":
-            match = int(left_operand) % int(right_operand)
+            match = left_operand % right_operand
 
         elif operator == "In":
             values = right_operand.split(",")
@@ -47,7 +54,7 @@ class AnaHelper():
 
         elif operator == "Between":
             values = right_operand.split(",")[:2]
-            match = int(left_operand) > int(values[0]) and int(left_operand) < int(values[1])
+            match = left_operand > values[0] and left_operand < values[1]
         else:
             logger.error(f"Unknown operator found {operator}")
 

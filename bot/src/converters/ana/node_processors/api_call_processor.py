@@ -1,4 +1,7 @@
-from functools import reduce
+"""
+This module handles ApiCall node in ANA studio
+Author: https://github.com/velutha
+"""
 import requests
 from src.converters.ana.ana_helper import AnaHelper
 from src.models.ana_node import AnaNode
@@ -15,7 +18,7 @@ class ApiCallProcessor():
         next_node_data = {}
 
         api_response = self.__make_api_call(node_data)
-        next_node_data = self.__validate_api_response(response=api_response, node_data=node_data)
+        next_node_data = self.__handle_api_response(response=api_response, node_data=node_data)
 
         return next_node_data
 
@@ -40,64 +43,44 @@ class ApiCallProcessor():
 
         return api_response
 
-    def __validate_api_response(self, response, node_data):
+    def __handle_api_response(self, response, node_data):
 
         if response is None:
             return {"id": "", "data": {}}
 
-        next_node_key = ""
         variable_data = self.state.get("var_data", {})
         buttons = node_data.get("Buttons")
+        variable_name = node_data["VariableName"]
+        final_var_data = Util.merge_dicts(variable_data, {variable_name : response})
 
-        if isinstance(response, dict):
-            # json response from api
+        next_node_id = self.__get_next_node_id(buttons=buttons, api_response=response, data=final_var_data)
 
-            for button in buttons:
-                match_keys = button.get("ConditionMatchKey").split(".")
-                variable_name = match_keys.pop(0)
-
-                final_var_data = Util.merge_dicts(variable_data, {variable_name : response})
-
-                match_operator = button.get("ConditionOperator")
-                match_value = button.get("ConditionMatchValue")
-
-                import pdb
-                pdb.set_trace()
-                variable_value = self.__deep_match(final_var_data, match_keys)
-                pdb.set_trace()
-
-                condition_matched = AnaHelper().is_condition_match(variable_value, match_operator, match_value)
-                if condition_matched:
-                    next_node_id = button["NextNodeId"]
-                    break
-
-            next_node_key = self.state.get("flow_id", "") + "." + next_node_id
-            next_node_data = AnaNode(next_node_key).get_contents()
-        else:
-            # string response from api
-            for button in buttons:
-                match_keys = button.get("ConditionMatchKey").split(".")
-                variable_name = match_keys.pop(0)
-
-                final_var_data = Util.merge_dicts(variable_data, {variable_name : response})
-
-                match_operator = button.get("ConditionOperator")
-                match_value = button.get("ConditionMatchValue")
-
-                variable_value = self.__deep_match(final_var_data, match_keys)
-                import pdb
-                pdb.set_trace()
-
-                condition_matched = AnaHelper().is_condition_match(variable_value, match_operator, match_value)
-                if condition_matched:
-                    next_node_id = button["NextNodeId"]
-                    break
-
-            next_node_key = self.state.get("flow_id", "") + "." + next_node_id
-            next_node_data = AnaNode(next_node_key).get_contents()
+        next_node_key = self.state.get("flow_id", "") + "." + next_node_id
+        next_node_data = AnaNode(next_node_key).get_contents()
 
         return {"id": next_node_key, "data": next_node_data}
 
     @classmethod
-    def __deep_match(cls, dictionary, *keys):
-        return reduce(lambda d, key: d.get(key, None) if d else None, keys, dictionary)
+    def __get_next_node_id(cls, buttons, api_response, data):
+
+        next_node_id = ""
+        for button in buttons:
+
+            if isinstance(api_response, dict):
+                match_keys = button.get("ConditionMatchKey").split(".")[1:]
+                match_dict = api_response
+            else:
+                match_keys = button.get("ConditionMatchKey").split(".")
+                match_dict = data
+
+            variable_value = Util.deep_find(match_dict, match_keys)
+            match_operator = button.get("ConditionOperator")
+            match_value = button.get("ConditionMatchValue")
+
+            condition_matched = AnaHelper.is_condition_match(variable_value, match_operator, match_value)
+
+            if condition_matched:
+                next_node_id = button["NextNodeId"]
+                break
+
+        return next_node_id

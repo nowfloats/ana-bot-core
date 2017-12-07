@@ -27,6 +27,10 @@ class KinesisHelper():
         if data is None:
             return
 
+        if config["ENVIRONMENT"] == "development":
+            logger.info("Did not write to kinesis since it is development environment")
+            return
+
         json_data = json.dumps(data)
         self.client.put_records(
             Records=[

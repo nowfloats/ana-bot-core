@@ -1,5 +1,10 @@
-from src.models.ana_node import AnaNode
+"""
+This module handles Condition node in ANA studio
+Author: https://github.com/velutha
+"""
 from src.converters.ana.ana_helper import AnaHelper
+from src.models.ana_node import AnaNode
+from src.utils import Util
 
 class ConditionProcessor():
 
@@ -10,17 +15,14 @@ class ConditionProcessor():
 
         next_node_id = ""
         variable_data = self.state.get("var_data", {})
-        variables = variable_data.keys()
         buttons = node_data.get("Buttons")
 
         for button in buttons:
-            match_key = button.get("ConditionMatchKey")
+            match_keys = button.get("ConditionMatchKey").split(".")
             match_operator = button.get("ConditionOperator")
             match_value = button.get("ConditionMatchValue")
 
-            variable_value = ""
-            if match_key in variables:
-                variable_value = variable_data[match_key]
+            variable_value = Util.deep_find(variable_data, match_keys)
 
             condition_matched = AnaHelper().is_condition_match(variable_value, match_operator, match_value)
             if condition_matched:

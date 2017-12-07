@@ -1,3 +1,4 @@
+from functools import reduce
 import json
 import requests
 from src.config import application_config
@@ -11,6 +12,17 @@ class Util(object):
         for dictionary in args:
             result.update(dictionary)
         return result
+
+    @staticmethod
+    def deep_find(dictionary, keys):
+        if not isinstance(dictionary, dict):
+            logger.error("Object you passed to deep find is not a dictionary")
+            return None
+        if not isinstance(keys, list):
+            # change it to list if it's one element
+            keys = [keys]
+
+        return reduce(lambda d, key: d.get(key) if d else None, keys, dictionary)
 
     @staticmethod
     def send_messages(messages, sending_to):

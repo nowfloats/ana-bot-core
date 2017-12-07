@@ -2,7 +2,7 @@
 Module which converts output from ana studio to platform's message format
 Author: https://github.com/velutha
 """
-from .node_processors.combination_processor import CombinationProcessor
+from .node_processors.combination.combination_processor import CombinationProcessor
 from .node_processors.api_call_processor import ApiCallProcessor
 from .node_processors.condition_processor import ConditionProcessor
 from .node_processors.card_processor import CardProcessor
@@ -26,11 +26,11 @@ class Converter():
             }
 
         if node_type in ["Combination"]:
-            Processor = node_processor_map.get(node_type, None)
+            Processor = node_processor_map.get(node_type)
             data = Processor(self.state).process_node(node_data)
 
         elif node_type in ["ApiCall", "Condition"]:
-            Processor = node_processor_map.get(node_type, None)
+            Processor = node_processor_map.get(node_type)
             next_node_data = Processor(self.state).get_next_node(node_data)
             data = self.get_messages_data(next_node_data.get("data"))
             # this should ideally not happen here this
