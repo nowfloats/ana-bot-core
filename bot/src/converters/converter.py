@@ -78,7 +78,7 @@ class Converter():
             message = Message(meta=meta_data, data=data).trim()
             messages.append({"message": message, "sending_to": "USER"})
 
-        return messages
+        return {"messages" : messages}
 
     def __get_node_and_events(self, message_data):
 
