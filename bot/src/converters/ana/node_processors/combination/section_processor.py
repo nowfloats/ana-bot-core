@@ -20,11 +20,11 @@ class SectionProcessor():
 
         section_processor_map = {
             "Text": self.__text_processor,
-            "Image": self.__image_processor,
-            "Gif": self.__image_processor,
-            "EmbeddedHtml": self.__link_processor,
-            "Link": self.__link_processor,
-            "Video": self.__video_processor,
+            "EmbeddedHtml": self.__text_processor,
+            "Link": self.__text_processor,
+            "Image": self.__media_processor,
+            "Gif": self.__media_processor,
+            "Video": self.__media_processor,
             "Carousel": self.__carousel_processor
             }
 
@@ -53,52 +53,39 @@ class SectionProcessor():
     def __text_processor(self, data):
 
         message_type = MessageType.get_value("SIMPLE")
-        text = data.get("Text", "")
-        final_text = self.verb_replacer(text)
-        message_content = MessageContent(text=final_text, mandatory=1).trim()
-        message_data = MessageData(type=message_type, content=message_content).trim()
-
-        return message_data
-
-    def __image_processor(self, data):
-
-        message_type = MessageType.get_value("SIMPLE")
-        media_type = MediaType.get_value("IMAGE")
-        url = data.get("Url", "")
-        encoded_url = furl(url).url
-        preview_url = data.get("PreviewUrl", "")
-        text = data.get("Title", "")
-        final_text = self.verb_replacer(text)
-        media_content = Media(type=media_type, url=encoded_url, previewUrl=preview_url).trim()
-        message_content = MessageContent(text=final_text, media=media_content, mandatory=1).trim()
-        message_data = MessageData(type=message_type, content=message_content).trim()
-
-        return message_data
-
-    @classmethod
-    def __link_processor(cls, data):
-
-        message_type = MessageType.get_value("SIMPLE")
-        text = data["Url"]
+        section_type = data.get("SectionType")
+        if section_type == "Text":
+            text = data.get("Text", "")
+            text = self.verb_replacer(text)
+        elif section_type in ["EmbeddedHtml", "Link"]:
+            text = data.get("Url", "")
         message_content = MessageContent(text=text, mandatory=1).trim()
         message_data = MessageData(type=message_type, content=message_content).trim()
 
         return message_data
 
-    def __video_processor(self, data):
+
+    def __media_processor(self, data):
 
         message_type = MessageType.get_value("SIMPLE")
-        media_type = MediaType.get_value("VIDEO")
+        section_type = data.get("SectionType")
+        if section_type in ["Image", "Gif"]:
+            media_type = MediaType.get_value("IMAGE")
+        elif section_type == "Video":
+            media_type = MediaType.get_value("VIDEO")
+
         url = data.get("Url", "")
-        encoded_url = furl(url).url
+        url = furl(url).url
         preview_url = data.get("PreviewUrl", "")
+        preview_url = furl(preview_url).url
         text = data.get("Title", "")
-        final_text = self.verb_replacer(text)
-        media_content = Media(type=media_type, url=encoded_url, previewUrl=preview_url).trim()
-        message_content = MessageContent(text=final_text, media=media_content, mandatory=1).trim()
+        text = self.verb_replacer(text)
+        media_content = Media(type=media_type, url=url, previewUrl=preview_url).trim()
+        message_content = MessageContent(text=text, media=media_content, mandatory=1).trim()
         message_data = MessageData(type=message_type, content=message_content).trim()
 
         return message_data
+
 
     @classmethod
     def __carousel_processor(cls, data):
@@ -109,10 +96,10 @@ class SectionProcessor():
         for section_item in section_items:
             media_type = MediaType.get_value("IMAGE")
             image_url = section_item.get("ImageUrl", "")
+            image_url = furl(image_url).url
             title = section_item.get("Title", "")
             description = section_item.get("Caption", "")
-            encoded_url = furl(image_url).url
-            media_content = Media(type=media_type, url=encoded_url).trim()
+            media_content = Media(type=media_type, url=image_url).trim()
             buttons = section_item.get("Buttons", [])
             options = []
             for button in buttons:
