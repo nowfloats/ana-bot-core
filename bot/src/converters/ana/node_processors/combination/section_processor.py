@@ -7,8 +7,8 @@ import re
 from furl import furl
 from src.logger import logger
 from src.models.types import MessageTypeWrapper as MessageType, MediaTypeWrapper as MediaType, ButtonTypeWrapper as ButtonType
-from src.models.message import MessageContent, MessageData, Media
-from src.models.inputs import Option, Item
+from src.models.message import MessageContentWrapper as MessageContent, MessageDataWrapper as MessageData, MediaWrapper as Media
+from src.models.inputs import OptionWrapper as Option, ItemWrapper as Item
 
 class SectionProcessor():
 

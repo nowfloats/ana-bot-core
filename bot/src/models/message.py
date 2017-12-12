@@ -1,18 +1,6 @@
-from src.thrift_models.ttypes import MessageContent, MessageData, MessageMeta, Message, Media, Item, Option 
+from src.thrift_models.ttypes import MessageContent, MessageData, MessageMeta, Message, Media
 
-class Option(Option):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def trim(self):
-        obj = {}
-        for key, value in self.__dict__.items():
-            if value != None:
-                obj[key] = value
-        return obj
-
-class Item(Item):
+class MediaWrapper(Media):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,7 +12,7 @@ class Item(Item):
                 obj[key] = value
         return obj
 
-class Media(Media):
+class MessageContentWrapper(MessageContent):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -36,8 +24,7 @@ class Media(Media):
                 obj[key] = value
         return obj
 
-class MessageContent(MessageContent):
-
+class MessageDataWrapper(MessageData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -48,7 +35,7 @@ class MessageContent(MessageContent):
                 obj[key] = value
         return obj
 
-class MessageData(MessageData):
+class MessageMetaWrapper(MessageMeta):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -59,18 +46,7 @@ class MessageData(MessageData):
                 obj[key] = value
         return obj
 
-class MessageMeta(MessageMeta):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def trim(self):
-        obj = {}
-        for key, value in self.__dict__.items():
-            if value != None:
-                obj[key] = value
-        return obj
-
-class Message(Message):
+class MessageWrapper(Message):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

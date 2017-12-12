@@ -2,8 +2,8 @@
 Messages being sent to agent are constructed here
 Author: https://github.com/velutha
 """
-from src.models.message import MessageContent, MessageData
-from src.models.inputs import TextInput
+from src.models.message import MessageContentWrapper as MessageContent, MessageDataWrapper as MessageData
+from src.models.inputs import TextInputWrapper as TextInput
 from src.models.types import MessageTypeWrapper as MessageType, InputTypeWrapper as InputType
 
 class Converter():

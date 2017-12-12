@@ -10,7 +10,7 @@ from src.converters.ana.ana_converter import Converter as AnaConverter
 from src.converters.agent.agent_converter import Converter as AgentConverter
 
 from src.models.types import SenderTypeWrapper as SenderType
-from src.models.message import Message, MessageMeta
+from src.models.message import MessageWrapper as Message, MessageMetaWrapper as MessageMeta
 
 class Converter():
 

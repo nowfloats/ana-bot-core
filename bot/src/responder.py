@@ -1,13 +1,13 @@
 """
 Message lifecycle goes here, receiving to responding
-__author__: https://github.com/velutha
+Author: https://github.com/velutha
 """
 from src import EventLogPool
 from src.utils import Util
-from src.models.sender_type import SenderTypeCustom as SenderType
+from src.models.types import SenderTypeWrapper as SenderType
 from src.converters.converter import Converter
 from src.event_logger import EventLogger
-from src.logger import logger
+# from src.logger import logger
 from src.models.user import User
 from src.models.business import Business
 

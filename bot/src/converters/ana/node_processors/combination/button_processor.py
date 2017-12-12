@@ -5,8 +5,8 @@ Author: https://github.com/velutha
 import json
 from src.config import ana_config as config
 from src.models.types import MessageTypeWrapper as MessageType, InputTypeWrapper as InputType, ButtonTypeWrapper as ButtonType
-from src.models.message import MessageContent, MessageData
-from src.models.inputs import TextInput
+from src.models.message import MessageContentWrapper as MessageContent, MessageDataWrapper as MessageData
+from src.models.inputs import TextInputWrapper as TextInput
 from src.logger import logger
 
 class ButtonProcessor():
