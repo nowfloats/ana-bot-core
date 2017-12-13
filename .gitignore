@@ -105,3 +105,5 @@ ENV/
 
 #reddit dump
 dump.rdb
+*/.idea/*
+*/program.prof

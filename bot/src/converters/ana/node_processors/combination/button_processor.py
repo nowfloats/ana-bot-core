@@ -43,24 +43,8 @@ class ButtonProcessor():
         message_type = MessageType.get_value("INPUT")
         input_type = InputType.get_value("OPTIONS")
 
-        for button in data:
-            button_type = button.get("ButtonType", "")
-            if button_type == "OpenUrl":
-                button_heading = "Choose an option" # to be compatible with fb quick_replies
-                option = {
-                    "title": button.get("ButtonName", ""),
-                    "value": json.dumps({"url": button["Url"], "value": button["_id"]}),
-                    "type": ButtonType.get_value("URL")
-                    }
-            elif button_type == "NextNode":
-                button_heading = "Choose an option" # to be compatible with fb quick_replies
-                option = {
-                    "title": button.get("ButtonName", button.get("ButtonText", "")),
-                    "value": button.get("_id", ""),
-                    "type": ButtonType.get_value("QUICK_REPLY")
-                    }
-
-            elem_options.append(option)
+        button_heading = "Choose an option"
+        elem_options = [cls.__process_click_button(button) for button in data]
 
         if elem_options != []:
             message_content = MessageContent(
@@ -82,47 +66,69 @@ class ButtonProcessor():
 
         elem_message_data = []
 
-        for button in data:
-            button_type = button.get("ButtonType")
-            message_type = ""
-            input_type = ""
-            input_attr = None
-            content = None
-
-            message_type = MessageType.get_value("INPUT")
-
-            if button_type == "GetText":
-                input_type = InputType.get_value("TEXT")
-                input_attr = TextInput(placeHolder=button.get("PlaceholderText", "")).trim()
-            elif button_type == "GetNumber":
-                input_type = InputType.get_value("NUMERIC")
-            elif button_type == "GetPhoneNumber":
-                input_type = InputType.get_value("PHONE")
-            elif button_type == "GetEmail":
-                input_type = InputType.get_value("EMAIL")
-            elif button_type == "GetLocation":
-                input_type = InputType.get_value("LOCATION")
-            elif button_type == "GetAddress":
-                input_type = InputType.get_value("ADDRESS")
-            elif button_type == "GetDate":
-                input_type = InputType.get_value("DATE")
-            elif button_type == "GetTime":
-                input_type = InputType.get_value("TIME")
-            elif button_type == "GetItemFromSource":
-                pass
-            else:
-                logger.warning("Undefined Text Input Type" + str(button_type))
-
-            content = MessageContent(
-                inputType=input_type,
-                textInputAttr=input_attr,
-                mandatory=1,
-                ).trim()
-            message_data = MessageData(
-                type=message_type,
-                content=content
-                ).trim()
-            elem_message_data.append(message_data)
-
+        elem_message_data = [cls.__process_input_button(button) for button in data]
 
         return elem_message_data
+
+    @classmethod
+    def __process_click_button(cls, button):
+        button_type = button.get("ButtonType", "")
+
+        title = button.get("ButtonName", button.get("ButtonText", ""))
+
+        if button_type == "OpenUrl":
+            value = json.dumps({"url": button["Url"], "value": button["_id"]})
+            type_of_button = ButtonType.get_value("URL")
+        elif button_type == "NextNode":
+            value = button["_id"]
+            type_of_button = ButtonType.get_value("QUICK_REPLY")
+
+        option = {
+            "title" : title,
+            "value" : value,
+            "type" : type_of_button
+            }
+
+        return option
+
+    @classmethod
+    def __process_input_button(cls, button):
+
+        button_type = button.get("ButtonType")
+        message_type = ""
+        input_type = ""
+        input_attr = None
+        content = None
+
+        message_type = MessageType.get_value("INPUT")
+        input_attr = TextInput(placeHolder=button.get("PlaceholderText", "")).trim()
+
+        button_type_map = {
+            "GetText": "TEXT",
+            "GetNumber": "NUMERIC",
+            "GetPhoneNumber": "PHONE",
+            "GetEmail": "EMAIL",
+            "GetLocation": "LOCATION",
+            "GetAddress": "ADDRESS",
+            "GetDate": "DATE",
+            "GetTime": "TIME",
+            }
+
+        type_of_input = button_type_map[button_type]
+
+        if type_of_input is None:
+            logger.warning("Undefined Text Input Type" + str(button_type))
+
+        input_type = InputType.get_value(type_of_input)
+
+        content = MessageContent(
+            inputType=input_type,
+            textInputAttr=input_attr,
+            mandatory=1,
+            ).trim()
+        message_data = MessageData(
+            type=message_type,
+            content=content
+            ).trim()
+
+        return message_data
