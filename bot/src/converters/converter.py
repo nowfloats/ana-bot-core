@@ -82,7 +82,7 @@ class Converter():
 
     def __get_node_and_events(self, message_data):
 
-        get_started_node = self.state["flow_id"] + "." + flow_config["first_node_key"]
+        get_started_node = self.state.get("flow_id", "") + "." + flow_config["first_node_key"]
         next_node_id = get_started_node
         event_data = []
 
@@ -116,7 +116,9 @@ class Converter():
             responseTo=meta_data["id"],
             senderType=SenderType.get_value("ANA")
             ).trim()
-        for message_data in messages_data:
-            message = Message(meta=message_meta_data, data=message_data).trim()
-            outgoing_messages.append(message)
+
+        outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
+        # for message_data in messages_data:
+            # message = Message(meta=message_meta_data, data=message_data).trim()
+            # outgoing_messages.append(message)
         return outgoing_messages

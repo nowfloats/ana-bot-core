@@ -12,32 +12,33 @@ from src.controllers.session_controller import SessionController
 from src.logger import logger
 from src.responder import MessageProcessor
 
+
 @app.route("/bot/health")
 def hello_world():
     status_message = {"status": "UP"}
     return jsonify(status_message)
 
+
 @app.route("/bot/refresh")
 @Validator.validate_business_params
 def populate_ana_flows():
-
     business_id = request.args.get("business_id")
     response = ChatFlowController.populate_flows(business_id)
 
     return response
 
+
 @app.route("/bot/clear", endpoint="clear_sessions")
 @Validator.validate_session_params
 def clear_sessions():
-
     user_id = request.args.get("user_id")
     response = SessionController.clear_sessions(user_id)
 
     return response
 
+
 @app.route("/bot/message", methods=["POST"])
 def message_handler():
-
     message = request.get_json()
 
     logger.info("****************")
@@ -52,11 +53,18 @@ def message_handler():
 
     return jsonify(status="received")
 
+
 @app.route("/bot/business", methods=["POST"])
 def business_handler():
-
     business_data = request.get_json()
     response = BusinessController.create_business(business_data)
+
+    return response
+
+@app.route("/bot/flow", methods=["POST"])
+def flow_handler():
+    business_data = request.get_json()
+    response = ChatFlowController.populate_flows_new(business_data)
 
     return response
 
@@ -68,8 +76,8 @@ def get_business():
 
     return response
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     HOST = os.environ.get("HOST") or "0.0.0.0"
     PORT = os.environ.get("PORT") or 9500
 

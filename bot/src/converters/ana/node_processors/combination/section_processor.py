@@ -92,31 +92,44 @@ class SectionProcessor():
 
         message_type = MessageType.get_value("CAROUSEL")
         section_items = data.get("Items", [])
-        item_elements = []
-        for section_item in section_items:
-            media_type = MediaType.get_value("IMAGE")
-            image_url = section_item.get("ImageUrl", "")
-            image_url = furl(image_url).url
-            title = section_item.get("Title", "")
-            description = section_item.get("Caption", "")
-            media_content = Media(type=media_type, url=image_url).trim()
-            buttons = section_item.get("Buttons", [])
-            options = []
-            for button in buttons:
-                if button["Type"] == "OpenUrl":
-                    button_title = button.get("Text", "")
-                    button_value = json.dumps({"url": button["Url"], "value": button["_id"]})
-                    button_type = ButtonType.get_value("URL")
-                else:
-                    button_title = button.get("Text", "")
-                    button_value = button["_id"]
-                    button_type = ButtonType.get_value("ACTION")
-                option_element = Option(title=button_title, value=button_value, type=button_type).trim()
-                options.append(option_element)
 
-            item_element = Item(title=title, desc=description, media=media_content, options=options).trim()
-            item_elements.append(item_element)
+        item_elements = []
+        item_elements = [cls.__process_carousel_item(item) for item in section_items]
+
         message_content = MessageContent(items=item_elements, mandatory=1).trim()
         message_data = MessageData(type=message_type, content=message_content).trim()
 
         return message_data
+
+    @classmethod
+    def __process_carousel_item(cls, section_item):
+
+        media_type = MediaType.get_value("IMAGE")
+        image_url = section_item.get("ImageUrl", "")
+        image_url = furl(image_url).url
+        title = section_item.get("Title", "")
+        description = section_item.get("Caption", "")
+        media_content = Media(type=media_type, url=image_url).trim()
+        buttons = section_item.get("Buttons", [])
+
+        options = []
+        options = [cls.__process_carousel_button(button) for button in buttons]
+
+        item_element = Item(title=title, desc=description, media=media_content, options=options).trim()
+
+        return item_element
+
+    @classmethod
+    def __process_carousel_button(cls, button):
+
+        if button["Type"] == "OpenUrl":
+            button_title = button.get("Text", "")
+            button_value = json.dumps({"url": button["Url"], "value": button["_id"]})
+            button_type = ButtonType.get_value("URL")
+        else:
+            button_title = button.get("Text", "")
+            button_value = button["_id"]
+            button_type = ButtonType.get_value("ACTION")
+        option_element = Option(title=button_title, value=button_value, type=button_type).trim()
+
+        return option_element

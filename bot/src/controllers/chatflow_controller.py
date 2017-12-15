@@ -22,3 +22,16 @@ class ChatFlowController():
 
         data_saved_to_cache = Business(business_id).save_business_data_to_cache(business_data=business_data, nodes=nodes)
         return jsonify(message="success") if data_saved_to_cache else jsonify(message="failure")
+
+    @staticmethod
+    def populate_flows_new(data):
+
+        business_data = {}
+        business_id = data["businessId"]
+        business_data["business_id"] = business_id
+        business_data["flow_id"] = data["flowId"]
+        business_data["business_name"] = data["businessName"]
+        nodes = data["flow"]
+
+        data_saved_to_cache = Business(business_id).save_business_data_to_cache(business_data=business_data, nodes=nodes)
+        return jsonify(message="success") if data_saved_to_cache else jsonify(message="failure")
