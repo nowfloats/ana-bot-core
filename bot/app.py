@@ -61,6 +61,7 @@ def business_handler():
 
     return response
 
+# add a validator method to check for data in body
 @app.route("/bot/flow", methods=["POST"])
 def flow_handler():
     business_data = request.get_json()

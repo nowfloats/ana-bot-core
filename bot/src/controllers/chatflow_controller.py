@@ -29,8 +29,10 @@ class ChatFlowController():
         business_data = {}
         business_id = data["businessId"]
         business_data["business_id"] = business_id
-        business_data["flow_id"] = data["flowId"]
+        business_data["flow_id"] = data["id"]
         business_data["business_name"] = data["businessName"]
+        business_data["flow_name"] = data["name"]
+        business_data["user_id"] = data["userId"]
         nodes = data["flow"]
 
         data_saved_to_cache = Business(business_id).save_business_data_to_cache(business_data=business_data, nodes=nodes)
