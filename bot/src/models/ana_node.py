@@ -125,7 +125,8 @@ class AnaNode():
             "location": ["GetLocation"],
             "address": ["GetAddress"],
             "date": ["GetDate"],
-            "time": ["GetTime"]
+            "time": ["GetTime"],
+            "media": ["GetImage", "GetFile, GetAudio, GetVideo"]
             }
 
         if input_type not in input_to_button_types_map.keys():

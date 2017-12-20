@@ -4,7 +4,8 @@ Author: https://github.com/velutha
 """
 import json
 from src.config import ana_config as config
-from src.models.types import MessageTypeWrapper as MessageType, InputTypeWrapper as InputType, ButtonTypeWrapper as ButtonType
+from src.models.types import MessageTypeWrapper as MessageType, InputTypeWrapper as InputType, ButtonTypeWrapper as ButtonType,\
+        MediaTypeWrapper as MediaType
 from src.models.message import MessageContentWrapper as MessageContent, MessageDataWrapper as MessageData
 from src.models.inputs import TextInputWrapper as TextInput
 from src.logger import logger
@@ -112,6 +113,7 @@ class ButtonProcessor():
             "GetAddress": "ADDRESS",
             "GetDate": "DATE",
             "GetTime": "TIME",
+            "GetImage": "MEDIA"
             }
 
         type_of_input = button_type_map[button_type]
@@ -120,9 +122,20 @@ class ButtonProcessor():
             logger.warning("Undefined Text Input Type" + str(button_type))
 
         input_type = InputType.get_value(type_of_input)
+        media_type = None
+
+        if button_type == "GetImage":
+            media_type = MediaType.get_value("IMAGE")
+        elif button_type == "GetAudio":
+            media_type = MediaType.get_value("AUDIO")
+        elif button_type == "GetVideo":
+            media_type = MediaType.get_value("VIDEO")
+        elif button_type == "GetFile":
+            media_type = MediaType.get_value("FILE")
 
         content = MessageContent(
             inputType=input_type,
+            mediaType=media_type,
             textInputAttr=input_attr,
             mandatory=1,
             ).trim()

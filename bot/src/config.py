@@ -19,11 +19,11 @@ flow_config = {
     }
 
 ana_config = {
-    "click_input_types" : ["NextNode", "OpenUrl", "GetFile", "GetAudio",\
-            "PostText", "GetImage", "GetAgent"],
+    "click_input_types" : ["NextNode", "OpenUrl", "GetFile", "PostText", "GetAgent"],
 
     "text_input_types" : ["GetText", "GetEmail", "GetNumber", "GetPhoneNumber",\
-            "GetItemFromSource", "GetLocation", "GetAddress", "GetDate", "GetDateTime", "GetTime"],
+            "GetItemFromSource", "GetLocation", "GetAddress", "GetDate", "GetDateTime",\
+            "GetTime", "GetImage", "GetFile", "GetAudio", "GetVideo"],
 
     "ana_section_types" : ["Image", "Text", "Graph", "Gif", "Audio", "Video",\
             "Link", "EmbeddedHtml", "Carousel"],
