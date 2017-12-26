@@ -1,4 +1,4 @@
-from src.thrift_models.ttypes import MessageType, InputType, SenderType, MediaType, ButtonType, Medium
+from src.thrift_models.ttypes import MessageType, InputType, SenderType, MediaType, ButtonType, Medium, EventType
 
 class SenderTypeWrapper(SenderType):
 
@@ -59,3 +59,13 @@ class MediumWrapper(Medium):
     @staticmethod
     def get_value(name):
         return Medium._NAMES_TO_VALUES[name]
+
+class EventTypeWrapper(EventType):
+
+    @staticmethod
+    def get_name(event_type):
+        return EventType._VALUES_TO_NAMES[event_type]
+
+    @staticmethod
+    def get_value(name):
+        return EventType._NAMES_TO_VALUES[name]

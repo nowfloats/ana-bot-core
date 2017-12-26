@@ -1,5 +1,6 @@
 import time
-from src.models.types import MediumWrapper as Medium
+from src.models.types import MediumWrapper as Medium, EventTypeWrapper as EventType
+from src.models.message import MessageWrapper as Message, EventWrapper as Event
 from src.connectors.kinesis_helper import KinesisHelper
 from src.logger import logger
 
@@ -7,6 +8,24 @@ class EventLogger(KinesisHelper):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def log_event(self, type_of_event, data):
+        final_event_data = {}
+        if type_of_event == "SESSION_START":
+            event_type = EventType.get_value("SESSION_STARTED")
+            events = Event(type=event_type).trim()
+            event_data = Message(meta=data, events=events).trim()
+
+            final_event_data = {
+                "meta" : {
+                    "topic": "SESSION"
+                    },
+                "data": event_data
+                }
+
+        self.log_message(key="analytics", data=final_event_data)
+        logger.info(str(type_of_event) + " event logged with data" + str(final_event_data))
+        return 1
 
     def log(self, meta_data, event, state):
 
@@ -35,6 +54,6 @@ class EventLogger(KinesisHelper):
             "timestamp": int(time.time())
             }
 
-        self.log_message(data=final_event_data)
+        self.log_message(key="analytics", data=final_event_data)
         logger.info(str(event_type) + " event logged with data" + str(final_event_data))
         return 1

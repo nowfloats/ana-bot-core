@@ -56,8 +56,8 @@ class MessageProcessor():
             user_id = meta_data["sender"]["id"]
             business_id = meta_data["recipient"]["id"]
 
-        session_id = meta_data.get("sessionId")
-        state = User(user_id).get_session_data(session_id)
+        # session_id = meta_data.get("sessionId")
+        state = User(user_id).get_session_data(meta_data=meta_data)
 
         flow_data = Business(business_id).get_business_data()
         current_state = Util.merge_dicts(state, flow_data)

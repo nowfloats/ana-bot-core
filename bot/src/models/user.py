@@ -4,6 +4,7 @@ import json
 import time
 from src import SESSION_CACHE, DB
 from src.logger import logger
+from src.event_logger import EventLogger
 from src.models.types import MediumWrapper as Medium
 
 class User():
@@ -12,15 +13,20 @@ class User():
         self.user_id = user_id
         self.CACHE = SESSION_CACHE
 
-    def get_session_data(self, session_id):
+    def get_session_data(self, meta_data):
 
         response = {}
         session_data = {}
         user_session_key = self.user_id + "." + "sessions"
         user_sessions = self.CACHE.lrange(user_session_key, 0, -1)
 
+        session_id = meta_data.get("sessionId")
         # initializing session if it does not exist
-        session_id = str(uuid.uuid4()) if session_id is None else session_id
+        if session_id is None:
+            session_id = str(uuid.uuid4())
+            meta_data["sessionId"] = session_id
+            EventLogger().log_event(type_of_event="SESSION_START", data=meta_data)
+        # session_id = str(uuid.uuid4()) if session_id is None else session_id
 
         if session_id in user_sessions:
             session_data = self.CACHE.hgetall(session_id)
