@@ -69,15 +69,15 @@ class EventLogger(KinesisHelper):
             "timestamp": int(time.time())
             }
 
-        # log_data = {
-            # "meta": {
-                # "topic": "analytics"
-                # },
-            # "data": final_event_data
-            # }
+        log_data = {
+            "meta": {
+                "topic": "analytics"
+                },
+            "data": final_event_data
+            }
 
-        self.log_message(key="analytics", data=final_event_data)
-        logger.info("Analytics event logged with data" + str(final_event_data))
+        self.log_message(key="analytics", data=log_data)
+        logger.info("Analytics event logged with data" + str(log_data))
         return 1
 
     # def log(self, meta_data, event, state):

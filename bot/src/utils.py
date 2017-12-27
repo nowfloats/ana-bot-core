@@ -38,7 +38,7 @@ class Util(object):
             return 0
         #This is deliberately synchronous to maintain order of messages being sent
         for message in messages:
-            logger.info(message)
+            logger.info(f"Message sent to {sending_to} {message}")
             json_message = json.dumps(message)
             try:
                 response = requests.post(url, headers=headers, data=json_message)
