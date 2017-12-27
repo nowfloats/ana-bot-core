@@ -104,34 +104,17 @@ class ButtonProcessor():
         message_type = MessageType.get_value("INPUT")
         input_attr = TextInput(placeHolder=button.get("PlaceholderText", "")).trim()
 
-        button_type_map = {
-            "GetText": "TEXT",
-            "GetNumber": "NUMERIC",
-            "GetPhoneNumber": "PHONE",
-            "GetEmail": "EMAIL",
-            "GetLocation": "LOCATION",
-            "GetAddress": "ADDRESS",
-            "GetDate": "DATE",
-            "GetTime": "TIME",
-            "GetImage": "MEDIA"
-            }
+        button_type_map = config["button_map"]
 
-        type_of_input = button_type_map[button_type]
+        elem_type = button_type_map[button_type]
+        if elem_type is None:
+            logger.warning("Undefined Input Type" + str(button_type))
 
-        if type_of_input is None:
-            logger.warning("Undefined Text Input Type" + str(button_type))
+        type_of_input = elem_type["input_type"]
+        type_of_media = elem_type["media_type"]
 
         input_type = InputType.get_value(type_of_input)
-        media_type = None
-
-        if button_type == "GetImage":
-            media_type = MediaType.get_value("IMAGE")
-        elif button_type == "GetAudio":
-            media_type = MediaType.get_value("AUDIO")
-        elif button_type == "GetVideo":
-            media_type = MediaType.get_value("VIDEO")
-        elif button_type == "GetFile":
-            media_type = MediaType.get_value("FILE")
+        media_type = MediaType.get_value(type_of_media)
 
         content = MessageContent(
             inputType=input_type,

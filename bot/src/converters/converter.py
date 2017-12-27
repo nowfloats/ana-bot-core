@@ -18,7 +18,10 @@ class Converter():
         self.state = state
 
     def get_messages_and_events(self, meta_data, message_data):
-
+        """
+        Depending on whether the sender is agent/user, this method
+        constructs messages to send with each message given a tag 'sending_to'
+        """
         messages = {}
         sender_type = SenderType.get_name(meta_data["senderType"])
 
@@ -35,6 +38,12 @@ class Converter():
         return messages
 
     def get_user_messages(self, node_data, meta_data, message_data):
+        """
+        This method gets messages to send if the sender of incoming_message is user.
+        It tries to get messages from ANA studio flow (AnaConverter)
+        If ANA does not give any messages, they are connected to agent
+        In future AI middle layer will come here
+        """
 
         outgoing_messages = []
         user_messages = []
@@ -62,6 +71,9 @@ class Converter():
         return {"messages": outgoing_messages, "events": events_data}
 
     def get_agent_messages(self, meta_data, message_data):
+        """
+        This method gets messages to send if the sender of incoming_message is an agent
+        """
 
         messages = []
         messages_data = AgentConverter(self.state).get_messages_data(message_data)
@@ -81,6 +93,10 @@ class Converter():
         return {"messages" : messages}
 
     def __get_node_and_events(self, message_data):
+        """
+        Get next_node(ANA output node) to send to user depending on current_node
+        and the incoming message. If it's a first time user, next_node is first_node
+        """
 
         get_started_node = self.state.get("flow_id", "") + "." + flow_config["first_node_key"]
         next_node_id = get_started_node
@@ -107,6 +123,9 @@ class Converter():
 
     @classmethod
     def __construct_user_messages(cls, meta_data, messages_data):
+        """
+        This method constructs messages that are being sent to user
+        """
 
         outgoing_messages = []
         message_meta_data = MessageMeta(
@@ -118,7 +137,4 @@ class Converter():
             ).trim()
 
         outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
-        # for message_data in messages_data:
-            # message = Message(meta=message_meta_data, data=message_data).trim()
-            # outgoing_messages.append(message)
         return outgoing_messages

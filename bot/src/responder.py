@@ -1,5 +1,6 @@
 """
 Message lifecycle goes here, receiving to responding
+All the higher level logic should exist here
 Author: https://github.com/velutha
 """
 from src import EventLogPool
@@ -25,6 +26,10 @@ class MessageProcessor():
         self.meta_data["sessionId"] = self.state.get("session_id")
 
     def respond_to_message(self):
+        """
+        This method is responsible for getting the messages to respond with
+        Also covers analytics events for those messages for e.g. click, view
+        """
 
         messages_data = Converter(self.state).get_messages_and_events(meta_data=self.meta_data, message_data=self.message_data)
 
@@ -46,6 +51,11 @@ class MessageProcessor():
 
     @classmethod
     def __get_current_state(cls, meta_data):
+        """
+        Gets state of the user in conversation which gives info about where he is in conversation
+        Gets info the flow/business to which user belongs to
+        For e.g. current_node_id of flow exists in state
+        """
 
         sender_type = SenderType.get_name(meta_data["senderType"])
 
@@ -66,6 +76,11 @@ class MessageProcessor():
 
     @classmethod
     def __update_state(cls, state, meta_data):
+        """
+        This methods updates the state of the user after the message is sent
+        For e.g. updating current_node_id
+        For now agent is stateless, state corresponds to only user
+        """
 
         sender_type = SenderType.get_name(meta_data["senderType"])
 
@@ -81,6 +96,11 @@ class MessageProcessor():
 
     @classmethod
     def __log_events(cls, meta_data, state, events):
+        """
+        While the user is responded with messages, there will be some analytics events
+        which are recorded for e.g. 'click' event for user clicking the button
+        No analytics events are recorded for messages sent by agent as of now
+        """
 
         sender_type = SenderType.get_name(meta_data["senderType"])
 
@@ -88,7 +108,14 @@ class MessageProcessor():
             # no need to log any event as of now
             return
 
+        type_of_event = "analytics"
+
         for event in events:
-            EventLogPool.submit(EventLogger().log(meta_data=meta_data, event=event, state=state))
+            data = {
+                "meta_data": meta_data,
+                "state_data": state,
+                "event_data": event
+                }
+            EventLogPool.submit(EventLogger().log_event(type_of_event=type_of_event, data=data))
 
         return 1

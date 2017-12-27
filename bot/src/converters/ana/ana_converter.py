@@ -14,6 +14,12 @@ class Converter():
         self.state = state
 
     def get_messages_data(self, node_data):
+        """
+        This method is responsible for converting ANA studio output to
+        the platform's message structure depending on type of ANA node
+        For any new type of node , type and it's corresponding class
+        should be added to dict below in a factory pattern
+        """
 
         node_type = node_data.get("NodeType", "")
 
