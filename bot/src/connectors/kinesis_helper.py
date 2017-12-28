@@ -22,7 +22,7 @@ class KinesisHelper():
             logger.error(err)
             raise
 
-    def log_message(self, data=None, key="core-chat-events"):
+    def log_message(self, key, data=None):
 
         if data is None:
             return

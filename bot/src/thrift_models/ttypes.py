@@ -205,6 +205,60 @@ class AddressField(object):
     }
 
 
+class EventType(object):
+    DISCONNECTED = 0
+    CONNECTED = 1
+    IDLE = 2
+    SESSION_STARTED = 3
+    SESSION_CLOSED = 4
+    CHAT_ALLOCATION = 5
+    CHAT_DEALLOCATION = 6
+    MESSAGE_COUNT = 7
+    RESPONSE_NEEDED = 8
+    ACTIVE = 9
+    INACTIVE = 10
+    TYPING = 11
+    AWAY = 12
+    ACK = 13
+    NO_AGENT_FOUND = 14
+
+    _VALUES_TO_NAMES = {
+        0: "DISCONNECTED",
+        1: "CONNECTED",
+        2: "IDLE",
+        3: "SESSION_STARTED",
+        4: "SESSION_CLOSED",
+        5: "CHAT_ALLOCATION",
+        6: "CHAT_DEALLOCATION",
+        7: "MESSAGE_COUNT",
+        8: "RESPONSE_NEEDED",
+        9: "ACTIVE",
+        10: "INACTIVE",
+        11: "TYPING",
+        12: "AWAY",
+        13: "ACK",
+        14: "NO_AGENT_FOUND",
+    }
+
+    _NAMES_TO_VALUES = {
+        "DISCONNECTED": 0,
+        "CONNECTED": 1,
+        "IDLE": 2,
+        "SESSION_STARTED": 3,
+        "SESSION_CLOSED": 4,
+        "CHAT_ALLOCATION": 5,
+        "CHAT_DEALLOCATION": 6,
+        "MESSAGE_COUNT": 7,
+        "RESPONSE_NEEDED": 8,
+        "ACTIVE": 9,
+        "INACTIVE": 10,
+        "TYPING": 11,
+        "AWAY": 12,
+        "ACK": 13,
+        "NO_AGENT_FOUND": 14,
+    }
+
+
 class Date(object):
     """
     Attributes:
@@ -1499,6 +1553,7 @@ class Input(object):
      - location
      - media
      - input
+     - text
     """
 
     thrift_spec = (
@@ -1510,9 +1565,10 @@ class Input(object):
         (5, TType.STRUCT, 'location', (Location, Location.thrift_spec), None, ),  # 5
         (6, TType.LIST, 'media', (TType.STRUCT, (Media, Media.thrift_spec), False), None, ),  # 6
         (7, TType.STRING, 'input', 'UTF8', None, ),  # 7
+        (8, TType.STRING, 'text', 'UTF8', None, ),  # 8
     )
 
-    def __init__(self, val=None, address=None, date=None, time=None, location=None, media=None, input=None,):
+    def __init__(self, val=None, address=None, date=None, time=None, location=None, media=None, input=None, text=None,):
         self.val = val
         self.address = address
         self.date = date
@@ -1520,6 +1576,7 @@ class Input(object):
         self.location = location
         self.media = media
         self.input = input
+        self.text = text
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1575,6 +1632,11 @@ class Input(object):
                     self.input = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.text = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1615,6 +1677,10 @@ class Input(object):
         if self.input is not None:
             oprot.writeFieldBegin('input', TType.STRING, 7)
             oprot.writeString(self.input.encode('utf-8') if sys.version_info[0] == 2 else self.input)
+            oprot.writeFieldEnd()
+        if self.text is not None:
+            oprot.writeFieldBegin('text', TType.STRING, 8)
+            oprot.writeString(self.text.encode('utf-8') if sys.version_info[0] == 2 else self.text)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2007,19 +2073,22 @@ class MessageData(object):
 class Event(object):
     """
     Attributes:
-     - title
-     - payload
+     - type
+     - channel
+     - unreadCount
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRING, 'title', 'UTF8', None, ),  # 1
-        (2, TType.STRING, 'payload', 'UTF8', None, ),  # 2
+        (1, TType.I32, 'type', None, None, ),  # 1
+        (2, TType.STRING, 'channel', 'UTF8', None, ),  # 2
+        (3, TType.I64, 'unreadCount', None, None, ),  # 3
     )
 
-    def __init__(self, title=None, payload=None,):
-        self.title = title
-        self.payload = payload
+    def __init__(self, type=None, channel=None, unreadCount=None,):
+        self.type = type
+        self.channel = channel
+        self.unreadCount = unreadCount
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2031,13 +2100,18 @@ class Event(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.STRING:
-                    self.title = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                if ftype == TType.I32:
+                    self.type = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.payload = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.channel = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I64:
+                    self.unreadCount = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             else:
@@ -2050,18 +2124,24 @@ class Event(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('Event')
-        if self.title is not None:
-            oprot.writeFieldBegin('title', TType.STRING, 1)
-            oprot.writeString(self.title.encode('utf-8') if sys.version_info[0] == 2 else self.title)
+        if self.type is not None:
+            oprot.writeFieldBegin('type', TType.I32, 1)
+            oprot.writeI32(self.type)
             oprot.writeFieldEnd()
-        if self.payload is not None:
-            oprot.writeFieldBegin('payload', TType.STRING, 2)
-            oprot.writeString(self.payload.encode('utf-8') if sys.version_info[0] == 2 else self.payload)
+        if self.channel is not None:
+            oprot.writeFieldBegin('channel', TType.STRING, 2)
+            oprot.writeString(self.channel.encode('utf-8') if sys.version_info[0] == 2 else self.channel)
+            oprot.writeFieldEnd()
+        if self.unreadCount is not None:
+            oprot.writeFieldBegin('unreadCount', TType.I64, 3)
+            oprot.writeI64(self.unreadCount)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
     def validate(self):
+        if self.type is None:
+            raise TProtocolException(message='Required field type is unset!')
         return
 
     def __repr__(self):
@@ -2081,20 +2161,20 @@ class Message(object):
     Attributes:
      - meta
      - data
-     - event
+     - events
     """
 
     thrift_spec = (
         None,  # 0
         (1, TType.STRUCT, 'meta', (MessageMeta, MessageMeta.thrift_spec), None, ),  # 1
         (2, TType.STRUCT, 'data', (MessageData, MessageData.thrift_spec), None, ),  # 2
-        (3, TType.STRUCT, 'event', (Event, Event.thrift_spec), None, ),  # 3
+        (3, TType.LIST, 'events', (TType.STRUCT, (Event, Event.thrift_spec), False), None, ),  # 3
     )
 
-    def __init__(self, meta=None, data=None, event=None,):
+    def __init__(self, meta=None, data=None, events=None,):
         self.meta = meta
         self.data = data
-        self.event = event
+        self.events = events
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2118,9 +2198,14 @@ class Message(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.STRUCT:
-                    self.event = Event()
-                    self.event.read(iprot)
+                if ftype == TType.LIST:
+                    self.events = []
+                    (_etype45, _size42) = iprot.readListBegin()
+                    for _i46 in range(_size42):
+                        _elem47 = Event()
+                        _elem47.read(iprot)
+                        self.events.append(_elem47)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             else:
@@ -2141,9 +2226,12 @@ class Message(object):
             oprot.writeFieldBegin('data', TType.STRUCT, 2)
             self.data.write(oprot)
             oprot.writeFieldEnd()
-        if self.event is not None:
-            oprot.writeFieldBegin('event', TType.STRUCT, 3)
-            self.event.write(oprot)
+        if self.events is not None:
+            oprot.writeFieldBegin('events', TType.LIST, 3)
+            oprot.writeListBegin(TType.STRUCT, len(self.events))
+            for iter48 in self.events:
+                iter48.write(oprot)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2151,8 +2239,6 @@ class Message(object):
     def validate(self):
         if self.meta is None:
             raise TProtocolException(message='Required field meta is unset!')
-        if self.data is None:
-            raise TProtocolException(message='Required field data is unset!')
         return
 
     def __repr__(self):

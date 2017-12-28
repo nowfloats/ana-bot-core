@@ -7,7 +7,7 @@ from src.config import ana_config as config
 from src.models.types import MessageTypeWrapper as MessageType, InputTypeWrapper as InputType, ButtonTypeWrapper as ButtonType,\
         MediaTypeWrapper as MediaType
 from src.models.message import MessageContentWrapper as MessageContent, MessageDataWrapper as MessageData
-from src.models.inputs import TextInputWrapper as TextInput
+from src.models.inputs import TextInputWrapper as TextInput, OptionWrapper as Option, ListItemWrapper as ListItem
 from src.logger import logger
 
 class ButtonProcessor():
@@ -84,18 +84,18 @@ class ButtonProcessor():
             value = button["_id"]
             type_of_button = ButtonType.get_value("QUICK_REPLY")
 
-        option = {
-            "title" : title,
-            "value" : value,
-            "type" : type_of_button
-            }
-
+        option = Option(title=title, value=value, type=type_of_button).trim()
         return option
 
     @classmethod
     def __process_input_button(cls, button):
 
         button_type = button.get("ButtonType")
+
+        if button_type == "GetItemFromSource":
+            message_data = cls.__process_getitem_button(button)
+            return message_data
+
         message_type = ""
         input_type = ""
         input_attr = None
@@ -104,34 +104,17 @@ class ButtonProcessor():
         message_type = MessageType.get_value("INPUT")
         input_attr = TextInput(placeHolder=button.get("PlaceholderText", "")).trim()
 
-        button_type_map = {
-            "GetText": "TEXT",
-            "GetNumber": "NUMERIC",
-            "GetPhoneNumber": "PHONE",
-            "GetEmail": "EMAIL",
-            "GetLocation": "LOCATION",
-            "GetAddress": "ADDRESS",
-            "GetDate": "DATE",
-            "GetTime": "TIME",
-            "GetImage": "MEDIA"
-            }
+        button_type_map = config["button_map"]
 
-        type_of_input = button_type_map[button_type]
+        elem_type = button_type_map.get(button_type)
+        if elem_type is None:
+            logger.warning("Undefined Input Type" + str(button_type))
 
-        if type_of_input is None:
-            logger.warning("Undefined Text Input Type" + str(button_type))
+        type_of_input = elem_type["input_type"]
+        type_of_media = elem_type["media_type"]
 
         input_type = InputType.get_value(type_of_input)
-        media_type = None
-
-        if button_type == "GetImage":
-            media_type = MediaType.get_value("IMAGE")
-        elif button_type == "GetAudio":
-            media_type = MediaType.get_value("AUDIO")
-        elif button_type == "GetVideo":
-            media_type = MediaType.get_value("VIDEO")
-        elif button_type == "GetFile":
-            media_type = MediaType.get_value("FILE")
+        media_type = MediaType.get_value(type_of_media)
 
         content = MessageContent(
             inputType=input_type,
@@ -139,6 +122,32 @@ class ButtonProcessor():
             textInputAttr=input_attr,
             mandatory=1,
             ).trim()
+        message_data = MessageData(
+            type=message_type,
+            content=content
+            ).trim()
+
+        return message_data
+
+    @classmethod
+    def __process_getitem_button(cls, data):
+
+        source = data.get("ItemsSource")
+        values = list(map(lambda x: ListItem(text=x.split(":")[0], value=x.split(":")[1]).trim(), source.split(",")))
+        button_text = data.get("ButtonName")
+
+        message_type = MessageType.get_value("INPUT")
+        input_type = InputType.get_value("LIST")
+        is_multiple = 1 if data.get("AllowMultiple") else 0
+
+        content = MessageContent(
+            inputType=input_type,
+            text=button_text,
+            multiple=is_multiple,
+            mandatory=1,
+            values=values
+            ).trim()
+
         message_data = MessageData(
             type=message_type,
             content=content

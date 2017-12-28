@@ -1,4 +1,16 @@
-from src.thrift_models.ttypes import MessageContent, MessageData, MessageMeta, Message, Media
+from src.thrift_models.ttypes import MessageContent, MessageData, MessageMeta, Message, Media, Event
+
+class EventWrapper(Event):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def trim(self):
+        obj = {}
+        for key, value in self.__dict__.items():
+            if value != None:
+                obj[key] = value
+        return [obj]
 
 class MediaWrapper(Media):
 
