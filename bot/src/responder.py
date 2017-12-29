@@ -49,6 +49,9 @@ class MessageProcessor():
 
         return 1
 
+    def respond_to_events(self):
+        return {}
+
     @classmethod
     def __get_current_state(cls, meta_data):
         """

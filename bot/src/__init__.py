@@ -12,12 +12,11 @@ from src.thread_pool import ThreadPoolExecutorStackTraced
 
 app = Flask(__name__)
 
-SESSION_CACHE = RedisHelper().session_redis_client
+SESSION_CACHE = RedisHelper().create_session_client()
 
-ANA_CACHE = RedisHelper().ana_redis_client
+ANA_CACHE = RedisHelper().create_ana_client()
 
 DB_CONNECTION = os.environ.get("DB_CONNECTION") or "mongodb://localhost:27027/anachatdb"
-
 
 MONGO_CLIENT = MongoClient(
     host=os.environ.get("DB_CONNECTION"),
