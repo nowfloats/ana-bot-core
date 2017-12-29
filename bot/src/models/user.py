@@ -52,7 +52,10 @@ class User():
             business_name = state.get("business_name", "")
             timestamp = int(time.time())
 
-            new_state["current_node_id"] = state["current_node_id"]
+            current_node_id = state.get("current_node_id")
+            if current_node_id is not None:
+                new_state["current_node_id"] = state["current_node_id"]
+
             new_state["timestamp"] = timestamp
             new_state["var_data"] = json.dumps(final_var_data)
 

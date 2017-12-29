@@ -8,6 +8,7 @@ from src.utils import Util
 from src.models.types import SenderTypeWrapper as SenderType
 from src.converters.converter import Converter
 from src.event_logger import EventLogger
+from src.event_handler import MessageEventHandler
 # from src.logger import logger
 from src.models.user import User
 from src.models.business import Business
@@ -32,7 +33,7 @@ class MessageProcessor():
         Also covers analytics events for those messages for e.g. click, view
         """
 
-        EventResponder(self.state).handle_events(events=self.events)
+        MessageEventHandler(self.state).handle_events(events=self.events)
         data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data)
 
         outgoing_messages = data.get("messages", [])

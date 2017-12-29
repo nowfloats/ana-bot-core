@@ -23,6 +23,10 @@ class Converter():
         constructs messages to send with each message given a tag 'sending_to'
         """
         messages = {}
+
+        if message_data == {}:
+            return messages
+
         sender_type = SenderType.get_name(meta_data["senderType"])
 
         if sender_type == "AGENT":

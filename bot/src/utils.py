@@ -35,7 +35,7 @@ class Util(object):
         headers = {"Content-Type" : "application/json"}
         if messages == []:
             logger.info("No messages to send to " + str(sending_to))
-            return 0
+            return 1
         #This is deliberately synchronous to maintain order of messages being sent
         for message in messages:
             logger.info(f"Message sent to {sending_to} {message}")

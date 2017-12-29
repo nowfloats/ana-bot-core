@@ -22,11 +22,11 @@ class ApiCallProcessor():
 
         return next_node_data
 
-    @staticmethod
-    def __make_api_call(node_data):
+    def __make_api_call(self, node_data):
 
-        api_url = node_data.get("ApiUrl")
+        api_url = node_data.get("ApiUrl", "")
         api_method = node_data.get("ApiMethod")
+        api_url = AnaHelper.verb_replacer(text=api_url, state=self.state)
 
         api_headers = {}
         headers = node_data.get("Headers", "").split("\n")
@@ -39,6 +39,7 @@ class ApiCallProcessor():
         if response.status_code == 200:
             api_response = response.json()
         else:
+            api_response = None
             logger.error(f"ApiCall did not return status code 200 {node_data['Id']}")
 
         return api_response
