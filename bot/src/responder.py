@@ -17,7 +17,8 @@ class MessageProcessor():
     def __init__(self, message):
 
         self.meta_data = message["meta"]
-        self.message_data = message["data"]
+        self.message_data = message.get("data", {})
+        self.events = message.get("events", [])
 
         self.sender_id = self.meta_data["sender"]["id"]
         self.recipient_id = self.meta_data["recipient"]["id"]
@@ -31,13 +32,14 @@ class MessageProcessor():
         Also covers analytics events for those messages for e.g. click, view
         """
 
-        messages_data = Converter(self.state).get_messages_and_events(meta_data=self.meta_data, message_data=self.message_data)
+        EventResponder(self.state).handle_events(events=self.events)
+        data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data)
 
-        messages = messages_data.get("messages", [])
-        events = messages_data.get("events", [])
+        outgoing_messages = data.get("messages", [])
+        events_to_publish = data.get("publish_events", [])
 
-        agent_messages = [message["message"] for message in messages if message["sending_to"] == "AGENT"]
-        user_messages = [message["message"] for message in messages if message["sending_to"] == "USER"]
+        agent_messages = [message["message"] for message in outgoing_messages if message["sending_to"] == "AGENT"]
+        user_messages = [message["message"] for message in outgoing_messages if message["sending_to"] == "USER"]
 
         agent_response = Util.send_messages(messages=agent_messages, sending_to="AGENT")
         user_response = Util.send_messages(messages=user_messages, sending_to="USER")
@@ -45,7 +47,7 @@ class MessageProcessor():
         if agent_response or user_response:
 
             self.__update_state(meta_data=self.meta_data, state=self.state)
-            self.__log_events(meta_data=self.meta_data, state=self.state, events=events)
+            self.__log_events(meta_data=self.meta_data, state=self.state, events=events_to_publish)
 
         return 1
 
@@ -69,7 +71,6 @@ class MessageProcessor():
             user_id = meta_data["sender"]["id"]
             business_id = meta_data["recipient"]["id"]
 
-        # session_id = meta_data.get("sessionId")
         state = User(user_id).get_session_data(meta_data=meta_data)
 
         flow_data = Business(business_id).get_business_data()

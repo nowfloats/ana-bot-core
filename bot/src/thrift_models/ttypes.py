@@ -37,21 +37,21 @@ class SenderType(object):
 class MediaType(object):
     IMAGE = 0
     AUDIO = 1
-    VIDEO = 2
-    FILE = 3
+    VIDEO = 3
+    FILE = 4
 
     _VALUES_TO_NAMES = {
         0: "IMAGE",
         1: "AUDIO",
-        2: "VIDEO",
-        3: "FILE",
+        3: "VIDEO",
+        4: "FILE",
     }
 
     _NAMES_TO_VALUES = {
         "IMAGE": 0,
         "AUDIO": 1,
-        "VIDEO": 2,
-        "FILE": 3,
+        "VIDEO": 3,
+        "FILE": 4,
     }
 
 
@@ -221,6 +221,13 @@ class EventType(object):
     AWAY = 12
     ACK = 13
     NO_AGENT_FOUND = 14
+    INTENT_TO_HANDOVER = 15
+    INTERACTION = 16
+    QUEUED = 17
+    PRIORITY_QUEUED = 18
+    ALLOCATION_REQUEST = 19
+    OUT_OF_BUSINESS_HOURS = 20
+    SET_SESSION_DATA = 21
 
     _VALUES_TO_NAMES = {
         0: "DISCONNECTED",
@@ -238,6 +245,13 @@ class EventType(object):
         12: "AWAY",
         13: "ACK",
         14: "NO_AGENT_FOUND",
+        15: "INTENT_TO_HANDOVER",
+        16: "INTERACTION",
+        17: "QUEUED",
+        18: "PRIORITY_QUEUED",
+        19: "ALLOCATION_REQUEST",
+        20: "OUT_OF_BUSINESS_HOURS",
+        21: "SET_SESSION_DATA",
     }
 
     _NAMES_TO_VALUES = {
@@ -256,6 +270,13 @@ class EventType(object):
         "AWAY": 12,
         "ACK": 13,
         "NO_AGENT_FOUND": 14,
+        "INTENT_TO_HANDOVER": 15,
+        "INTERACTION": 16,
+        "QUEUED": 17,
+        "PRIORITY_QUEUED": 18,
+        "ALLOCATION_REQUEST": 19,
+        "OUT_OF_BUSINESS_HOURS": 20,
+        "SET_SESSION_DATA": 21,
     }
 
 
@@ -451,6 +472,80 @@ class Time(object):
         return not (self == other)
 
 
+class DateTime(object):
+    """
+    Attributes:
+     - date
+     - time
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'date', (Date, Date.thrift_spec), None, ),  # 1
+        (2, TType.STRUCT, 'time', (Time, Time.thrift_spec), None, ),  # 2
+    )
+
+    def __init__(self, date=None, time=None,):
+        self.date = date
+        self.time = time
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.date = Date()
+                    self.date.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.time = Time()
+                    self.time.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('DateTime')
+        if self.date is not None:
+            oprot.writeFieldBegin('date', TType.STRUCT, 1)
+            self.date.write(oprot)
+            oprot.writeFieldEnd()
+        if self.time is not None:
+            oprot.writeFieldBegin('time', TType.STRUCT, 2)
+            self.time.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class DateRange(object):
     """
     Attributes:
@@ -604,6 +699,80 @@ class TimeRange(object):
         if self.interval is not None:
             oprot.writeFieldBegin('interval', TType.STRING, 3)
             oprot.writeString(self.interval.encode('utf-8') if sys.version_info[0] == 2 else self.interval)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class DateTimeRange(object):
+    """
+    Attributes:
+     - dateRange
+     - timeRange
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'dateRange', (DateRange, DateRange.thrift_spec), None, ),  # 1
+        (2, TType.STRUCT, 'timeRange', (TimeRange, TimeRange.thrift_spec), None, ),  # 2
+    )
+
+    def __init__(self, dateRange=None, timeRange=None,):
+        self.dateRange = dateRange
+        self.timeRange = timeRange
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.dateRange = DateRange()
+                    self.dateRange.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.timeRange = TimeRange()
+                    self.timeRange.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('DateTimeRange')
+        if self.dateRange is not None:
+            oprot.writeFieldBegin('dateRange', TType.STRUCT, 1)
+            self.dateRange.write(oprot)
+            oprot.writeFieldEnd()
+        if self.timeRange is not None:
+            oprot.writeFieldBegin('timeRange', TType.STRUCT, 2)
+            self.timeRange.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -779,6 +948,9 @@ class MessageMeta(object):
      - timestamp
      - sessionId
      - responseTo
+     - businessId
+     - flowId
+     - threadId
     """
 
     thrift_spec = (
@@ -790,9 +962,12 @@ class MessageMeta(object):
         (5, TType.I64, 'timestamp', None, None, ),  # 5
         (6, TType.STRING, 'sessionId', 'UTF8', None, ),  # 6
         (7, TType.STRING, 'responseTo', 'UTF8', None, ),  # 7
+        (8, TType.STRING, 'businessId', 'UTF8', None, ),  # 8
+        (9, TType.STRING, 'flowId', 'UTF8', None, ),  # 9
+        (10, TType.STRING, 'threadId', 'UTF8', None, ),  # 10
     )
 
-    def __init__(self, id=None, sender=None, recipient=None, senderType=thrift_spec[4][4], timestamp=None, sessionId=None, responseTo=None,):
+    def __init__(self, id=None, sender=None, recipient=None, senderType=thrift_spec[4][4], timestamp=None, sessionId=None, responseTo=None, businessId=None, flowId=None, threadId=None,):
         self.id = id
         self.sender = sender
         self.recipient = recipient
@@ -800,6 +975,9 @@ class MessageMeta(object):
         self.timestamp = timestamp
         self.sessionId = sessionId
         self.responseTo = responseTo
+        self.businessId = businessId
+        self.flowId = flowId
+        self.threadId = threadId
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -847,6 +1025,21 @@ class MessageMeta(object):
                     self.responseTo = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.businessId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.STRING:
+                    self.flowId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.STRING:
+                    self.threadId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -884,6 +1077,18 @@ class MessageMeta(object):
         if self.responseTo is not None:
             oprot.writeFieldBegin('responseTo', TType.STRING, 7)
             oprot.writeString(self.responseTo.encode('utf-8') if sys.version_info[0] == 2 else self.responseTo)
+            oprot.writeFieldEnd()
+        if self.businessId is not None:
+            oprot.writeFieldBegin('businessId', TType.STRING, 8)
+            oprot.writeString(self.businessId.encode('utf-8') if sys.version_info[0] == 2 else self.businessId)
+            oprot.writeFieldEnd()
+        if self.flowId is not None:
+            oprot.writeFieldBegin('flowId', TType.STRING, 9)
+            oprot.writeString(self.flowId.encode('utf-8') if sys.version_info[0] == 2 else self.flowId)
+            oprot.writeFieldEnd()
+        if self.threadId is not None:
+            oprot.writeFieldBegin('threadId', TType.STRING, 10)
+            oprot.writeString(self.threadId.encode('utf-8') if sys.version_info[0] == 2 else self.threadId)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1550,6 +1755,7 @@ class Input(object):
      - address
      - date
      - time
+     - dateTime
      - location
      - media
      - input
@@ -1562,17 +1768,19 @@ class Input(object):
         (2, TType.STRUCT, 'address', (Address, Address.thrift_spec), None, ),  # 2
         (3, TType.STRUCT, 'date', (Date, Date.thrift_spec), None, ),  # 3
         (4, TType.STRUCT, 'time', (Time, Time.thrift_spec), None, ),  # 4
-        (5, TType.STRUCT, 'location', (Location, Location.thrift_spec), None, ),  # 5
-        (6, TType.LIST, 'media', (TType.STRUCT, (Media, Media.thrift_spec), False), None, ),  # 6
-        (7, TType.STRING, 'input', 'UTF8', None, ),  # 7
-        (8, TType.STRING, 'text', 'UTF8', None, ),  # 8
+        (5, TType.STRUCT, 'dateTime', (DateTime, DateTime.thrift_spec), None, ),  # 5
+        (6, TType.STRUCT, 'location', (Location, Location.thrift_spec), None, ),  # 6
+        (7, TType.LIST, 'media', (TType.STRUCT, (Media, Media.thrift_spec), False), None, ),  # 7
+        (8, TType.STRING, 'input', 'UTF8', None, ),  # 8
+        (9, TType.STRING, 'text', 'UTF8', None, ),  # 9
     )
 
-    def __init__(self, val=None, address=None, date=None, time=None, location=None, media=None, input=None, text=None,):
+    def __init__(self, val=None, address=None, date=None, time=None, dateTime=None, location=None, media=None, input=None, text=None,):
         self.val = val
         self.address = address
         self.date = date
         self.time = time
+        self.dateTime = dateTime
         self.location = location
         self.media = media
         self.input = input
@@ -1612,11 +1820,17 @@ class Input(object):
                     iprot.skip(ftype)
             elif fid == 5:
                 if ftype == TType.STRUCT:
+                    self.dateTime = DateTime()
+                    self.dateTime.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRUCT:
                     self.location = Location()
                     self.location.read(iprot)
                 else:
                     iprot.skip(ftype)
-            elif fid == 6:
+            elif fid == 7:
                 if ftype == TType.LIST:
                     self.media = []
                     (_etype10, _size7) = iprot.readListBegin()
@@ -1627,12 +1841,12 @@ class Input(object):
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
-            elif fid == 7:
+            elif fid == 8:
                 if ftype == TType.STRING:
                     self.input = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
-            elif fid == 8:
+            elif fid == 9:
                 if ftype == TType.STRING:
                     self.text = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
@@ -1663,23 +1877,27 @@ class Input(object):
             oprot.writeFieldBegin('time', TType.STRUCT, 4)
             self.time.write(oprot)
             oprot.writeFieldEnd()
+        if self.dateTime is not None:
+            oprot.writeFieldBegin('dateTime', TType.STRUCT, 5)
+            self.dateTime.write(oprot)
+            oprot.writeFieldEnd()
         if self.location is not None:
-            oprot.writeFieldBegin('location', TType.STRUCT, 5)
+            oprot.writeFieldBegin('location', TType.STRUCT, 6)
             self.location.write(oprot)
             oprot.writeFieldEnd()
         if self.media is not None:
-            oprot.writeFieldBegin('media', TType.LIST, 6)
+            oprot.writeFieldBegin('media', TType.LIST, 7)
             oprot.writeListBegin(TType.STRUCT, len(self.media))
             for iter13 in self.media:
                 iter13.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.input is not None:
-            oprot.writeFieldBegin('input', TType.STRING, 7)
+            oprot.writeFieldBegin('input', TType.STRING, 8)
             oprot.writeString(self.input.encode('utf-8') if sys.version_info[0] == 2 else self.input)
             oprot.writeFieldEnd()
         if self.text is not None:
-            oprot.writeFieldBegin('text', TType.STRING, 8)
+            oprot.writeFieldBegin('text', TType.STRING, 9)
             oprot.writeString(self.text.encode('utf-8') if sys.version_info[0] == 2 else self.text)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1717,6 +1935,7 @@ class MessageContent(object):
      - options
      - dateRange
      - timeRange
+     - dateTimeRange
      - defaultLocation
      - textInputAttr
      - input
@@ -1738,12 +1957,13 @@ class MessageContent(object):
         (12, TType.SET, 'options', (TType.STRUCT, (Option, Option.thrift_spec), False), None, ),  # 12
         (13, TType.STRUCT, 'dateRange', (DateRange, DateRange.thrift_spec), None, ),  # 13
         (14, TType.STRUCT, 'timeRange', (TimeRange, TimeRange.thrift_spec), None, ),  # 14
-        (15, TType.STRUCT, 'defaultLocation', (Location, Location.thrift_spec), None, ),  # 15
-        (16, TType.STRUCT, 'textInputAttr', (TextInput, TextInput.thrift_spec), None, ),  # 16
-        (17, TType.STRUCT, 'input', (Input, Input.thrift_spec), None, ),  # 17
+        (15, TType.STRUCT, 'dateTimeRange', (DateTimeRange, DateTimeRange.thrift_spec), None, ),  # 15
+        (16, TType.STRUCT, 'defaultLocation', (Location, Location.thrift_spec), None, ),  # 16
+        (17, TType.STRUCT, 'textInputAttr', (TextInput, TextInput.thrift_spec), None, ),  # 17
+        (18, TType.STRUCT, 'input', (Input, Input.thrift_spec), None, ),  # 18
     )
 
-    def __init__(self, text=None, media=None, title=None, items=None, payload=None, inputType=None, mandatory=thrift_spec[7][4], values=None, multiple=None, mediaType=None, requiredFields=None, options=None, dateRange=None, timeRange=None, defaultLocation=None, textInputAttr=None, input=None,):
+    def __init__(self, text=None, media=None, title=None, items=None, payload=None, inputType=None, mandatory=thrift_spec[7][4], values=None, multiple=None, mediaType=None, requiredFields=None, options=None, dateRange=None, timeRange=None, dateTimeRange=None, defaultLocation=None, textInputAttr=None, input=None,):
         self.text = text
         self.media = media
         self.title = title
@@ -1758,6 +1978,7 @@ class MessageContent(object):
         self.options = options
         self.dateRange = dateRange
         self.timeRange = timeRange
+        self.dateTimeRange = dateTimeRange
         self.defaultLocation = defaultLocation
         self.textInputAttr = textInputAttr
         self.input = input
@@ -1869,17 +2090,23 @@ class MessageContent(object):
                     iprot.skip(ftype)
             elif fid == 15:
                 if ftype == TType.STRUCT:
+                    self.dateTimeRange = DateTimeRange()
+                    self.dateTimeRange.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 16:
+                if ftype == TType.STRUCT:
                     self.defaultLocation = Location()
                     self.defaultLocation.read(iprot)
                 else:
                     iprot.skip(ftype)
-            elif fid == 16:
+            elif fid == 17:
                 if ftype == TType.STRUCT:
                     self.textInputAttr = TextInput()
                     self.textInputAttr.read(iprot)
                 else:
                     iprot.skip(ftype)
-            elif fid == 17:
+            elif fid == 18:
                 if ftype == TType.STRUCT:
                     self.input = Input()
                     self.input.read(iprot)
@@ -1963,16 +2190,20 @@ class MessageContent(object):
             oprot.writeFieldBegin('timeRange', TType.STRUCT, 14)
             self.timeRange.write(oprot)
             oprot.writeFieldEnd()
+        if self.dateTimeRange is not None:
+            oprot.writeFieldBegin('dateTimeRange', TType.STRUCT, 15)
+            self.dateTimeRange.write(oprot)
+            oprot.writeFieldEnd()
         if self.defaultLocation is not None:
-            oprot.writeFieldBegin('defaultLocation', TType.STRUCT, 15)
+            oprot.writeFieldBegin('defaultLocation', TType.STRUCT, 16)
             self.defaultLocation.write(oprot)
             oprot.writeFieldEnd()
         if self.textInputAttr is not None:
-            oprot.writeFieldBegin('textInputAttr', TType.STRUCT, 16)
+            oprot.writeFieldBegin('textInputAttr', TType.STRUCT, 17)
             self.textInputAttr.write(oprot)
             oprot.writeFieldEnd()
         if self.input is not None:
-            oprot.writeFieldBegin('input', TType.STRUCT, 17)
+            oprot.writeFieldBegin('input', TType.STRUCT, 18)
             self.input.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -2076,6 +2307,7 @@ class Event(object):
      - type
      - channel
      - unreadCount
+     - data
     """
 
     thrift_spec = (
@@ -2083,12 +2315,14 @@ class Event(object):
         (1, TType.I32, 'type', None, None, ),  # 1
         (2, TType.STRING, 'channel', 'UTF8', None, ),  # 2
         (3, TType.I64, 'unreadCount', None, None, ),  # 3
+        (4, TType.STRING, 'data', 'UTF8', None, ),  # 4
     )
 
-    def __init__(self, type=None, channel=None, unreadCount=None,):
+    def __init__(self, type=None, channel=None, unreadCount=None, data=None,):
         self.type = type
         self.channel = channel
         self.unreadCount = unreadCount
+        self.data = data
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2114,6 +2348,11 @@ class Event(object):
                     self.unreadCount = iprot.readI64()
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.data = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2135,6 +2374,10 @@ class Event(object):
         if self.unreadCount is not None:
             oprot.writeFieldBegin('unreadCount', TType.I64, 3)
             oprot.writeI64(self.unreadCount)
+            oprot.writeFieldEnd()
+        if self.data is not None:
+            oprot.writeFieldBegin('data', TType.STRING, 4)
+            oprot.writeString(self.data.encode('utf-8') if sys.version_info[0] == 2 else self.data)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

@@ -17,7 +17,7 @@ class Converter():
     def __init__(self, state):
         self.state = state
 
-    def get_messages_and_events(self, meta_data, message_data):
+    def get_messages(self, meta_data, message_data):
         """
         Depending on whether the sender is agent/user, this method
         constructs messages to send with each message given a tag 'sending_to'
@@ -28,12 +28,10 @@ class Converter():
         if sender_type == "AGENT":
             messages = self.get_agent_messages(meta_data, message_data)
         else:
-            data = self.__get_node_and_events(message_data=message_data)
+            data = self.__get_node(message_data=message_data)
             node_data = data.get("node")
-            node_events = data.get("events")
-
             messages = self.get_user_messages(node_data, meta_data, message_data)
-            messages["events"] = messages["events"] + node_events
+            messages["publish_events"] = messages.get("events", []) + data.get("publish_events", [])
 
         return messages
 
@@ -51,7 +49,7 @@ class Converter():
 
         messages = AnaConverter(self.state).get_messages_data(node_data)
         outgoing_messages_data = messages.get("messages", [])
-        events_data = messages.get("events", [])
+        events_data = messages.get("publish_events", [])
 
         if outgoing_messages_data == []:
             # no messages from ana flow, send incoming message to agent
@@ -68,7 +66,7 @@ class Converter():
 
         outgoing_messages = user_messages + agent_messages
 
-        return {"messages": outgoing_messages, "events": events_data}
+        return {"messages": outgoing_messages, "publish_events": events_data}
 
     def get_agent_messages(self, meta_data, message_data):
         """
@@ -92,7 +90,7 @@ class Converter():
 
         return {"messages" : messages}
 
-    def __get_node_and_events(self, message_data):
+    def __get_node(self, message_data):
         """
         Get next_node(ANA output node) to send to user depending on current_node
         and the incoming message. If it's a first time user, next_node is first_node
@@ -107,7 +105,7 @@ class Converter():
             current_node_id = self.state.get("current_node_id", get_started_node) # give first_node as default
             next_node_data = AnaNode(current_node_id).get_next_node_data(self.state["flow_id"], message_data)
 
-            event_data = next_node_data.get("events", [])
+            event_data = next_node_data.get("publish_events", [])
             next_node_id = next_node_data["node_id"]
 
             var_data = json.loads(self.state.get("var_data", "{}"))
@@ -119,7 +117,7 @@ class Converter():
         self.state["current_node_id"] = next_node_id
         node = AnaNode(next_node_id).get_contents()
 
-        return {"node": node, "events": event_data}
+        return {"node": node, "publish_events": event_data}
 
     @classmethod
     def __construct_user_messages(cls, meta_data, messages_data):
