@@ -14,7 +14,7 @@ class EventLogger(KinesisHelper):
         logger_method = getattr(self, "log_%s"%type_of_event.lower(), None)
 
         if logger_method is None:
-            logger.error(f"Unknown event type logged {type_of_event}")
+            logger.error(f"Unknown event type published {type_of_event}")
 
         message_logged = logger_method(data)
         return message_logged

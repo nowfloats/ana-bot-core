@@ -36,7 +36,6 @@ class AnaNode():
         if node_type == "HandoffToAgent":
             return {"node_id": self.node_key, "input_data": {}}
 
-
         next_node_data = self.__get_next_node_data(input_data=input_data, node_content=current_node_contents)
 
         next_node_id = next_node_data.get("node_id", "")
@@ -45,7 +44,7 @@ class AnaNode():
         events = next_node_data["event_data"]
         user_input = next_node_data["user_input"]
 
-        return {"node_id": node_key, "input_data": user_input, "events": events}
+        return {"node_id": node_key, "input_data": user_input, "publish_events": events}
 
 
     @classmethod
@@ -91,32 +90,6 @@ class AnaNode():
                         })
                     break
 
-            # for button in button_contents:
-                # button_type = button.get("ButtonType", button.get("Type"))
-                # var_name = node_content.get("VariableName")
-                # if button_type in ["NextNode", "OpenUrl"]:
-                    # current_node_id = input_data["val"]
-                    # if button["_id"] == current_node_id:
-                        # if var_name:
-                            # user_input[var_name] = button.get("VariableValue", "")
-                        # next_node_id = button["NextNodeId"]
-                        # event_data.append({
-                            # "type_of_event": "click",
-                            # "node_data": node_content,
-                            # "event_data": button
-                            # })
-                        # break
-                # elif button_type in ["GetText", "GetNumber", "GetPhoneNumber", "GetEmail"]:
-                    # if var_name:
-                        # user_input[var_name] = input_data["val"]
-                    # next_node_id = button["NextNodeId"]
-                    # event_data.append({
-                        # "type_of_event": "click",
-                        # "node_data": node_content,
-                        # "event_data": button
-                        # })
-
-                    # break
         else:
 
             valid_button_types = cls.__get_button_types(input_key)

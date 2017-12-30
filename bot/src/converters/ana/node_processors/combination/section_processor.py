@@ -6,6 +6,7 @@ import json
 import re
 from furl import furl
 from src.logger import logger
+from src.converters.ana.ana_helper import AnaHelper
 from src.models.types import MessageTypeWrapper as MessageType, MediaTypeWrapper as MediaType, ButtonTypeWrapper as ButtonType
 from src.models.message import MessageContentWrapper as MessageContent, MessageDataWrapper as MessageData, MediaWrapper as Media
 from src.models.inputs import OptionWrapper as Option, ItemWrapper as Item
@@ -39,16 +40,15 @@ class SectionProcessor():
 
         return messages_data
 
-    def verb_replacer(self, text):
-        variable_data = self.state.get("var_data", {})
-        matches = re.findall("\[~(.*?)\]", text)
-        variable_names = variable_data.keys()
-        final_text = text
-        for match in matches:
-            if match in variable_names:
-                key = "[~" + match + "]"
-                final_text = text.replace(key, variable_data[match])
-        return final_text
+    # def verb_replacer(self, text):
+        # variable_data = self.state.get("var_data", {})
+        # matches = re.findall("\[~(.*?)\]", text)
+        # variable_names = variable_data.keys()
+        # for match in matches:
+            # if match in variable_names:
+                # key = "[~" + match + "]"
+                # text = text.replace(key, variable_data[match])
+        # return text
 
     def __text_processor(self, data):
 
@@ -56,9 +56,9 @@ class SectionProcessor():
         section_type = data.get("SectionType")
         if section_type == "Text":
             text = data.get("Text", "")
-            text = self.verb_replacer(text)
         elif section_type in ["EmbeddedHtml", "Link"]:
             text = data.get("Url", "")
+        text = AnaHelper.verb_replacer(text=text, state=self.state)
         message_content = MessageContent(text=text, mandatory=1).trim()
         message_data = MessageData(type=message_type, content=message_content).trim()
 
@@ -79,7 +79,7 @@ class SectionProcessor():
         preview_url = data.get("PreviewUrl", "")
         preview_url = furl(preview_url).url
         text = data.get("Title", "")
-        text = self.verb_replacer(text)
+        text = self.verb_replacer(text=text, state=self.state)
         media_content = Media(type=media_type, url=url, previewUrl=preview_url).trim()
         message_content = MessageContent(text=text, media=media_content, mandatory=1).trim()
         message_data = MessageData(type=message_type, content=message_content).trim()

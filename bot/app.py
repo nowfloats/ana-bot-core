@@ -54,6 +54,19 @@ def message_handler():
     return jsonify(status="received")
 
 
+@app.route("/bot/event", methods=["POST"])
+def event_handler():
+    message = request.get_json()
+
+    logger.info("****************")
+    logger.info("Message Received")
+    logger.info(message)
+    logger.info("****************")
+
+    message = MessageProcessor(message).respond_to_events()
+
+    return jsonify(message)
+
 @app.route("/bot/business", methods=["POST"])
 def business_handler():
     business_data = request.get_json()

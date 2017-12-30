@@ -21,7 +21,7 @@ class Converter():
         should be added to dict below in a factory pattern
         """
 
-        node_type = node_data.get("NodeType", "")
+        node_type = node_data.get("NodeType", "Combination")
 
         node_processor_map = {
             "Combination": CombinationProcessor,
@@ -54,4 +54,4 @@ class Converter():
         messages = data.get("messages", [])
         events = data.get("events", [])
 
-        return {"messages": messages, "events": events}
+        return {"messages": messages, "publish_events": events}
