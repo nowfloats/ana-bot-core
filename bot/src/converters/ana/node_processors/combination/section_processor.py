@@ -3,7 +3,6 @@ This module handles sections inside combination node of ana studio output
 Author: https://github.com/velutha
 """
 import json
-import re
 from furl import furl
 from src.logger import logger
 from src.converters.ana.ana_helper import AnaHelper
@@ -79,7 +78,7 @@ class SectionProcessor():
         preview_url = data.get("PreviewUrl", "")
         preview_url = furl(preview_url).url
         text = data.get("Title", "")
-        text = self.verb_replacer(text=text, state=self.state)
+        text = AnaHelper.verb_replacer(text=text, state=self.state)
         media_content = Media(type=media_type, url=url, previewUrl=preview_url).trim()
         message_content = MessageContent(text=text, media=media_content, mandatory=1).trim()
         message_data = MessageData(type=message_type, content=message_content).trim()
