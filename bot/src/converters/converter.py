@@ -77,6 +77,7 @@ class Converter():
             sender=meta_data["sender"],
             sessionId=meta_data["sessionId"],
             responseTo=meta_data["id"],
+            flowId=meta_data.get("flowId"),
             senderType=SenderType.get_value("AGENT")
             ).trim()
 
@@ -138,6 +139,7 @@ class Converter():
             sender=sender,
             recipient=recipient,
             sessionId=meta_data["sessionId"],
+            flowId=meta_data.get("flowId"),
             responseTo=meta_data["id"],
             senderType=sender_type
             ).trim()
