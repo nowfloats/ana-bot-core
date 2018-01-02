@@ -13,7 +13,7 @@ class Converter():
     def __init__(self, state):
         self.state = state
 
-    def get_messages_data(self, node_data):
+    def get_messages_data(self, node_data, message_data):
         """
         This method is responsible for converting ANA studio output to
         the platform's message structure depending on type of ANA node
@@ -31,27 +31,31 @@ class Converter():
             "HandoffToAgent": AgentHandOffProcessor
             }
 
+        user_messages = []
+        agent_messages = []
+
+        Processor = node_processor_map.get(node_type)
+
         if node_type in ["Combination"]:
-            Processor = node_processor_map.get(node_type)
             data = Processor(self.state).process_node(node_data)
 
         elif node_type in ["ApiCall", "Condition"]:
-            Processor = node_processor_map.get(node_type)
             next_node_data = Processor(self.state).get_next_node(node_data)
-            data = self.get_messages_data(next_node_data.get("data"))
+            data = self.get_messages_data(next_node_data.get("data"), message_data)
             # this should ideally not happen here this
             # change current_node_id thing in converter
             # both should use the same method
             self.state["current_node_id"] = next_node_data.get("id")
 
         elif node_type == "HandoffToAgent":
-            data = {}
-
+            data = Processor(self.state).process_node(message_data)
         else:
             raise "Unknown Node Type. Fatal Error"
 
 
-        messages = data.get("messages", [])
+        user_messages = data.get("user_messages", [])
+        agent_messages = data.get("agent_messages", [])
         events = data.get("events", [])
+        # messages = data.get("messages", [])
 
-        return {"messages": messages, "publish_events": events}
+        return {"user_messages": user_messages, "agent_messages": agent_messages, "publish_events": events}

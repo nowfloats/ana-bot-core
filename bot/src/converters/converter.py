@@ -51,22 +51,14 @@ class Converter():
         user_messages = []
         agent_messages = []
 
-        messages = AnaConverter(self.state).get_messages_data(node_data)
-        outgoing_messages_data = messages.get("messages", [])
+        messages = AnaConverter(self.state).get_messages_data(node_data=node_data, message_data=message_data)
         events_data = messages.get("publish_events", [])
 
-        if outgoing_messages_data == []:
-            # no messages from ana flow, send incoming message to agent
-            incoming_message = Message(meta=meta_data, data=message_data).trim()
-            agent_messages = [{"message" :incoming_message, "sending_to": "AGENT"}]
+        outgoing_user_messages_data = messages.get("user_messages", [])
+        outgoing_agent_messages_data = messages.get("agent_messages", [])
 
-            # get messages to send to user when agent is connected
-            user_messages_data = AgentConverter.get_agent_connected_messages()
-        else:
-            user_messages_data = outgoing_messages_data
-
-        messages = self.__construct_user_messages(meta_data=meta_data, messages_data=user_messages_data)
-        user_messages = [{"message": message, "sending_to": "USER"} for message in messages]
+        user_messages = self.__construct_messages(meta_data=meta_data, messages_data=outgoing_user_messages_data, sending_to="USER")
+        agent_messages = self.__construct_messages(meta_data=meta_data, messages_data=outgoing_agent_messages_data, sending_to="AGENT")
 
         outgoing_messages = user_messages + agent_messages
 
@@ -74,11 +66,11 @@ class Converter():
 
     def get_agent_messages(self, meta_data, message_data):
         """
-        This method gets messages to send if the sender of incoming_message is an agent
+        This method gets messages to send if the sender of incoming_message is from agent
         """
 
         messages = []
-        messages_data = AgentConverter(self.state).get_messages_data(message_data)
+        messages_data = AgentConverter(self.state).get_messages_data(message_data).get("user_messages", [])
 
         meta_data = MessageMeta(
             recipient=meta_data["recipient"],
@@ -124,19 +116,76 @@ class Converter():
         return {"node": node, "publish_events": event_data}
 
     @classmethod
-    def __construct_user_messages(cls, meta_data, messages_data):
+    def __construct_messages(cls, meta_data, messages_data, sending_to):
         """
-        This method constructs messages that are being sent to user
+        This method constructs messages that are being sent
         """
+
+        if sending_to is None:
+            return []
+
+        if sending_to == "USER":
+            recipient = meta_data["sender"]
+            sender = meta_data["recipient"]
+            sender_type = SenderType.get_value("ANA")
+        elif sending_to == "AGENT":
+            recipient = meta_data["recipient"]
+            sender = meta_data["sender"]
+            sender_type = SenderType.get_value("USER")
 
         outgoing_messages = []
         message_meta_data = MessageMeta(
-            sender=meta_data["recipient"],
-            recipient=meta_data["sender"],
+            sender=sender,
+            recipient=recipient,
             sessionId=meta_data["sessionId"],
             responseTo=meta_data["id"],
-            senderType=SenderType.get_value("ANA")
+            senderType=sender_type
             ).trim()
 
         outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
-        return outgoing_messages
+
+        messages = [{"sending_to": sending_to, "message": message} for message in outgoing_messages]
+
+        return messages
+
+    # @classmethod
+    # def __construct_user_messages(cls, meta_data, messages_data):
+        # """
+        # This method constructs messages that are being sent to user
+        # """
+
+        # outgoing_messages = []
+        # message_meta_data = MessageMeta(
+            # sender=meta_data["recipient"],
+            # recipient=meta_data["sender"],
+            # sessionId=meta_data["sessionId"],
+            # responseTo=meta_data["id"],
+            # senderType=SenderType.get_value("ANA")
+            # ).trim()
+
+        # outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
+
+        # messages = [{"sending_to": "USER", "message": message} for message in outgoing_messages]
+
+        # return messages
+
+    # @classmethod
+    # def __construct_agent_messages(cls, meta_data, messages_data):
+        # """
+        # This method constructs messages that are being sent to agent
+        # """
+
+        # outgoing_messages = []
+        # message_meta_data = MessageMeta(
+            # sender=meta_data["sender"],
+            # recipient=meta_data["recipient"],
+            # sessionId=meta_data["sessionId"],
+            # responseTo=meta_data["id"],
+            # senderType=SenderType.get_value("USER")
+            # ).trim()
+
+        # outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
+
+        # messages = [{"sending_to": "AGENT", "message": message} for message in outgoing_messages]
+
+        # return messages

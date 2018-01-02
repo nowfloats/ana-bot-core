@@ -24,4 +24,4 @@ class CombinationProcessor():
             "event_data" : {}
             }
 
-        return {"messages": messages, "events": [event_log_data]}
+        return {"user_messages": messages, "events": [event_log_data]}
