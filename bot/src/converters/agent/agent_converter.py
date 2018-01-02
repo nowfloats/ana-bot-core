@@ -1,5 +1,5 @@
 """
-Messages being sent to agent are constructed here
+Messages if an agent is connected are constructed here
 Author: https://github.com/velutha
 """
 from src.models.message import MessageContentWrapper as MessageContent, MessageDataWrapper as MessageData
@@ -17,12 +17,11 @@ class Converter():
 
         messages_data = []
         user_messages_data = cls.__convert_to_user_message(message_data)
-        # messages_data.append(message_data)
-
         other_messages_data = cls.get_agent_connected_messages()
+
         messages_data = user_messages_data + other_messages_data
 
-        return messages_data
+        return {"user_messages": messages_data}
 
     @classmethod
     def __convert_to_user_message(cls, data):
