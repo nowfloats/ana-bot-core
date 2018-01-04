@@ -41,10 +41,8 @@ class Util(object):
         #This is deliberately synchronous to maintain order of messages being sent
         for message in messages:
             if sending_to == "AGENT":
-                if message.id is None:
-                    message.id = str(uuid.uuid4())
-                if message.timestamp is None:
-                    message.timestamp = int(time.time())
+                message['meta']['id'] = str(uuid.uuid4())
+                message['meta']['timestamp'] = int(time.time())
 
             logger.info(f"Message sent to {sending_to} {message}")
             json_message = json.dumps(message)
