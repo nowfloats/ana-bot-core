@@ -2,6 +2,7 @@
 Module which constructs messages to send
 """
 import json
+import uuid
 from src.config import flow_config
 from src.models.ana_node import AnaNode
 from src.utils import Util
@@ -77,8 +78,6 @@ class Converter():
             sender=meta_data["sender"],
             sessionId=meta_data["sessionId"],
             responseTo=meta_data["id"],
-            id=meta_data["id"],
-            timestamp=meta_data["timestamp"],
             flowId=meta_data.get("flowId"),
             senderType=SenderType.get_value("AGENT")
             ).trim()
@@ -143,8 +142,6 @@ class Converter():
             sessionId=meta_data["sessionId"],
             flowId=meta_data.get("flowId"),
             responseTo=meta_data["id"],
-            id=meta_data["id"],
-            timestamp=meta_data["timestamp"],
             senderType=sender_type
             ).trim()
 

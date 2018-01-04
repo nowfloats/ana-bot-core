@@ -1,6 +1,8 @@
 from functools import reduce
 import json
 import requests
+import uuid
+import time
 from src.config import application_config
 from src.logger import logger
 
@@ -38,6 +40,12 @@ class Util(object):
             return 1
         #This is deliberately synchronous to maintain order of messages being sent
         for message in messages:
+            if sending_to == "AGENT":
+                if message.id is None:
+                    message.id = str(uuid.uuid4())
+                if message.timestamp is None:
+                    message.timestamp = int(time.time())
+
             logger.info(f"Message sent to {sending_to} {message}")
             json_message = json.dumps(message)
             try:
