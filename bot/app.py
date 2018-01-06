@@ -54,16 +54,21 @@ def message_handler():
     return jsonify(status="received")
 
 
-@app.route("/bot/event", methods=["POST"])
+@app.route("/bot/events", methods=["POST"])
 def event_handler():
     message = request.get_json()
 
     logger.info("****************")
-    logger.info("Message Received")
+    logger.info("Event Received")
     logger.info(message)
     logger.info("****************")
 
     message = MessageProcessor(message).respond_to_events()
+
+    logger.info("****************")
+    logger.info("Event Response")
+    logger.info(message)
+    logger.info("****************")
 
     return jsonify(message)
 
@@ -94,5 +99,5 @@ def get_business():
 if __name__ == "__main__":
     HOST = os.environ.get("HOST") or "0.0.0.0"
     PORT = os.environ.get("PORT") or 9500
-
+    PORT = int(PORT)
     app.run(host=HOST, port=PORT)

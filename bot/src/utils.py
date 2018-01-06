@@ -27,9 +27,16 @@ class Util(object):
         return reduce(lambda d, key: d.get(key) if d else None, keys, dictionary)
 
     @staticmethod
+    def prepare_agent_message(message):
+        message['meta']['id'] = str(uuid.uuid4())
+        message['meta']['timestamp'] = int(time.time())
+        return message
+
+    @staticmethod
     def send_messages(messages, sending_to):
 
-        # change whoever is passing sending_to to accept from common sender_type
+        # change whoever is passing sending_to to accept from common
+        # sender_type
         endpoints = {"USER": application_config["GATEWAY_URL"], \
                 "AGENT": application_config["AGENT_URL"]}
         url = endpoints[sending_to]
@@ -38,11 +45,11 @@ class Util(object):
         if messages == []:
             logger.info("No messages to send to " + str(sending_to))
             return 1
-        #This is deliberately synchronous to maintain order of messages being sent
+        #This is deliberately synchronous to maintain order of messages being
+        #sent
         for message in messages:
             if sending_to == "AGENT":
-                message['meta']['id'] = str(uuid.uuid4())
-                message['meta']['timestamp'] = int(time.time())
+                message = prepare_agent_message(message)
 
             logger.info(f"Message sent to {sending_to} {message}")
             json_message = json.dumps(message)

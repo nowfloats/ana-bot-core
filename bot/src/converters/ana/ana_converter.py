@@ -48,7 +48,7 @@ class Converter():
             self.state["current_node_id"] = next_node_data.get("id")
 
         elif node_type == "HandoffToAgent":
-            data = Processor(self.state).process_node(message_data)
+            data = Processor(self.state).process_node(message_data, node_data)
         else:
             raise "Unknown Node Type. Fatal Error"
 

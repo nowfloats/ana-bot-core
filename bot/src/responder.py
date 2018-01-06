@@ -33,8 +33,8 @@ class MessageProcessor():
         Also covers analytics events for those messages for e.g. click, view
         """
 
-        MessageEventHandler(self.state).handle_events(events=self.events)
-        data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data)
+        MessageEventHandler(self.state, self.meta_data, self.message_data).handle_events(events=self.events)
+        data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data, event=None)
 
         outgoing_messages = data.get("messages", [])
         events_to_publish = data.get("publish_events", [])
@@ -53,7 +53,21 @@ class MessageProcessor():
         return 1
 
     def respond_to_events(self):
-        return {}
+        
+        resp_messages = MessageEventHandler(self.state, self.meta_data, self.message_data).handle_events(events=self.events)
+        
+        if resp_messages:
+            for msg in resp_messages:
+                if msg['sending_to'] == "AGENT":
+                    msg['message'] = Util.prepare_agent_message(msg['message'])
+                    pass
+                pass
+            pass
+
+        #if resp_messages:
+        #    self.__update_state(meta_data=self.meta_data, state=self.state)
+        #    self.__log_events(meta_data=self.meta_data, state=self.state, events=events_to_publish)
+        return resp_messages
 
     @classmethod
     def __get_current_state(cls, meta_data):

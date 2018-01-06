@@ -18,19 +18,23 @@ class Converter():
     def __init__(self, state):
         self.state = state
 
-    def get_messages(self, meta_data, message_data):
+    def get_messages(self, meta_data, message_data, event):
         """
         Depending on whether the sender is agent/user, this method
         constructs messages to send with each message given a tag 'sending_to'
         """
         messages = {}
 
-        if message_data == {}:
+        if message_data == {} and event != "INTENT_TO_HANDOVER":
             return messages
 
         sender_type = SenderType.get_name(meta_data["senderType"])
-
-        if sender_type == "AGENT":
+        if sender_type == "AGENT" and event == "INTENT_TO_HANDOVER":
+            data = self.__get_current_node()
+            node_data = data.get("node")
+            messages = self.get_user_messages(node_data, meta_data, message_data)
+            messages["publish_events"] = messages.get("events", []) + messages.get("publish_events", []) + data.get("publish_events", [])
+        elif sender_type == "AGENT":
             messages = self.get_agent_messages(meta_data, message_data)
         else:
             data = self.__get_node(message_data=message_data)
@@ -73,14 +77,12 @@ class Converter():
         messages = []
         messages_data = AgentConverter(self.state).get_messages_data(message_data).get("user_messages", [])
 
-        meta_data = MessageMeta(
-            recipient=meta_data["recipient"],
+        meta_data = MessageMeta(recipient=meta_data["recipient"],
             sender=meta_data["sender"],
             sessionId=meta_data["sessionId"],
             responseTo=meta_data["id"],
             flowId=meta_data.get("flowId"),
-            senderType=SenderType.get_value("AGENT")
-            ).trim()
+            senderType=SenderType.get_value("AGENT")).trim()
 
         for data in messages_data:
             message = Message(meta=meta_data, data=data).trim()
@@ -117,6 +119,18 @@ class Converter():
 
         return {"node": node, "publish_events": event_data}
 
+    def __get_current_node(self):
+        """
+        Gets the current node based on the state
+        """
+
+        get_started_node = self.state.get("flow_id", "") + "." + flow_config["first_node_key"]
+        current_node_id = self.state.get("current_node_id", get_started_node) # give first_node as default
+
+        node = AnaNode(current_node_id).get_contents()
+
+        return {"node": node, "publish_events": []}
+
     @classmethod
     def __construct_messages(cls, meta_data, messages_data, sending_to):
         """
@@ -136,14 +150,12 @@ class Converter():
             sender_type = SenderType.get_value("USER")
 
         outgoing_messages = []
-        message_meta_data = MessageMeta(
-            sender=sender,
+        message_meta_data = MessageMeta(sender=sender,
             recipient=recipient,
             sessionId=meta_data["sessionId"],
             flowId=meta_data.get("flowId"),
             responseTo=meta_data["id"],
-            senderType=sender_type
-            ).trim()
+            senderType=sender_type).trim()
 
         outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
 
