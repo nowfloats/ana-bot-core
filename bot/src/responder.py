@@ -63,10 +63,16 @@ class MessageProcessor():
                     pass
                 pass
             pass
+        
+        #temp code, remove it once receiver can accept array response
+        if resp_messages and len(resp_messages) > 0:
+            return resp_messages[0]
+            pass
 
         #if resp_messages:
         #    self.__update_state(meta_data=self.meta_data, state=self.state)
-        #    self.__log_events(meta_data=self.meta_data, state=self.state, events=events_to_publish)
+        #    self.__log_events(meta_data=self.meta_data, state=self.state,
+        #    events=events_to_publish)
         return resp_messages
 
     @classmethod
