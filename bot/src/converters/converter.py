@@ -37,7 +37,7 @@ class Converter():
         elif sender_type == "AGENT" and event != "HANDOVER":
             messages = self.get_agent_messages(meta_data, message_data)
         else:
-            data = self.__get_node(message_data=message_data)
+            data = self.__get_node(message_data=message_data, event=event)
             node_data = data.get("node")
             messages = self.get_user_messages(node_data, meta_data, message_data, event)
             messages["publish_events"] = messages.get("events", []) + data.get("publish_events", [])
@@ -90,7 +90,7 @@ class Converter():
 
         return {"messages" : messages}
 
-    def __get_node(self, message_data):
+    def __get_node(self, message_data, event):
         """
         Get next_node(ANA output node) to send to user depending on current_node
         and the incoming message. If it's a first time user, next_node is first_node
@@ -103,7 +103,7 @@ class Converter():
         if bool(self.state.get("current_node_id")):
             # user already in ana flow
             current_node_id = self.state.get("current_node_id", get_started_node) # give first_node as default
-            next_node_data = AnaNode(current_node_id).get_next_node_data(self.state["flow_id"], message_data)
+            next_node_data = AnaNode(current_node_id).get_next_node_data(self.state["flow_id"], message_data, event)
 
             event_data = next_node_data.get("publish_events", [])
             next_node_id = next_node_data["node_id"]
@@ -141,9 +141,15 @@ class Converter():
             return []
 
         if sending_to == "USER":
-            recipient = meta_data["sender"]
-            sender = meta_data["recipient"]
-            sender_type = SenderType.get_value("ANA")
+            if meta_data['senderType'] == SenderType.get_value("AGENT"): # If agent is the sender of incoming message, don't swap the sender and recipient
+                recipient = meta_data["recipient"]
+                sender = meta_data["sender"]
+                sender_type = SenderType.get_value("ANA")
+            else:
+                recipient = meta_data["sender"]
+                sender = meta_data["recipient"]
+                sender_type = SenderType.get_value("ANA")
+                pass
         elif sending_to == "AGENT":
             recipient = meta_data["recipient"]
             sender = meta_data["sender"]

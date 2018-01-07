@@ -26,14 +26,14 @@ class AnaNode():
             raise
         # handle response not found or empty ideally this should never happen
 
-    def get_next_node_data(self, flow_id, message_content):
+    def get_next_node_data(self, flow_id, message_content, event):
 
         current_node_contents = self.get_contents()
         input_data = message_content["content"]["input"]
 
         node_type = current_node_contents.get("NodeType")
-        # current node is agent node, so continue as is
-        if node_type == "HandoffToAgent": # and bool(input_data) is False
+        # current node is agent node and event is not handover, so continue as is
+        if node_type == "HandoffToAgent" and event != "HANDOVER": # and bool(input_data) is False
             return {"node_id": self.node_key, "input_data": {}}
 
         next_node_data = self.__get_next_node_data(input_data=input_data, node_content=current_node_contents)
