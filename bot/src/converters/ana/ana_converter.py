@@ -13,7 +13,7 @@ class Converter():
     def __init__(self, state):
         self.state = state
 
-    def get_messages_data(self, node_data, message_data):
+    def get_messages_data(self, node_data, message_data, event):
         """
         This method is responsible for converting ANA studio output to
         the platform's message structure depending on type of ANA node
@@ -48,7 +48,7 @@ class Converter():
             self.state["current_node_id"] = next_node_data.get("id")
 
         elif node_type == "HandoffToAgent":
-            data = Processor(self.state).process_node(message_data, node_data)
+            data = Processor(self.state).process_node(message_data, node_data, event)
         else:
             raise "Unknown Node Type. Fatal Error"
 

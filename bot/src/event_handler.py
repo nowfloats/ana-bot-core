@@ -23,7 +23,7 @@ class MessageEventHandler(object):
             if handler_method is None:
                 logger.error(f"Unknown event encountered in message {event}")
             else:
-                return handler_method(event) #for synchronous events, return the response
+                return handler_method(event) # for synchronous events, return the response
 
         return 1
 
@@ -42,15 +42,39 @@ class MessageEventHandler(object):
         return 1
     
     def handle_intent_to_handover(self, event):
-        
         try:
             data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data, event="INTENT_TO_HANDOVER")
-            messages = data.get("messages",[]) 
-            #As a response to intent to handover event, Agent Panel expects input type messages in response
-            messages_to_return = [item for item in messages if item['sending_to'] == "AGENT" and item['message']['data'].get('type', None) == MessageType.get_value("INPUT")] #and item['message']['data']['content'].get('inputType', None) == InputType.get_value("OPTIONS")
+            outgoing_messages = data.get("messages",[]) 
+            # publish_events = data.get("publish_events",[])
+
+            # As a response to intent to handover event, Agent Panel expects input type messages in response
+            messages_to_return = [item for item in outgoing_messages if item['sending_to'] == "AGENT" and item['message']['data'].get('type', None) == MessageType.get_value("INPUT")] # and item['message']['data']['content'].get('inputType', None) == InputType.get_value("OPTIONS")
+
+            # if messages_to_return and publish_events:
+            #     Util.log_events(meta_data=self.meta_data, state=self.state, events=publish_events, message_event=None)
+            #     pass
+
             return messages_to_return
         except ValueError:
             logger.error(f"Error in INTENT_TO_HANDOVER get_messages with data: {data}")
 
-        return []
+        return None
+
+    def handle_handover(self, event):
+        try:
+            data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data, event="HANDOVER")
+            outgoing_messages = data.get("messages",[]) 
+            # publish_events = data.get("publish_events",[])
+            
+            user_messages = [message["message"] for message in outgoing_messages if message["sending_to"] == "USER"]
+            user_response = Util.send_messages(messages=user_messages, sending_to="USER")
+
+            if user_response:
+                Util.update_state(meta_data=self.meta_data, state=self.state, event="HANDOVER")
+                # Util.log_events(meta_data=self.meta_data, state=self.state, events=publish_events, message_event="HANDOVER")
+
+        except ValueError:
+            logger.error(f"Error in HANDOVER get_messages with data: {data}")
+
+        return None
 

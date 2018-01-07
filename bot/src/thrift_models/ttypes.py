@@ -228,6 +228,7 @@ class EventType(object):
     ALLOCATION_REQUEST = 19
     OUT_OF_BUSINESS_HOURS = 20
     SET_SESSION_DATA = 21
+    HANDOVER = 22
 
     _VALUES_TO_NAMES = {
         0: "DISCONNECTED",
@@ -252,6 +253,7 @@ class EventType(object):
         19: "ALLOCATION_REQUEST",
         20: "OUT_OF_BUSINESS_HOURS",
         21: "SET_SESSION_DATA",
+        22: "HANDOVER"
     }
 
     _NAMES_TO_VALUES = {
@@ -277,6 +279,7 @@ class EventType(object):
         "ALLOCATION_REQUEST": 19,
         "OUT_OF_BUSINESS_HOURS": 20,
         "SET_SESSION_DATA": 21,
+        "HANDOVER": 22
     }
 
 

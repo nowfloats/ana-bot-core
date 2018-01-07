@@ -32,19 +32,19 @@ class Converter():
         if sender_type == "AGENT" and event == "INTENT_TO_HANDOVER":
             data = self.__get_current_node()
             node_data = data.get("node")
-            messages = self.get_user_messages(node_data, meta_data, message_data)
+            messages = self.get_user_messages(node_data, meta_data, message_data, event)
             messages["publish_events"] = messages.get("events", []) + messages.get("publish_events", []) + data.get("publish_events", [])
-        elif sender_type == "AGENT":
+        elif sender_type == "AGENT" and event != "HANDOVER":
             messages = self.get_agent_messages(meta_data, message_data)
         else:
             data = self.__get_node(message_data=message_data)
             node_data = data.get("node")
-            messages = self.get_user_messages(node_data, meta_data, message_data)
+            messages = self.get_user_messages(node_data, meta_data, message_data, event)
             messages["publish_events"] = messages.get("events", []) + data.get("publish_events", [])
 
         return messages
 
-    def get_user_messages(self, node_data, meta_data, message_data):
+    def get_user_messages(self, node_data, meta_data, message_data, event):
         """
         This method gets messages to send if the sender of incoming_message is user.
         It tries to get messages from ANA studio flow (AnaConverter)
@@ -56,7 +56,7 @@ class Converter():
         user_messages = []
         agent_messages = []
 
-        messages = AnaConverter(self.state).get_messages_data(node_data=node_data, message_data=message_data)
+        messages = AnaConverter(self.state).get_messages_data(node_data=node_data, message_data=message_data, event=event)
         events_data = messages.get("publish_events", [])
 
         outgoing_user_messages_data = messages.get("user_messages", [])

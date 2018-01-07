@@ -3,15 +3,9 @@ Message lifecycle goes here, receiving to responding
 All the higher level logic should exist here
 Author: https://github.com/velutha
 """
-from src import EventLogPool
 from src.utils import Util
-from src.models.types import SenderTypeWrapper as SenderType
 from src.converters.converter import Converter
-from src.event_logger import EventLogger
 from src.event_handler import MessageEventHandler
-# from src.logger import logger
-from src.models.user import User
-from src.models.business import Business
 
 class MessageProcessor():
 
@@ -24,7 +18,7 @@ class MessageProcessor():
         self.sender_id = self.meta_data["sender"]["id"]
         self.recipient_id = self.meta_data["recipient"]["id"]
 
-        self.state = self.__get_current_state(self.meta_data)
+        self.state = Util.get_current_state(self.meta_data)
         self.meta_data["sessionId"] = self.state.get("session_id")
 
     def respond_to_message(self):
@@ -47,102 +41,32 @@ class MessageProcessor():
 
         if agent_response or user_response:
 
-            self.__update_state(meta_data=self.meta_data, state=self.state)
-            self.__log_events(meta_data=self.meta_data, state=self.state, events=events_to_publish)
+            Util.update_state(meta_data=self.meta_data, state=self.state, event=None)
+            Util.log_events(meta_data=self.meta_data, state=self.state, events=events_to_publish, message_event=None)
 
         return 1
 
     def respond_to_events(self):
         
-        resp_messages = MessageEventHandler(self.state, self.meta_data, self.message_data).handle_events(events=self.events)
-        
-        if resp_messages:
-            for msg in resp_messages:
+        event_resp = MessageEventHandler(self.state, self.meta_data, self.message_data).handle_events(events=self.events)
+
+        # if nothing in event response
+        if event_resp is None:
+            return {}
+            pass
+
+        if event_resp:
+            for msg in event_resp:
                 if msg['sending_to'] == "AGENT":
                     msg['message'] = Util.prepare_agent_message(msg['message'])
                     pass
                 pass
             pass
-        
-        #temp code, remove it once receiver can accept array response
-        if resp_messages and len(resp_messages) > 0:
-            return resp_messages[0]
-            pass
 
-        #if resp_messages:
-        #    self.__update_state(meta_data=self.meta_data, state=self.state)
-        #    self.__log_events(meta_data=self.meta_data, state=self.state,
-        #    events=events_to_publish)
-        return resp_messages
+        # TODO: Temp code, need to be removed it once receiver can accept array response
+        if event_resp and len(event_resp) > 0:
+            return event_resp[0]['message']
 
-    @classmethod
-    def __get_current_state(cls, meta_data):
-        """
-        Gets state of the user in conversation which gives info about where he is in conversation
-        Gets info the flow/business to which user belongs to
-        For e.g. current_node_id of flow exists in state
-        """
+        return {}
+        #return [item['message'] for item in event_resp]
 
-        sender_type = SenderType.get_name(meta_data["senderType"])
-
-        if sender_type == "AGENT":
-            user_id = meta_data["recipient"]["id"]
-            business_id = meta_data["sender"]["id"]
-        else:
-            user_id = meta_data["sender"]["id"]
-            business_id = meta_data["recipient"]["id"]
-
-        state = User(user_id).get_session_data(meta_data=meta_data)
-        flow_id = meta_data.get("flowId")
-
-        business_id = flow_id if flow_id else business_id
-        flow_data = Business(business_id).get_business_data()
-        current_state = Util.merge_dicts(state, flow_data)
-
-        return current_state
-
-    @classmethod
-    def __update_state(cls, state, meta_data):
-        """
-        This methods updates the state of the user after the message is sent
-        For e.g. updating current_node_id
-        For now agent is stateless, state corresponds to only user
-        """
-
-        sender_type = SenderType.get_name(meta_data["senderType"])
-
-        if sender_type == "AGENT":
-            # no need to update user state
-            return
-
-        user_id = meta_data["sender"]["id"]
-        session_id = meta_data["sessionId"]
-        state_saved = User(user_id).set_state(session_id, state, meta_data)
-
-        return state_saved
-
-    @classmethod
-    def __log_events(cls, meta_data, state, events):
-        """
-        While the user is responded with messages, there will be some analytics events
-        which are recorded for e.g. 'click' event for user clicking the button
-        No analytics events are recorded for messages sent by agent as of now
-        """
-
-        sender_type = SenderType.get_name(meta_data["senderType"])
-
-        if sender_type == "AGENT":
-            # no need to log any event as of now
-            return
-
-        type_of_event = "analytics"
-
-        for event in events:
-            data = {
-                "meta_data": meta_data,
-                "state_data": state,
-                "event_data": event
-                }
-            EventLogPool.submit(EventLogger().log_event(type_of_event=type_of_event, data=data))
-
-        return 1

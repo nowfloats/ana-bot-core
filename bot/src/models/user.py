@@ -46,8 +46,10 @@ class User():
             new_state = {}
             final_var_data = state.get("var_data", {})
             new_var_data = state.get("new_var_data", {})
-
+            
+            #TODO: need to choose sender.medium or recipient.medium based on senderType
             channel_type = meta_data["sender"]["medium"]
+
             channel = Medium.get_name(channel_type)
             business_name = state.get("business_name", "")
             timestamp = int(time.time())

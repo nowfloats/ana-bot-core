@@ -33,7 +33,7 @@ class AnaNode():
 
         node_type = current_node_contents.get("NodeType")
         # current node is agent node, so continue as is
-        if node_type == "HandoffToAgent":
+        if node_type == "HandoffToAgent": # and bool(input_data) is False
             return {"node_id": self.node_key, "input_data": {}}
 
         next_node_data = self.__get_next_node_data(input_data=input_data, node_content=current_node_contents)
