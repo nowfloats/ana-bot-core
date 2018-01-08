@@ -16,6 +16,7 @@ class MessageEventHandler(object):
         self.message_data = message_data
 
     def handle_events(self, events):
+        reponses = []
         for event in events:
             event_type = EventType.get_name(event.get("type"))
             handler_method = getattr(self, "handle_%s" % event_type.lower(), None)
@@ -23,9 +24,11 @@ class MessageEventHandler(object):
             if handler_method is None:
                 logger.error(f"Unknown event encountered in message {event}")
             else:
-                return handler_method(event) # for synchronous events, return the response
-
-        return 1
+                resp = handler_method(event) # for synchronous events, return the response
+                if resp:
+                    reponses.extend(resp)
+                    pass
+        return reponses
 
     def handle_set_session_data(self, event):
 
