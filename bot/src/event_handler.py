@@ -42,7 +42,7 @@ class MessageEventHandler(object):
         except ValueError:
             logger.error(f"Set session data payload is not in json format {data}")
 
-        return 1
+        return []
     
     def handle_intent_to_handover(self, event):
         try:
@@ -61,7 +61,7 @@ class MessageEventHandler(object):
         except ValueError:
             logger.error(f"Error in INTENT_TO_HANDOVER get_messages with data: {data}")
 
-        return None
+        return []
 
     def handle_handover(self, event):
         try:
@@ -79,5 +79,5 @@ class MessageEventHandler(object):
         except ValueError:
             logger.error(f"Error in HANDOVER get_messages with data: {data}")
 
-        return None
+        return []
 
