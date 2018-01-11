@@ -34,7 +34,10 @@ class ApiCallProcessor():
             header_key_values = header_line.split(":")[:2]
             api_headers[header_key_values[0]] = header_key_values[1]
 
-        api_body = node_data.get("Body", {})
+        api_body = node_data.get("Body", "")
+        if api_body:
+            api_body = AnaHelper.verb_replacer(text=api_body, state=self.state)
+
         response = requests.request(method=api_method, url=api_url, headers=api_headers, data=api_body)
         if response.status_code == 200:
             api_response = response.json()

@@ -116,7 +116,7 @@ class Converter():
 
         self.state["current_node_id"] = next_node_id
         node = AnaNode(next_node_id).get_contents()
-
+        
         return {"node": node, "publish_events": event_data}
 
     def __get_current_node(self):
