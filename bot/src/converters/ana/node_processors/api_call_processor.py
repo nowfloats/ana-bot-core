@@ -3,6 +3,7 @@ This module handles ApiCall node in ANA studio
 Author: https://github.com/velutha
 """
 import requests
+import re
 from src.converters.ana.ana_helper import AnaHelper
 from src.models.ana_node import AnaNode
 from src.logger import logger
@@ -49,37 +50,34 @@ class ApiCallProcessor():
 
     def __handle_api_response(self, response, node_data):
 
-        if response is None:
-            return {"id": "", "data": {}}
-
         variable_data = self.state.get("var_data", {})
-        buttons = node_data.get("Buttons")
         variable_name = node_data["VariableName"]
-        final_var_data = Util.merge_dicts(variable_data, {variable_name : response})
-
-        next_node_id = self.__get_next_node_id(buttons=buttons, api_response=response, data=final_var_data)
-
+        if bool(response) is True:
+            variable_data = Util.merge_dicts(variable_data, {variable_name : response})
+        
+        next_node_id = self.__get_next_node_id(data=variable_data, state=self.state, node_data=node_data)
         next_node_key = self.state.get("flow_id", "") + "." + next_node_id
         next_node_data = AnaNode(next_node_key).get_contents()
 
         return {"id": next_node_key, "data": next_node_data}
 
     @classmethod
-    def __get_next_node_id(cls, buttons, api_response, data):
+    def __get_next_node_id(cls, data, state, node_data):
 
-        next_node_id = ""
-        for button in buttons:
+        next_node_id = node_data.get('NextNodeId', '') # Fallback node id
 
-            if isinstance(api_response, dict):
-                match_keys = button.get("ConditionMatchKey").split(".")[1:]
-                match_dict = api_response
-            else:
-                match_keys = button.get("ConditionMatchKey").split(".")
-                match_dict = data
+        for button in node_data.get('Buttons', []):
+            root_key = re.split('\.|\[', button.get("ConditionMatchKey"))[0]
 
-            variable_value = Util.deep_find(match_dict, match_keys)
+            if data.get(root_key, None) is None:
+                continue
+
+            path = button.get("ConditionMatchKey")
+            obj = { root_key:data[root_key] }
+            variable_value = Util.deep_find(obj, path)
+
             match_operator = button.get("ConditionOperator")
-            match_value = button.get("ConditionMatchValue")
+            match_value = AnaHelper.verb_replacer(text=button.get("ConditionMatchValue", ""), state=state)
 
             condition_matched = AnaHelper.is_condition_match(variable_value, match_operator, match_value)
 

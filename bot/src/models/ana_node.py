@@ -5,6 +5,7 @@ import json
 from src import ANA_CACHE
 from src.logger import logger
 from src.config import ana_config as config
+from src.converters.ana.ana_helper import AnaHelper
 
 class AnaNode():
 
@@ -26,7 +27,7 @@ class AnaNode():
             raise
         # handle response not found or empty ideally this should never happen
 
-    def get_next_node_data(self, flow_id, message_content, event):
+    def get_next_node_data(self, flow_id, message_content, event, state):
 
         current_node_contents = self.get_contents()
         input_data = message_content["content"]["input"]
@@ -36,7 +37,7 @@ class AnaNode():
         if node_type == "HandoffToAgent" and event != "HANDOVER": # and bool(input_data) is False
             return {"node_id": self.node_key, "input_data": {}}
 
-        next_node_data = self.__get_next_node_data(input_data=input_data, node_content=current_node_contents)
+        next_node_data = self.__get_next_node_data(input_data=input_data, node_content=current_node_contents, state=state)
 
         next_node_id = next_node_data.get("node_id", "")
         node_key = flow_id + "." + next_node_id if next_node_id != "" else self.node_key
@@ -48,7 +49,7 @@ class AnaNode():
 
 
     @classmethod
-    def __get_next_node_data(cls, input_data, node_content):
+    def __get_next_node_data(cls, input_data, node_content, state):
 
         next_node_id = ""
         event_data = []
@@ -69,7 +70,7 @@ class AnaNode():
                 current_node_id = input_data["val"]
                 if button["_id"] == current_node_id:
                     if var_name:
-                        user_input[var_name] = button.get("VariableValue", "")
+                        user_input[var_name] = AnaHelper.verb_replacer(text=button.get("VariableValue", ""), state=state)
                     next_node_id = button["NextNodeId"]
                     event_data.append({
                         "type_of_event": "click",

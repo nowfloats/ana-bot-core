@@ -65,11 +65,17 @@ class AnaHelper():
     def verb_replacer(text, state):
         variable_data = state.get("var_data", {})
         if type(variable_data) is dict:
-            matches = re.findall(r"\[~(.*?)\]", text)
-            variable_names = variable_data.keys()
+            matches = re.findall(r"\[~(.*?)\]|{{(.*?)}}", text)
             for match in matches:
-                if match in variable_names:
-                    key = "[~" + match + "]"
-                    text = text.replace(key, variable_data[match])
+                if len(match) > 0:
+                    match = match[0]
+                if variable_data.get(match, None) is not None:
+                    text = text.replace("[~" + match + "]", variable_data[match]).replace("{{" + match + "}}",variable_data[match])
+                else:
+                    root_key = re.split('\.|\[', match)[0]
+                    if variable_data.get(root_key, None) is None:
+                        continue
+                    variable_value = Util.deep_find({ root_key:variable_data[root_key] }, match)
+                    text = text.replace("[~" + match + "]", variable_value).replace("{{" + match + "}}", variable_value)
             return text
         return text

@@ -3,6 +3,7 @@ import json
 import requests
 import uuid
 import time
+from jsonpath import jsonpath
 from src.config import application_config
 from src.logger import logger
 from src.models.types import SenderTypeWrapper as SenderType
@@ -21,16 +22,27 @@ class Util(object):
             result.update(dictionary)
         return result
 
-    @staticmethod
-    def deep_find(dictionary, keys):
-        if not isinstance(dictionary, dict):
-            logger.error("Object you passed to deep find is not a dictionary")
-            return None
-        if not isinstance(keys, list):
-            # change it to list if it's one element
-            keys = [keys]
+    #@staticmethod
+    #def deep_find(dictionary, keys):
+    #    if not isinstance(dictionary, dict):
+    #        logger.error("Object you passed to deep find is not a dictionary")
+    #        return None
+    #    if not isinstance(keys, list):
+    #        # change it to list if it's one element
+    #        keys = [keys]
 
-        return reduce(lambda d, key: d.get(key) if d else None, keys, dictionary)
+    #    return reduce(lambda d, key: d.get(key) if d else None, keys, dictionary)
+
+    @staticmethod
+    def deep_find(obj, path):
+        try:
+            val = jsonpath(obj, path)
+            if bool(val) and (type(val) is list) and len(val) == 1:
+                val = val[0]
+            return val
+        except Exception as err:
+            logger.error(err)
+            return None
 
     @staticmethod
     def prepare_agent_message(message):

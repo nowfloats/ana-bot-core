@@ -103,7 +103,7 @@ class Converter():
         if bool(self.state.get("current_node_id")):
             # user already in ana flow
             current_node_id = self.state.get("current_node_id", get_started_node) # give first_node as default
-            next_node_data = AnaNode(current_node_id).get_next_node_data(self.state["flow_id"], message_data, event)
+            next_node_data = AnaNode(current_node_id).get_next_node_data(self.state["flow_id"], message_data, event, self.state)
 
             event_data = next_node_data.get("publish_events", [])
             next_node_id = next_node_data["node_id"]
