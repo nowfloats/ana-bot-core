@@ -36,9 +36,13 @@ class Util(object):
     @staticmethod
     def deep_find(obj, path):
         try:
+            logger.debug("obj: " + str(obj))##debug
+            logger.debug("path: " + str(path))##debug
+
             val = jsonpath(obj, path)
             if bool(val) and (type(val) is list) and len(val) == 1:
                 val = val[0]
+            logger.debug("val: " + str(val) )##debug
             return val
         except Exception as err:
             logger.error(err)
