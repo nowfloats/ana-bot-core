@@ -67,7 +67,7 @@ class AnaHelper():
             match = left_operand.endswith(right_operand)
 
         elif operator == "Contains":
-            match = left_operand in right_operand
+            match = right_operand in left_operand
         
         elif operator == "IsNull":
             match = bool(left_operand) is False
