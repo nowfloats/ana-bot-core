@@ -3,9 +3,9 @@ This is the entry point to bot-core server
 Author: https://github.com/velutha
 """
 import os
+from flask import request, jsonify
 from src import app, MessageHandlerPool
 from src.validator import Validator
-from flask import request, jsonify
 from src.controllers.business_controller import BusinessController
 from src.controllers.chatflow_controller import ChatFlowController
 from src.controllers.session_controller import SessionController
@@ -95,4 +95,4 @@ if __name__ == "__main__":
     HOST = os.environ.get("HOST") or "0.0.0.0"
     PORT = os.environ.get("PORT") or 9500
 
-    app.run(host=HOST, port=PORT)
+    app.run(host=HOST, port=int(PORT))
