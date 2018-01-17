@@ -9,7 +9,8 @@ application_config = {
     "AWS_REGION" : os.environ.get("AWS_REGION"),
     "KINESIS_STREAM_NAME": os.environ.get("KINESIS_STREAM_NAME"),
     "ENVIRONMENT": os.environ.get("ENVIRONMENT"),
-    "IS_AWS_ENABLED": os.environ.get("IS_AWS_ENABLED")
+    "IS_AWS_ENABLED": os.environ.get("IS_AWS_ENABLED") == "TRUE" or False,
+    "IS_REDIS_CLUSTER": os.environ.get("IS_REDIS_CLUSTER") == "TRUE" or False
     }
 
 flow_config = {

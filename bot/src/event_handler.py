@@ -42,7 +42,7 @@ class MessageEventHandler(object):
 
         return []
 
-    def handle_intent_to_handover(self):
+    def handle_intent_to_handover(self, event):
         try:
             data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data, event="INTENT_TO_HANDOVER")
             outgoing_messages = data.get("messages", [])

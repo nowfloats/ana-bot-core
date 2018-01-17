@@ -1,8 +1,8 @@
-from functools import reduce
+# from functools import reduce
 import json
-import requests
 import uuid
 import time
+import requests
 from jsonpath import jsonpath
 from src.config import application_config
 from src.logger import logger
@@ -11,7 +11,6 @@ from src.models.user import User
 from src.models.business import Business
 from src.event_logger import EventLogger
 from src import EventLogPool
-
 
 class Util(object):
 
@@ -36,13 +35,9 @@ class Util(object):
     @staticmethod
     def deep_find(obj, path):
         try:
-            logger.debug("obj: " + str(obj))##debug
-            logger.debug("path: " + str(path))##debug
-
             val = jsonpath(obj, path)
-            if bool(val) and (type(val) is list) and len(val) == 1:
+            if bool(val) and isinstance(val, list) and len(val) == 1:
                 val = val[0]
-            logger.debug("val: " + str(val) )##debug
             return val
         except Exception as err:
             logger.error(err)
@@ -57,15 +52,13 @@ class Util(object):
     @staticmethod
     def send_messages(messages, sending_to):
 
-        # change whoever is passing sending_to to accept from common
-        # sender_type
         endpoints = {"USER": application_config["GATEWAY_URL"], \
                 "AGENT": application_config["AGENT_URL"]}
         url = endpoints[sending_to]
 
         headers = {"Content-Type" : "application/json"}
         if messages == []:
-            logger.info("No messages to send to " + str(sending_to))
+            logger.info(f"No messages to send to {sending_to}")
             return 1
         #This is deliberately synchronous to maintain order of messages being
         #sent
@@ -136,29 +129,18 @@ class Util(object):
         return current_state
 
     @staticmethod
-    def log_events(meta_data, state, events, message_event):
+    def log_events(meta_data, state, events):
         """
         While the user is responded with messages, there will be some analytics events
         which are recorded for e.g. 'click' event for user clicking the button
         No analytics events are recorded for messages sent by agent as of now
         """
 
-        sender_type = SenderType.get_name(meta_data["senderType"])
+        sender = SenderType.get_name(meta_data["senderType"])
 
-        # userId and bizId should be reversed and sent
-        #if sender_type=="AGENT" and message_event == "HANDOVER":
-        #    for event in events:
-        #        data = {
-        #            "meta_data": meta_data,
-        #            "state_data": state,
-        #            "event_data": event
-        #            }
-        #        EventLogPool.submit(EventLogger().log_event(type_of_event=type_of_event, data=data))
-        #    return 1
-
-        if sender_type == "AGENT":
+        if sender == "AGENT":
             # no need to log any event as of now
-            return
+            return 1
 
         type_of_event = "analytics"
 

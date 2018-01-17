@@ -28,7 +28,7 @@ class MessageProcessor():
         """
 
         MessageEventHandler(self.state, self.meta_data, self.message_data).handle_events(events=self.events)
-        data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data, event=None)
+        data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data)
 
         outgoing_messages = data.get("messages", [])
         events_to_publish = data.get("publish_events", [])
@@ -42,7 +42,7 @@ class MessageProcessor():
         if agent_response or user_response:
 
             Util.update_state(meta_data=self.meta_data, state=self.state, event=None)
-            Util.log_events(meta_data=self.meta_data, state=self.state, events=events_to_publish, message_event=None)
+            Util.log_events(meta_data=self.meta_data, state=self.state, events=events_to_publish)
 
         return 1
 
@@ -53,20 +53,15 @@ class MessageProcessor():
         # if nothing in event response
         if event_resp is None:
             return {}
-            pass
 
         if event_resp:
             for msg in event_resp:
                 if msg['sending_to'] == "AGENT":
                     msg['message'] = Util.prepare_agent_message(msg['message'])
-                    pass
-                pass
-            pass
 
-        # TODO: Temp code, need to be removed it once receiver can accept array response
+        #Temp code, need to be removed it once receiver can accept array response
         if event_resp and len(event_resp) > 0:
             return event_resp[0]['message']
 
         return {}
         #return [item['message'] for item in event_resp]
-

@@ -17,33 +17,29 @@ class Converter():
     def __init__(self, state):
         self.state = state
 
-    def get_messages(self, meta_data, message_data, event):
+    def get_messages(self, meta_data, message_data):
         """
         Depending on whether the sender is agent/user, this method
         constructs messages to send with each message given a tag 'sending_to'
         """
         messages = {}
 
-        if message_data == {} and event != "INTENT_TO_HANDOVER":
+        if message_data == {}:
             return messages
 
-        sender_type = SenderType.get_name(meta_data["senderType"])
-        if sender_type == "AGENT" and event == "INTENT_TO_HANDOVER":
-            data = self.__get_current_node()
-            node_data = data.get("node")
-            messages = self.get_user_messages(node_data, meta_data, message_data, event)
-            messages["publish_events"] = messages.get("events", []) + messages.get("publish_events", []) + data.get("publish_events", [])
-        elif sender_type == "AGENT" and event != "HANDOVER":
+        sender = SenderType.get_name(meta_data["senderType"])
+
+        if sender == "AGENT":
             messages = self.get_agent_messages(meta_data, message_data)
         else:
-            data = self.__get_node(message_data=message_data, event=event)
+            data = self.__get_node(message_data=message_data)
             node_data = data.get("node")
-            messages = self.get_user_messages(node_data, meta_data, message_data, event)
+            messages = self.get_user_messages(node_data, meta_data, message_data)
             messages["publish_events"] = messages.get("events", []) + data.get("publish_events", [])
 
         return messages
 
-    def get_user_messages(self, node_data, meta_data, message_data, event):
+    def get_user_messages(self, node_data, meta_data, message_data):
         """
         This method gets messages to send if the sender of incoming_message is user.
         It tries to get messages from ANA studio flow (AnaConverter)
@@ -55,7 +51,7 @@ class Converter():
         user_messages = []
         agent_messages = []
 
-        messages = AnaConverter(self.state).get_messages_data(node_data=node_data, message_data=message_data, event=event)
+        messages = AnaConverter(self.state).get_messages_data(node_data=node_data, message_data=message_data)
         events_data = messages.get("publish_events", [])
 
         outgoing_user_messages_data = messages.get("user_messages", [])
@@ -89,7 +85,7 @@ class Converter():
 
         return {"messages" : messages}
 
-    def __get_node(self, message_data, event):
+    def __get_node(self, message_data):
         """
         Get next_node(ANA output node) to send to user depending on current_node
         and the incoming message. If it's a first time user, next_node is first_node
@@ -102,7 +98,7 @@ class Converter():
         if bool(self.state.get("current_node_id")):
             # user already in ana flow
             current_node_id = self.state.get("current_node_id", get_started_node) # give first_node as default
-            next_node_data = AnaNode(current_node_id).get_next_node_data(self.state["flow_id"], message_data, event, self.state)
+            next_node_data = AnaNode(current_node_id).get_next_node_data(message_data, self.state)
 
             event_data = next_node_data.get("publish_events", [])
             next_node_id = next_node_data["node_id"]

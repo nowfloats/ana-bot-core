@@ -11,18 +11,18 @@ class AnaHelper():
 
         if left_operand is None or right_operand is None:
             return match
-        
+
         if isinstance(left_operand, int) or isinstance(right_operand, int):
             left_operand = int(left_operand)
             right_operand = int(right_operand)
-        
+
         isFloat = False
         try:
             _left_operand = float(left_operand)
             _right_operand = float(right_operand)
             isFloat = True
         except Exception as err:
-            pass
+            logger.error(f"Unknown Error occured during comparison {err}")
 
         if isFloat:
             left_operand = _left_operand
@@ -68,7 +68,7 @@ class AnaHelper():
 
         elif operator == "Contains":
             match = right_operand in left_operand
-        
+
         elif operator == "IsNull":
             match = bool(left_operand) is False
 
@@ -83,25 +83,25 @@ class AnaHelper():
     @staticmethod
     def verb_replacer(text, state):
         variable_data = state.get("var_data", {})
-        logger.debug("variable_data" + str(variable_data)) 
-        logger.debug("text" + str(text)) 
-        if type(variable_data) is dict:
+        logger.debug(f"variable_data {variable_data}")
+        logger.debug(f"text {text}")
+        if isinstance(variable_data, dict):
             all_matches = re.findall(r"\[~(.*?)\]|{{(.*?)}}", text)
             for matches in all_matches:
                 for match in matches:
-                    logger.debug("match: " + str(match))
+                    logger.debug(f"match: {match}")
                     if variable_data.get(match, None) is not None:
-                        text = text.replace("[~" + match + "]", variable_data[match]).replace("{{" + match + "}}",variable_data[match])
+                        text = text.replace("[~" + match + "]", variable_data[match]).replace("{{" + match + "}}", variable_data[match])
                     else:
-                        logger.debug("No exact match") 
-                        root_key = re.split('\.|\[', match)[0]
-                        logger.debug("match: " + str(match))
-                        logger.debug("root_key: " + str(root_key))
+                        logger.debug("No exact match")
+                        root_key = re.split(r"\.|\[", match)[0]
+                        logger.debug("match: {match}")
+                        logger.debug("root_key: {root_key}")
                         if variable_data.get(root_key, None) is None:
                             continue
-                        variable_value = Util.deep_find({ root_key:variable_data[root_key] }, match)
-                        logger.debug("match: " + str(match))
-                        logger.debug("variable_value: " + str(variable_value))
+                        variable_value = Util.deep_find({root_key:variable_data[root_key]}, match)
+                        logger.debug("match: {match}")
+                        logger.debug("variable_value: {variable_value}")
                         text = text.replace("[~" + match + "]", str(variable_value)).replace("{{" + match + "}}", str(variable_value))
             return text
         return text
