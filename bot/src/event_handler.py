@@ -3,7 +3,7 @@ This module handles acting on "events" in message object
 Author: https://github.com/velutha
 """
 import json
-from src.models.types import EventTypeWrapper as EventType, MessageTypeWrapper as MessageType, InputTypeWrapper as InputType
+from src.models.types import EventTypeWrapper as EventType, MessageTypeWrapper as MessageType
 from src.logger import logger
 from src.utils import Util
 from src.converters.converter import Converter
@@ -24,10 +24,8 @@ class MessageEventHandler(object):
             if handler_method is None:
                 logger.error(f"Unknown event encountered in message {event}")
             else:
-                resp = handler_method(event) # for synchronous events, return the response
-                if resp:
-                    reponses.extend(resp)
-                    pass
+                response = handler_method(event) # for synchronous events, return the response
+                reponses.extend(response)
         return reponses
 
     def handle_set_session_data(self, event):
@@ -43,11 +41,11 @@ class MessageEventHandler(object):
             logger.error(f"Set session data payload is not in json format {data}")
 
         return []
-    
-    def handle_intent_to_handover(self, event):
+
+    def handle_intent_to_handover(self):
         try:
             data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data, event="INTENT_TO_HANDOVER")
-            outgoing_messages = data.get("messages",[]) 
+            outgoing_messages = data.get("messages", [])
             # publish_events = data.get("publish_events",[])
 
             # As a response to intent to handover event, Agent Panel expects input type messages in response
@@ -66,9 +64,8 @@ class MessageEventHandler(object):
     def handle_handover(self, event):
         try:
             data = Converter(self.state).get_messages(meta_data=self.meta_data, message_data=self.message_data, event="HANDOVER")
-            outgoing_messages = data.get("messages",[]) 
+            outgoing_messages = data.get("messages", []) 
             # publish_events = data.get("publish_events",[])
-            
             user_messages = [message["message"] for message in outgoing_messages if message["sending_to"] == "USER"]
             user_response = Util.send_messages(messages=user_messages, sending_to="USER")
 

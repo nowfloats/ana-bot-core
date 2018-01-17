@@ -2,7 +2,6 @@
 Module which constructs messages to send
 """
 import json
-import uuid
 from src.config import flow_config
 from src.models.ana_node import AnaNode
 from src.utils import Util
@@ -78,11 +77,11 @@ class Converter():
         messages_data = AgentConverter(self.state).get_messages_data(message_data).get("user_messages", [])
 
         meta_data = MessageMeta(recipient=meta_data["recipient"],
-            sender=meta_data["sender"],
-            sessionId=meta_data["sessionId"],
-            responseTo=meta_data["id"],
-            flowId=meta_data.get("flowId"),
-            senderType=SenderType.get_value("AGENT")).trim()
+                                sender=meta_data["sender"],
+                                sessionId=meta_data["sessionId"],
+                                responseTo=meta_data["id"],
+                                flowId=meta_data.get("flowId"),
+                                senderType=SenderType.get_value("AGENT")).trim()
 
         for data in messages_data:
             message = Message(meta=meta_data, data=data).trim()
@@ -116,7 +115,7 @@ class Converter():
 
         self.state["current_node_id"] = next_node_id
         node = AnaNode(next_node_id).get_contents()
-        
+
         return {"node": node, "publish_events": event_data}
 
     def __get_current_node(self):
@@ -141,7 +140,8 @@ class Converter():
             return []
 
         if sending_to == "USER":
-            if meta_data['senderType'] == SenderType.get_value("AGENT"): # If agent is the sender of incoming message, don't swap the sender and recipient
+            if meta_data['senderType'] == SenderType.get_value("AGENT"):
+                # If agent is the sender of incoming message, don't swap the sender and recipient
                 recipient = meta_data["recipient"]
                 sender = meta_data["sender"]
                 sender_type = SenderType.get_value("ANA")
@@ -149,7 +149,6 @@ class Converter():
                 recipient = meta_data["sender"]
                 sender = meta_data["recipient"]
                 sender_type = SenderType.get_value("ANA")
-                pass
         elif sending_to == "AGENT":
             recipient = meta_data["recipient"]
             sender = meta_data["sender"]
@@ -157,56 +156,14 @@ class Converter():
 
         outgoing_messages = []
         message_meta_data = MessageMeta(sender=sender,
-            recipient=recipient,
-            sessionId=meta_data["sessionId"],
-            flowId=meta_data.get("flowId"),
-            responseTo=meta_data["id"],
-            senderType=sender_type).trim()
+                                        recipient=recipient,
+                                        sessionId=meta_data["sessionId"],
+                                        flowId=meta_data.get("flowId"),
+                                        responseTo=meta_data["id"],
+                                        senderType=sender_type).trim()
 
         outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
 
         messages = [{"sending_to": sending_to, "message": message} for message in outgoing_messages]
 
         return messages
-
-    # @classmethod
-    # def __construct_user_messages(cls, meta_data, messages_data):
-        # """
-        # This method constructs messages that are being sent to user
-        # """
-
-        # outgoing_messages = []
-        # message_meta_data = MessageMeta(
-            # sender=meta_data["recipient"],
-            # recipient=meta_data["sender"],
-            # sessionId=meta_data["sessionId"],
-            # responseTo=meta_data["id"],
-            # senderType=SenderType.get_value("ANA")
-            # ).trim()
-
-        # outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
-
-        # messages = [{"sending_to": "USER", "message": message} for message in outgoing_messages]
-
-        # return messages
-
-    # @classmethod
-    # def __construct_agent_messages(cls, meta_data, messages_data):
-        # """
-        # This method constructs messages that are being sent to agent
-        # """
-
-        # outgoing_messages = []
-        # message_meta_data = MessageMeta(
-            # sender=meta_data["sender"],
-            # recipient=meta_data["recipient"],
-            # sessionId=meta_data["sessionId"],
-            # responseTo=meta_data["id"],
-            # senderType=SenderType.get_value("USER")
-            # ).trim()
-
-        # outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
-
-        # messages = [{"sending_to": "AGENT", "message": message} for message in outgoing_messages]
-
-        # return messages

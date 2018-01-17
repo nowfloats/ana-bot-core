@@ -47,7 +47,7 @@ class MessageProcessor():
         return 1
 
     def respond_to_events(self):
-        
+
         event_resp = MessageEventHandler(self.state, self.meta_data, self.message_data).handle_events(events=self.events)
 
         # if nothing in event response
