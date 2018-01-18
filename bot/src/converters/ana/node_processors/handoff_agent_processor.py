@@ -7,7 +7,7 @@ class AgentHandOffProcessor():
         self.state = state
 
     @classmethod
-    def process_node(cls, message_data):
+    def process_node(cls, message_data, node_data):
         # agent_messages_data = [{"message" : message_data, "sending_to":
         # "AGENT"}]
         # if message_data:

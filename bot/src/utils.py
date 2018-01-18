@@ -63,38 +63,35 @@ class Util(object):
         #This is deliberately synchronous to maintain order of messages being
         #sent
         for message in messages:
-            if sending_to == "AGENT":
-                message = Util.prepare_agent_message(message)
-
-            logger.info(f"Message sent to {sending_to} {message}")
             json_message = json.dumps(message)
             try:
                 response = requests.post(url, headers=headers, data=json_message)
                 logger.info(response)
+                logger.info(f"Message sent to {sending_to} {message}")
             except Exception as err:
                 logger.error(err)
                 return 0
         return 1
 
     @staticmethod
-    def update_state(state, meta_data, event):
+    def update_state(state, meta_data):
         """
         This methods updates the state of the user after the message is sent
         For e.g. updating current_node_id
         For now agent is stateless, state corresponds to only user
         """
 
-        sender_type = SenderType.get_name(meta_data["senderType"])
+        sender = SenderType.get_name(meta_data["senderType"])
 
-        if sender_type == "AGENT" and event == "HANDOVER":
-            user_id = meta_data["recipient"]["id"]
-            session_id = meta_data["sessionId"]
-            state_saved = User(user_id).set_state(session_id, state, meta_data)
-            return state_saved
+        # if sender_type == "AGENT" and event == "HANDOVER":
+            # user_id = meta_data["recipient"]["id"]
+            # session_id = meta_data["sessionId"]
+            # state_saved = User(user_id).set_state(session_id, state, meta_data)
+            # return state_saved
 
-        if sender_type == "AGENT":
+        if sender == "AGENT":
             # no need to update user state
-            return
+            return state
 
         user_id = meta_data["sender"]["id"]
         session_id = meta_data["sessionId"]

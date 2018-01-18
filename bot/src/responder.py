@@ -41,27 +41,33 @@ class MessageProcessor():
 
         if agent_response or user_response:
 
-            Util.update_state(meta_data=self.meta_data, state=self.state, event=None)
+            Util.update_state(meta_data=self.meta_data, state=self.state)
             Util.log_events(meta_data=self.meta_data, state=self.state, events=events_to_publish)
 
         return 1
 
     def respond_to_events(self):
+        """
+        This method is responsible for responding to events hit on synchronous api
+        """
+        event_response = MessageEventHandler(self.state, self.meta_data, self.message_data).handle_events(events=self.events)
 
-        event_resp = MessageEventHandler(self.state, self.meta_data, self.message_data).handle_events(events=self.events)
+        if event_response == []:
+            return {}
+        return event_response[0]
 
         # if nothing in event response
-        if event_resp is None:
-            return {}
+        # if event_resp is None:
+            # return {}
 
-        if event_resp:
-            for msg in event_resp:
-                if msg['sending_to'] == "AGENT":
-                    msg['message'] = Util.prepare_agent_message(msg['message'])
+        # if event_resp:
+            # for msg in event_resp:
+                # if msg['sending_to'] == "AGENT":
+                    # msg['message'] = Util.prepare_agent_message(msg['message'])
 
         #Temp code, need to be removed it once receiver can accept array response
-        if event_resp and len(event_resp) > 0:
-            return event_resp[0]['message']
+        # if event_resp and len(event_resp) > 0:
+            # return event_resp[0]['message']
 
-        return {}
+        # return {}
         #return [item['message'] for item in event_resp]
