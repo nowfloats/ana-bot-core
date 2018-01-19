@@ -87,6 +87,7 @@ class MessageEventHandler(object):
     def handle_no_agent_found(self, event):
 
         messages = []
+        self.meta_data["id"] = ""
 
         message_text = "Apologies, our agents are busy at the moment"
         data = CustomMessage.get_simple_text(text=message_text)
