@@ -98,7 +98,7 @@ class MessageEventHandler(object):
         message = Message(meta=self.meta_data, data=data).trim()
         messages.append(message)
 
-        user_response = Util.send_messages(messages=[messages], sending_to="USER")
+        user_response = Util.send_messages(messages=messages, sending_to="USER")
         return []
 
 
