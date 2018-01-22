@@ -2,9 +2,10 @@
 Model for output from ana studio
 """
 import json
-from src import ANA_CACHE
+from src import CACHE
 from src.logger import logger
 from src.config import ana_config as config
+from src.converters.ana.ana_helper import AnaHelper
 
 class AnaNode():
 
@@ -13,10 +14,10 @@ class AnaNode():
 
     def get_contents(self):
 
-        response = ANA_CACHE.get(self.node_key)
+        response = CACHE.get(self.node_key)
 
         if response is None:
-            logger.warning("Data not found for" + str(self.node_key))
+            logger.warning(f"Data not found for {self.node_key}")
             return {}
         try:
             response_dict = json.loads(response)
@@ -26,20 +27,20 @@ class AnaNode():
             raise
         # handle response not found or empty ideally this should never happen
 
-    def get_next_node_data(self, flow_id, message_content):
+    def get_next_node_data(self, message_content, state):
 
         current_node_contents = self.get_contents()
         input_data = message_content["content"]["input"]
 
-        node_type = current_node_contents.get("NodeType")
+        # node_type = current_node_contents.get("NodeType")
         # current node is agent node, so continue as is
-        if node_type == "HandoffToAgent":
-            return {"node_id": self.node_key, "input_data": {}}
+        # if node_type == "HandoffToAgent":
+            # return {"node_id": self.node_key, "input_data": {}}
 
-        next_node_data = self.__get_next_node_data(input_data=input_data, node_content=current_node_contents)
+        next_node_data = self.__get_next_node_data(input_data=input_data, node_content=current_node_contents, state=state)
 
         next_node_id = next_node_data.get("node_id", "")
-        node_key = flow_id + "." + next_node_id if next_node_id != "" else self.node_key
+        node_key = state.get("flow_id", "")+ "." + next_node_id if next_node_id != "" else self.node_key
 
         events = next_node_data["event_data"]
         user_input = next_node_data["user_input"]
@@ -48,7 +49,7 @@ class AnaNode():
 
 
     @classmethod
-    def __get_next_node_data(cls, input_data, node_content):
+    def __get_next_node_data(cls, input_data, node_content, state):
 
         next_node_id = ""
         event_data = []
@@ -62,14 +63,14 @@ class AnaNode():
 
         input_key = list(input_data.keys())[0]
 
-
         if input_key == "val":
 
             for button in click_buttons:
                 current_node_id = input_data["val"]
                 if button["_id"] == current_node_id:
                     if var_name:
-                        user_input[var_name] = button.get("VariableValue", "")
+                        var_val = button.get("VariableValue", "")
+                        user_input[var_name] = AnaHelper.verb_replacer(text=var_val, state=state)
                     next_node_id = button["NextNodeId"]
                     event_data.append({
                         "type_of_event": "click",
@@ -155,7 +156,7 @@ class AnaNode():
             }
 
         if input_type not in input_to_button_types_map.keys():
-            logger.error("Unknown input type found " + input_type)
+            logger.error(f"Unknown input type found {input_type}")
 
         button_types = input_to_button_types_map.get(input_type, [])
 

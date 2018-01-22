@@ -3,9 +3,9 @@ This is the entry point to bot-core server
 Author: https://github.com/velutha
 """
 import os
+from flask import request, jsonify
 from src import app, MessageHandlerPool
 from src.validator import Validator
-from flask import request, jsonify
 from src.controllers.business_controller import BusinessController
 from src.controllers.chatflow_controller import ChatFlowController
 from src.controllers.session_controller import SessionController
@@ -54,18 +54,23 @@ def message_handler():
     return jsonify(status="received")
 
 
-@app.route("/bot/event", methods=["POST"])
+@app.route("/bot/events", methods=["POST"])
 def event_handler():
     message = request.get_json()
 
     logger.info("****************")
-    logger.info("Message Received")
+    logger.info("Event Received")
     logger.info(message)
     logger.info("****************")
 
-    message = MessageProcessor(message).respond_to_events()
+    response = MessageProcessor(message).respond_to_events()
 
-    return jsonify(message)
+    logger.info("****************")
+    logger.info("Event Response")
+    logger.info(response)
+    logger.info("****************")
+
+    return jsonify(response)
 
 @app.route("/bot/business", methods=["POST"])
 def business_handler():
@@ -90,9 +95,8 @@ def get_business():
 
     return response
 
-
 if __name__ == "__main__":
     HOST = os.environ.get("HOST") or "0.0.0.0"
     PORT = os.environ.get("PORT") or 9500
-
+    PORT = int(PORT)
     app.run(host=HOST, port=PORT)

@@ -48,14 +48,12 @@ class Converter():
             self.state["current_node_id"] = next_node_data.get("id")
 
         elif node_type == "HandoffToAgent":
-            data = Processor(self.state).process_node(message_data)
+            data = Processor(self.state).process_node(message_data, node_data)
         else:
             raise "Unknown Node Type. Fatal Error"
-
 
         user_messages = data.get("user_messages", [])
         agent_messages = data.get("agent_messages", [])
         events = data.get("events", [])
-        # messages = data.get("messages", [])
 
         return {"user_messages": user_messages, "agent_messages": agent_messages, "publish_events": events}

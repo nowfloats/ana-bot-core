@@ -3,6 +3,7 @@ This module handles ApiCall node in ANA studio
 Author: https://github.com/velutha
 """
 import requests
+import re
 from src.converters.ana.ana_helper import AnaHelper
 from src.models.ana_node import AnaNode
 from src.logger import logger
@@ -32,12 +33,23 @@ class ApiCallProcessor():
         headers = node_data.get("Headers", "").split("\n")
         for header_line in headers:
             header_key_values = header_line.split(":")[:2]
-            api_headers[header_key_values[0]] = header_key_values[1]
+            if len(header_key_values) == 2:
+                api_headers[header_key_values[0]] = header_key_values[1]
+        
+        logger.debug("api headers: " + str(api_headers))
+        api_body = node_data.get("RequestBody", "")
+        if api_body:
+            api_body = AnaHelper.verb_replacer(text=api_body, state=self.state)
 
-        api_body = node_data.get("Body", {})
+        logger.debug("api_body: " + str(api_body))
         response = requests.request(method=api_method, url=api_url, headers=api_headers, data=api_body)
+        
+        logger.debug("api response: " + str(response))
         if response.status_code == 200:
-            api_response = response.json()
+            try:
+                api_response = response.json()
+            except Exception as err:
+                api_response = response.text
         else:
             api_response = None
             logger.error(f"ApiCall did not return status code 200 {node_data['Id']}")
@@ -46,37 +58,36 @@ class ApiCallProcessor():
 
     def __handle_api_response(self, response, node_data):
 
-        if response is None:
-            return {"id": "", "data": {}}
-
         variable_data = self.state.get("var_data", {})
-        buttons = node_data.get("Buttons")
         variable_name = node_data["VariableName"]
-        final_var_data = Util.merge_dicts(variable_data, {variable_name : response})
+        if bool(response) is True:
+            variable_data = Util.merge_dicts(variable_data, {variable_name : response})
+            self.state["var_data"] = variable_data
 
-        next_node_id = self.__get_next_node_id(buttons=buttons, api_response=response, data=final_var_data)
-
+        next_node_id = self.__get_next_node_id(data=variable_data, state=self.state, node_data=node_data)
         next_node_key = self.state.get("flow_id", "") + "." + next_node_id
         next_node_data = AnaNode(next_node_key).get_contents()
 
         return {"id": next_node_key, "data": next_node_data}
 
     @classmethod
-    def __get_next_node_id(cls, buttons, api_response, data):
+    def __get_next_node_id(cls, data, state, node_data):
 
-        next_node_id = ""
-        for button in buttons:
+        next_node_id = node_data.get('NextNodeId', '') # Fallback node id
 
-            if isinstance(api_response, dict):
-                match_keys = button.get("ConditionMatchKey").split(".")[1:]
-                match_dict = api_response
-            else:
-                match_keys = button.get("ConditionMatchKey").split(".")
-                match_dict = data
+        for button in node_data.get('Buttons', []):
+            root_key = re.split('\.|\[', button.get("ConditionMatchKey"))[0]
 
-            variable_value = Util.deep_find(match_dict, match_keys)
+            if data.get(root_key, None) is None:
+                continue
+            
+            logger.debug("rootKey %s" % root_key)
+            path = button.get("ConditionMatchKey")
+            obj = { root_key:data[root_key] }
+            variable_value = Util.deep_find(obj, path)
+
             match_operator = button.get("ConditionOperator")
-            match_value = button.get("ConditionMatchValue")
+            match_value = AnaHelper.verb_replacer(text=button.get("ConditionMatchValue", ""), state=state)
 
             condition_matched = AnaHelper.is_condition_match(variable_value, match_operator, match_value)
 

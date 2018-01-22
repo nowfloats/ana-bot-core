@@ -3,12 +3,14 @@ This module handles buttons inside combination node of ana studio output
 Author: https://github.com/velutha
 """
 import json
+import requests
 from src.config import ana_config as config
 from src.models.types import MessageTypeWrapper as MessageType, InputTypeWrapper as InputType, ButtonTypeWrapper as ButtonType,\
         MediaTypeWrapper as MediaType
 from src.models.message import MessageContentWrapper as MessageContent, MessageDataWrapper as MessageData
 from src.models.inputs import TextInputWrapper as TextInput, OptionWrapper as Option, ListItemWrapper as ListItem
 from src.logger import logger
+from src.converters.ana.ana_helper import AnaHelper
 
 class ButtonProcessor():
 
@@ -30,7 +32,7 @@ class ButtonProcessor():
         elif click_elements != [] and text_elements != []:
             messages_data = self.__process_click_inputs(click_elements, mandatory=0)
         elif click_elements == [] and text_elements != []:
-            messages_data = self.__process_text_inputs(text_elements)
+            messages_data = self.__process_text_inputs(text_elements, self.state)
 
         return messages_data
 
@@ -48,26 +50,22 @@ class ButtonProcessor():
         elem_options = [cls.__process_click_button(button) for button in data]
 
         if elem_options != []:
-            message_content = MessageContent(
-                inputType=input_type,
+            message_content = MessageContent(inputType=input_type,
                 mandatory=mandatory,
                 options=elem_options,
-                text=button_heading
-                ).trim()
-            message_data = MessageData(
-                type=message_type,
-                content=message_content
-                ).trim()
+                text=button_heading).trim()
+            message_data = MessageData(type=message_type,
+                content=message_content).trim()
             elem_message_data.append(message_data)
 
         return elem_message_data
 
     @classmethod
-    def __process_text_inputs(cls, data):
+    def __process_text_inputs(cls, data, state):
 
         elem_message_data = []
 
-        elem_message_data = [cls.__process_input_button(button) for button in data]
+        elem_message_data = [cls.__process_input_button(button, state) for button in data]
 
         return elem_message_data
 
@@ -88,12 +86,12 @@ class ButtonProcessor():
         return option
 
     @classmethod
-    def __process_input_button(cls, button):
+    def __process_input_button(cls, button, state):
 
         button_type = button.get("ButtonType")
 
         if button_type == "GetItemFromSource":
-            message_data = cls.__process_getitem_button(button)
+            message_data = cls.__process_getitem_button(button, state)
             return message_data
 
         message_type = ""
@@ -116,41 +114,47 @@ class ButtonProcessor():
         input_type = InputType.get_value(type_of_input)
         media_type = MediaType.get_value(type_of_media)
 
-        content = MessageContent(
-            inputType=input_type,
+        content = MessageContent(inputType=input_type,
             mediaType=media_type,
             textInputAttr=input_attr,
-            mandatory=1,
-            ).trim()
-        message_data = MessageData(
-            type=message_type,
-            content=content
-            ).trim()
+            mandatory=1,).trim()
+        message_data = MessageData(type=message_type,
+            content=content).trim()
 
         return message_data
 
     @classmethod
-    def __process_getitem_button(cls, data):
+    def __process_getitem_button(cls, data, state):
 
         source = data.get("ItemsSource")
-        values = list(map(lambda x: ListItem(text=x.split(":")[0], value=x.split(":")[1]).trim(), source.split(",")))
+        url = data.get("Url")
+        values = list()
+        if source:
+            source = AnaHelper.verb_replacer(text=source, state=state)
+            values = list(map(lambda x: ListItem(text=x.split(":")[0], value=x.split(":")[1]).trim(), source.split(",")))
+        elif url:
+            url = AnaHelper.verb_replacer(text=url, state=state)
+            items_from_url = requests.get(url).json()
+            values = []
+            for key, value in items_from_url.items():
+                values.append({
+                    'text': key,
+                    'value': value
+                })
+
         button_text = data.get("ButtonName")
 
         message_type = MessageType.get_value("INPUT")
         input_type = InputType.get_value("LIST")
         is_multiple = 1 if data.get("AllowMultiple") else 0
 
-        content = MessageContent(
-            inputType=input_type,
+        content = MessageContent(inputType=input_type,
             text=button_text,
             multiple=is_multiple,
             mandatory=1,
-            values=values
-            ).trim()
+            values=values).trim()
 
-        message_data = MessageData(
-            type=message_type,
-            content=content
-            ).trim()
+        message_data = MessageData(type=message_type,
+            content=content).trim()
 
         return message_data

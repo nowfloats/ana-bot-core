@@ -5,6 +5,7 @@ Author: https://github.com/velutha
 from src.converters.ana.ana_helper import AnaHelper
 from src.models.ana_node import AnaNode
 from src.utils import Util
+import re
 
 class ConditionProcessor():
 
@@ -13,18 +14,23 @@ class ConditionProcessor():
 
     def get_next_node(self, node_data):
 
-        next_node_id = ""
+        next_node_id = node_data.get('NextNodeId', '') #Fallback node id
         variable_data = self.state.get("var_data", {})
         buttons = node_data.get("Buttons")
 
         for button in buttons:
-            match_keys = button.get("ConditionMatchKey").split(".")
+
+            root_key = re.split('\.|\[', button.get("ConditionMatchKey"))[0]
+            if variable_data.get(root_key, None) is None:
+                continue
+            path = button.get("ConditionMatchKey")
+            obj = { root_key:variable_data[root_key] }
+            variable_value = Util.deep_find(obj, path)
+
             match_operator = button.get("ConditionOperator")
-            match_value = button.get("ConditionMatchValue")
+            match_value = AnaHelper.verb_replacer(text=button.get("ConditionMatchValue", ""), state= self.state)
 
-            variable_value = Util.deep_find(variable_data, match_keys)
-
-            condition_matched = AnaHelper().is_condition_match(variable_value, match_operator, match_value)
+            condition_matched = AnaHelper.is_condition_match(variable_value, match_operator, match_value)
             if condition_matched:
                 next_node_id = button["NextNodeId"]
                 break

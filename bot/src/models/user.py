@@ -2,7 +2,7 @@ import uuid
 import datetime
 import json
 import time
-from src import SESSION_CACHE, DB
+from src import CACHE, DB
 from src.logger import logger
 from src.event_logger import EventLogger
 from src.models.types import MediumWrapper as Medium
@@ -11,7 +11,7 @@ class User():
 
     def __init__(self, user_id):
         self.user_id = user_id
-        self.CACHE = SESSION_CACHE
+        self.CACHE = CACHE
 
     def get_session_data(self, meta_data):
 
@@ -47,7 +47,9 @@ class User():
             final_var_data = state.get("var_data", {})
             new_var_data = state.get("new_var_data", {})
 
+            #TODO: need to choose sender.medium or recipient.medium based on senderType
             channel_type = meta_data["sender"]["medium"]
+
             channel = Medium.get_name(channel_type)
             business_name = state.get("business_name", "")
             timestamp = int(time.time())

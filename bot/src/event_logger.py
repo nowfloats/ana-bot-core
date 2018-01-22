@@ -1,10 +1,11 @@
 import time
 from src.models.types import MediumWrapper as Medium, EventTypeWrapper as EventType
 from src.models.message import MessageWrapper as Message, EventWrapper as Event
-from src.connectors.kinesis_helper import KinesisHelper
+# from src.connectors.kinesis_helper import KinesisHelper
+from src.event_log_interface import EventLogInterface
 from src.logger import logger
 
-class EventLogger(KinesisHelper):
+class EventLogger(EventLogInterface):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -27,15 +27,15 @@ class Converter():
         if message_data == {}:
             return messages
 
-        sender_type = SenderType.get_name(meta_data["senderType"])
+        sender = SenderType.get_name(meta_data["senderType"])
 
-        if sender_type == "AGENT":
+        if sender == "AGENT":
             messages = self.get_agent_messages(meta_data, message_data)
         else:
             data = self.__get_node(message_data=message_data)
             node_data = data.get("node")
             messages = self.get_user_messages(node_data, meta_data, message_data)
-            messages["publish_events"] = messages.get("events", []) + data.get("publish_events", [])
+            messages["publish_events"] = messages.get("publish_events", []) + data.get("publish_events", [])
 
         return messages
 
@@ -72,14 +72,12 @@ class Converter():
         messages = []
         messages_data = AgentConverter(self.state).get_messages_data(message_data).get("user_messages", [])
 
-        meta_data = MessageMeta(
-            recipient=meta_data["recipient"],
-            sender=meta_data["sender"],
-            sessionId=meta_data["sessionId"],
-            responseTo=meta_data["id"],
-            flowId=meta_data.get("flowId"),
-            senderType=SenderType.get_value("AGENT")
-            ).trim()
+        meta_data = MessageMeta(recipient=meta_data["recipient"],
+                                sender=meta_data["sender"],
+                                sessionId=meta_data["sessionId"],
+                                responseTo=meta_data["id"],
+                                flowId=meta_data.get("flowId"),
+                                senderType=SenderType.get_value("AGENT")).trim()
 
         for data in messages_data:
             message = Message(meta=meta_data, data=data).trim()
@@ -100,7 +98,7 @@ class Converter():
         if bool(self.state.get("current_node_id")):
             # user already in ana flow
             current_node_id = self.state.get("current_node_id", get_started_node) # give first_node as default
-            next_node_data = AnaNode(current_node_id).get_next_node_data(self.state["flow_id"], message_data)
+            next_node_data = AnaNode(current_node_id).get_next_node_data(message_data, self.state)
 
             event_data = next_node_data.get("publish_events", [])
             next_node_id = next_node_data["node_id"]
@@ -116,6 +114,18 @@ class Converter():
 
         return {"node": node, "publish_events": event_data}
 
+    def __get_current_node(self):
+        """
+        Gets the current node based on the state
+        """
+
+        get_started_node = self.state.get("flow_id", "") + "." + flow_config["first_node_key"]
+        current_node_id = self.state.get("current_node_id", get_started_node) # give first_node as default
+
+        node = AnaNode(current_node_id).get_contents()
+
+        return {"node": node, "publish_events": []}
+
     @classmethod
     def __construct_messages(cls, meta_data, messages_data, sending_to):
         """
@@ -126,68 +136,30 @@ class Converter():
             return []
 
         if sending_to == "USER":
-            recipient = meta_data["sender"]
-            sender = meta_data["recipient"]
-            sender_type = SenderType.get_value("ANA")
+            if meta_data['senderType'] == SenderType.get_value("AGENT"):
+                # If agent is the sender of incoming message, don't swap the sender and recipient
+                recipient = meta_data["recipient"]
+                sender = meta_data["sender"]
+                sender_type = SenderType.get_value("ANA")
+            else:
+                recipient = meta_data["sender"]
+                sender = meta_data["recipient"]
+                sender_type = SenderType.get_value("ANA")
         elif sending_to == "AGENT":
             recipient = meta_data["recipient"]
             sender = meta_data["sender"]
             sender_type = SenderType.get_value("USER")
 
         outgoing_messages = []
-        message_meta_data = MessageMeta(
-            sender=sender,
-            recipient=recipient,
-            sessionId=meta_data["sessionId"],
-            flowId=meta_data.get("flowId"),
-            responseTo=meta_data["id"],
-            senderType=sender_type
-            ).trim()
+        message_meta_data = MessageMeta(sender=sender,
+                                        recipient=recipient,
+                                        sessionId=meta_data["sessionId"],
+                                        flowId=meta_data.get("flowId"),
+                                        responseTo=meta_data["id"],
+                                        senderType=sender_type).trim()
 
         outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
 
         messages = [{"sending_to": sending_to, "message": message} for message in outgoing_messages]
 
         return messages
-
-    # @classmethod
-    # def __construct_user_messages(cls, meta_data, messages_data):
-        # """
-        # This method constructs messages that are being sent to user
-        # """
-
-        # outgoing_messages = []
-        # message_meta_data = MessageMeta(
-            # sender=meta_data["recipient"],
-            # recipient=meta_data["sender"],
-            # sessionId=meta_data["sessionId"],
-            # responseTo=meta_data["id"],
-            # senderType=SenderType.get_value("ANA")
-            # ).trim()
-
-        # outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
-
-        # messages = [{"sending_to": "USER", "message": message} for message in outgoing_messages]
-
-        # return messages
-
-    # @classmethod
-    # def __construct_agent_messages(cls, meta_data, messages_data):
-        # """
-        # This method constructs messages that are being sent to agent
-        # """
-
-        # outgoing_messages = []
-        # message_meta_data = MessageMeta(
-            # sender=meta_data["sender"],
-            # recipient=meta_data["recipient"],
-            # sessionId=meta_data["sessionId"],
-            # responseTo=meta_data["id"],
-            # senderType=SenderType.get_value("USER")
-            # ).trim()
-
-        # outgoing_messages = [Message(meta=message_meta_data, data=data).trim() for data in messages_data]
-
-        # messages = [{"sending_to": "AGENT", "message": message} for message in outgoing_messages]
-
-        # return messages

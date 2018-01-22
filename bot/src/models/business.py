@@ -4,7 +4,7 @@ Model for business entity, one bot is one business
 import datetime
 import uuid
 import json
-from src import ANA_CACHE, DB
+from src import CACHE, DB
 from src.config import flow_config as config
 from src.logger import logger
 
@@ -13,7 +13,7 @@ class Business():
     def __init__(self, business_id):
 
         self.business_id = business_id
-        self.CACHE = ANA_CACHE
+        self.CACHE = CACHE
         self.created_at = datetime.datetime.now()
         self.updated_at = datetime.datetime.now()
         self.collection = DB.business_data
