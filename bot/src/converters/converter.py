@@ -35,7 +35,7 @@ class Converter():
             data = self.__get_node(message_data=message_data)
             node_data = data.get("node")
             messages = self.get_user_messages(node_data, meta_data, message_data)
-            messages["publish_events"] = messages.get("events", []) + data.get("publish_events", [])
+            messages["publish_events"] = messages.get("publish_events", []) + data.get("publish_events", [])
 
         return messages
 
