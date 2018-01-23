@@ -18,6 +18,8 @@ class Util(object):
     def merge_dicts(*args):
         result = {}
         for dictionary in args:
+            logger.debug("Merging dictionaries")
+            logger.debug(f"{dictionary} {dictionary.__class__}")
             result.update(dictionary)
         return result
 
@@ -97,7 +99,6 @@ class Util(object):
         session_id = meta_data["sessionId"]
         state_saved = User(user_id).set_state(session_id, state, meta_data)
         return state_saved
-
 
     @staticmethod
     def get_current_state(meta_data):

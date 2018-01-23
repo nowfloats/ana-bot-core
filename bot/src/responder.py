@@ -6,6 +6,7 @@ Author: https://github.com/velutha
 from src.utils import Util
 from src.converters.converter import Converter
 from src.event_handler import MessageEventHandler
+from src.logger import logger
 
 class MessageProcessor():
 
@@ -19,6 +20,7 @@ class MessageProcessor():
         self.recipient_id = self.meta_data["recipient"]["id"]
 
         self.state = Util.get_current_state(self.meta_data)
+        logger.debug(f"Current state of user is {self.state}")
         self.meta_data["sessionId"] = self.state.get("session_id")
 
     def respond_to_message(self):

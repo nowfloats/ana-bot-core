@@ -2,8 +2,9 @@
 This module handles ApiCall node in ANA studio
 Author: https://github.com/velutha
 """
-import requests
 import re
+import json
+import requests
 from src.converters.ana.ana_helper import AnaHelper
 from src.models.ana_node import AnaNode
 from src.logger import logger
@@ -27,7 +28,9 @@ class ApiCallProcessor():
 
         api_url = node_data.get("ApiUrl", "")
         api_method = node_data.get("ApiMethod")
+        logger.debug(f"State passed to replace api_url is {self.state}")
         api_url = AnaHelper.verb_replacer(text=api_url, state=self.state)
+        logger.debug(f"URL after verb replacing is {api_url}")
 
         api_headers = {}
         headers = node_data.get("Headers", "").split("\n")
@@ -35,16 +38,16 @@ class ApiCallProcessor():
             header_key_values = header_line.split(":")[:2]
             if len(header_key_values) == 2:
                 api_headers[header_key_values[0]] = header_key_values[1]
-        
-        logger.debug("api headers: " + str(api_headers))
+
+        logger.debug(f"api headers: {api_headers}")
         api_body = node_data.get("RequestBody", "")
         if api_body:
             api_body = AnaHelper.verb_replacer(text=api_body, state=self.state)
 
-        logger.debug("api_body: " + str(api_body))
+        logger.debug(f"api_body: {api_body}")
         response = requests.request(method=api_method, url=api_url, headers=api_headers, data=api_body)
-        
-        logger.debug("api response: " + str(response))
+
+        logger.debug(f"api response: {response}")
         if response.status_code == 200:
             try:
                 api_response = response.json()
@@ -58,8 +61,13 @@ class ApiCallProcessor():
 
     def __handle_api_response(self, response, node_data):
 
-        variable_data = self.state.get("var_data", {})
+        variable_data = self.state.get("var_data", "{}")
+        if isinstance(variable_data, str):
+            variable_data = json.loads(variable_data)
         variable_name = node_data["VariableName"]
+        logger.debug(f"Variable Name is {variable_name}")
+        logger.debug(f"Response from api is {response} {response.__class__}")
+        logger.debug(f"Variable Data is {variable_data} {variable_data.__class__}")
         if bool(response) is True:
             variable_data = Util.merge_dicts(variable_data, {variable_name : response})
             self.state["var_data"] = variable_data
@@ -77,13 +85,11 @@ class ApiCallProcessor():
 
         for button in node_data.get('Buttons', []):
             root_key = re.split('\.|\[', button.get("ConditionMatchKey"))[0]
-
             if data.get(root_key, None) is None:
                 continue
-            
-            logger.debug("rootKey %s" % root_key)
+            logger.debug(f"rootKey %s {root_key}")
             path = button.get("ConditionMatchKey")
-            obj = { root_key:data[root_key] }
+            obj = {root_key:data[root_key]}
             variable_value = Util.deep_find(obj, path)
 
             match_operator = button.get("ConditionOperator")

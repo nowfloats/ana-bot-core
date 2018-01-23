@@ -1,4 +1,5 @@
 import re
+import json
 from src.logger import logger
 from src.utils import Util
 
@@ -82,26 +83,29 @@ class AnaHelper():
 
     @staticmethod
     def verb_replacer(text, state):
-        variable_data = state.get("var_data", {})
-        logger.debug(f"variable_data {variable_data}")
-        logger.debug(f"text {text}")
-        if isinstance(variable_data, dict):
-            all_matches = re.findall(r"\[~(.*?)\]|{{(.*?)}}", text)
-            for matches in all_matches:
-                for match in matches:
-                    logger.debug(f"match: {match}")
-                    if variable_data.get(match, None) is not None:
-                        text = text.replace("[~" + match + "]", variable_data[match]).replace("{{" + match + "}}", variable_data[match])
-                    else:
-                        logger.debug("No exact match")
-                        root_key = re.split(r"\.|\[", match)[0]
-                        logger.debug("match: {match}")
-                        logger.debug("root_key: {root_key}")
-                        if variable_data.get(root_key, None) is None:
-                            continue
-                        variable_value = Util.deep_find({root_key:variable_data[root_key]}, match)
-                        logger.debug("match: {match}")
-                        logger.debug("variable_value: {variable_value}")
-                        text = text.replace("[~" + match + "]", str(variable_value)).replace("{{" + match + "}}", str(variable_value))
-            return text
+        variable_data = state.get("var_data", "{}")
+        logger.debug(f"variable_data {variable_data} {variable_data.__class__}")
+        logger.debug(f"text received for replacing verbs is {text}")
+        if isinstance(variable_data, str):
+            variable_data = json.loads(variable_data)
+        all_matches = re.findall(r"\[~(.*?)\]|{{(.*?)}}", text)
+        for matches in all_matches:
+            for match in matches:
+                logger.debug(f"match: {match}")
+                if variable_data.get(match, None) is not None:
+                    logger.debug(f"Match exists in variable_data {variable_data[match]}")
+                    text = text.replace("[~" + match + "]", variable_data[match]).replace("{{" + match + "}}", variable_data[match])
+                    logger.debug(f"Text just after replacing is {text}")
+                else:
+                    logger.debug("No exact match")
+                    root_key = re.split(r"\.|\[", match)[0]
+                    logger.debug("match: {match}")
+                    logger.debug("root_key: {root_key}")
+                    if variable_data.get(root_key, None) is None:
+                        continue
+                    variable_value = Util.deep_find({root_key:variable_data[root_key]}, match)
+                    logger.debug("match: {match}")
+                    logger.debug("variable_value: {variable_value}")
+                    text = text.replace("[~" + match + "]", str(variable_value)).replace("{{" + match + "}}", str(variable_value))
+        logger.debug(f"Text after replacing verbs is {text}")
         return text

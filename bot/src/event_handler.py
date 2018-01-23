@@ -56,7 +56,10 @@ class MessageEventHandler(object):
         node_id = self.state.get("current_node_id")
         node_contents = AnaNode(node_id).get_contents()
         data = CombinationProcessor(self.state).process_node(node_contents)
-        message_data = data.get("user_messages")[0]
+        messages = data.get("user_messages", [])
+        message_data = {}
+        if messages:
+            message_data = messages[0]
         message = Message(meta=self.meta_data, data=message_data).trim()
 
         return [message]
