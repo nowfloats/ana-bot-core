@@ -2,7 +2,6 @@
 Module which constructs messages to send
 """
 import json
-import uuid
 from src.config import flow_config
 from src.models.ana_node import AnaNode
 from src.utils import Util
@@ -136,6 +135,7 @@ class Converter():
         if sending_to is None:
             return []
 
+        message_id = None
         if sending_to == "USER":
             if meta_data['senderType'] == SenderType.get_value("AGENT"):
                 # If agent is the sender of incoming message, don't swap the sender and recipient
@@ -147,12 +147,13 @@ class Converter():
                 sender = meta_data["recipient"]
                 sender_type = SenderType.get_value("ANA")
         elif sending_to == "AGENT":
+            message_id = meta_data["id"]
             recipient = meta_data["recipient"]
             sender = meta_data["sender"]
             sender_type = SenderType.get_value("USER")
 
         outgoing_messages = []
-        message_meta_data = MessageMeta(id=meta_data["id"],
+        message_meta_data = MessageMeta(id=message_id,
                                         sender=sender,
                                         recipient=recipient,
                                         sessionId=meta_data["sessionId"],
