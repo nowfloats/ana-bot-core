@@ -28,7 +28,9 @@ class ApiCallProcessor():
 
         api_url = node_data.get("ApiUrl", "")
         api_method = node_data.get("ApiMethod")
+        logger.debug(f"State passed to replace api_url is {self.state}")
         api_url = AnaHelper.verb_replacer(text=api_url, state=self.state)
+        logger.debug(f"URL after verb replacing is {api_url}")
 
         api_headers = {}
         headers = node_data.get("Headers", "").split("\n")
@@ -59,7 +61,9 @@ class ApiCallProcessor():
 
     def __handle_api_response(self, response, node_data):
 
-        variable_data = json.loads(self.state.get("var_data", "{}"))
+        variable_data = self.state.get("var_data", "{}")
+        if isinstance(variable_data, str):
+            variable_data = json.loads(variable_data)
         variable_name = node_data["VariableName"]
         logger.debug(f"Variable Name is {variable_name}")
         logger.debug(f"Response from api is {response} {response.__class__}")
