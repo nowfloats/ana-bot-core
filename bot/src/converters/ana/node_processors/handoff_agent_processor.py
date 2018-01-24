@@ -6,6 +6,13 @@ class AgentHandOffProcessor():
     def __init__(self, state):
         self.state = state
 
+    def get_next_node(self, node_data):
+
+        # return the same node_data since it's handoffagent node, it is
+        # the final node to process
+        next_node_key = self.state.get("flow_id", "") + "." + node_data.get("Id")
+        return {"id" : next_node_key, "data": node_data}
+
     @classmethod
     def process_node(cls, message_data, node_data):
         # agent_messages_data = [{"message" : message_data, "sending_to":
