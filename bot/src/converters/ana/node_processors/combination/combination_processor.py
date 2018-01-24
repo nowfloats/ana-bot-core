@@ -10,6 +10,12 @@ class CombinationProcessor():
     def __init__(self, state):
         self.state = state
 
+    def get_next_node(self, node_data):
+
+        # return the same node_data since it's combintion node
+        next_node_key = self.state.get("flow_id", "") + "." + node_data.get("Id", "")
+        return {"id" : next_node_key, "data": node_data}
+
     def process_node(self, node_data):
 
         sections = node_data.get("Sections", [])

@@ -109,7 +109,7 @@ class Converter():
             self.state["var_data"] = final_var_data
             self.state["new_var_data"] = new_var_data
 
-        self.state["current_node_id"] = next_node_id
+        # self.state["current_node_id"] = next_node_id
         node = AnaNode(next_node_id).get_contents()
 
         return {"node": node, "publish_events": event_data}
