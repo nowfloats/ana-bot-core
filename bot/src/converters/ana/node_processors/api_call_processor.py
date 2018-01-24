@@ -64,7 +64,7 @@ class ApiCallProcessor():
         variable_data = self.state.get("var_data", "{}")
         if isinstance(variable_data, str):
             variable_data = json.loads(variable_data)
-        variable_name = node_data["VariableName"]
+        variable_name = node_data.get("VariableName", "")
         logger.debug(f"Variable Name is {variable_name}")
         logger.debug(f"Response from api is {response} {response.__class__}")
         logger.debug(f"Variable Data is {variable_data} {variable_data.__class__}")
