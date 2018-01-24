@@ -43,8 +43,10 @@ class Converter():
         node_data = next_node_data["data"]
         self.state["current_node_id"] = next_node_data.get("id")
 
-        if node_type in ["Combination", "HandoffToAgent"]:
+        if node_type == "Combination":
             data = Processor(self.state).process_node(node_data)
+        elif node_type == "HandoffToAgent":
+            data = Processor(self.state).process_node(message_data, node_data)
         else:
             data = self.get_messages_data(node_data, message_data)
 
