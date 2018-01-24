@@ -83,6 +83,8 @@ class AnaHelper():
 
     @staticmethod
     def verb_replacer(text, state):
+        if text is None:
+            return text
         variable_data = state.get("var_data", "{}")
         logger.debug(f"variable_data {variable_data} {variable_data.__class__}")
         logger.debug(f"text received for replacing verbs is {text}")
