@@ -8,4 +8,4 @@ services:
       - "9500:9500"
     env_file:
       - .env
-    command: /usr/local/bin/gunicorn -w 2 app:app --access-logfile -
+    command: /usr/local/bin/gunicorn -w 2 -t 240 app:app --access-logfile -
