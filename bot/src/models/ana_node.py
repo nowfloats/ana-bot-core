@@ -32,11 +32,6 @@ class AnaNode():
         current_node_contents = self.get_contents()
         input_data = message_content["content"]["input"]
 
-        # node_type = current_node_contents.get("NodeType")
-        # current node is agent node, so continue as is
-        # if node_type == "HandoffToAgent":
-            # return {"node_id": self.node_key, "input_data": {}}
-
         next_node_data = self.__get_next_node_data(input_data=input_data, node_content=current_node_contents, state=state)
 
         next_node_id = next_node_data.get("node_id", "")
@@ -51,10 +46,11 @@ class AnaNode():
     @classmethod
     def __get_next_node_data(cls, input_data, node_content, state):
 
+        # TODO cleanup required here too many loops and variables
         next_node_id = ""
         event_data = []
         user_input = {}
-        var_name = node_content.get("VariableName")
+        var_name = node_content.get("VariableName", "")
 
         button_contents = cls._extract_button_elements(node_content)
 

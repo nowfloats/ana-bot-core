@@ -1,3 +1,7 @@
+"""
+User session data controller
+Author: https:github.com/velutha
+"""
 from flask import jsonify
 from src import CACHE
 

@@ -25,11 +25,7 @@ class KinesisHelper():
     def log_message(self, key, data=None):
 
         if data is None:
-            return
-
-        # if config["ENVIRONMENT"] == "development":
-            # logger.info("Did not write to kinesis since it is development environment")
-            # return
+            return 1
 
         json_data = json.dumps(data)
         self.client.put_records(
@@ -42,5 +38,4 @@ class KinesisHelper():
             ],
             StreamName=self.stream_name
         )
-        # check response and handle error
-        return
+        return 1

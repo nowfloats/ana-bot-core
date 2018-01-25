@@ -14,36 +14,22 @@ class AnaHelper():
             return match
 
         if isinstance(left_operand, bool):
+
             left_operand = "true" if left_operand else "false"
+
         elif isinstance(left_operand, float):
+
             try:
                 left_operand = float(left_operand)
                 right_operand = float(right_operand)
             except ValueError:
                 left_operand = str(left_operand)
                 right_operand = str(right_operand)
+
         elif isinstance(left_operand, int):
+
             left_operand = int(left_operand)
             right_operand = int(right_operand)
-
-        # if isinstance(left_operand, int) or isinstance(right_operand, int):
-            # left_operand = int(left_operand)
-            # right_operand = int(right_operand)
-
-        # isFloat = False
-        # try:
-            # _left_operand = float(left_operand)
-            # _right_operand = float(right_operand)
-            # isFloat = True
-        # except Exception as err:
-            # logger.error(f"Unknown Error occured during comparison {err}")
-
-        # if isFloat:
-            # left_operand = _left_operand
-            # right_operand = _right_operand
-        # else: # assume as string
-            # left_operand = str(left_operand)
-            # right_operand = str(right_operand)
 
         if operator == "EqualTo":
             match = left_operand == right_operand
@@ -96,14 +82,20 @@ class AnaHelper():
 
     @staticmethod
     def verb_replacer(text, state):
+
         if text is None:
             return text
+
         variable_data = state.get("var_data", "{}")
+
         logger.debug(f"variable_data {variable_data} {variable_data.__class__}")
         logger.debug(f"text received for replacing verbs is {text}")
+
         if isinstance(variable_data, str):
             variable_data = json.loads(variable_data)
+
         all_matches = re.findall(r"\[~(.*?)\]|{{(.*?)}}", text)
+
         for matches in all_matches:
             for match in matches:
                 logger.debug(f"match: {match}")

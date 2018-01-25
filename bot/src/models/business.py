@@ -54,9 +54,9 @@ class Business():
 
         try:
             self.CACHE.mset(node_dict)
-            logger.info("Node data written to cache for flow " + str(flow_id))
+            logger.info(f"Node data written to cache for flow {flow_id}")
             self.CACHE.hmset(self.business_id, business_data_to_save)
-            logger.info("Business data written to cache for flow " + str(flow_id))
+            logger.info(f"Business data written to cache for flow {flow_id}")
             return True
         except Exception as err:
             logger.error("Error writing to cache")

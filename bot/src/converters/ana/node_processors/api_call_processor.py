@@ -26,10 +26,12 @@ class ApiCallProcessor():
 
     def __make_api_call(self, node_data):
 
+        logger.debug(f"State passed to replace api_url is {self.state}")
+
         api_url = node_data.get("ApiUrl", "")
         api_method = node_data.get("ApiMethod")
-        logger.debug(f"State passed to replace api_url is {self.state}")
         api_url = AnaHelper.verb_replacer(text=api_url, state=self.state)
+
         logger.debug(f"URL after verb replacing is {api_url}")
 
         api_headers = {}
@@ -40,18 +42,21 @@ class ApiCallProcessor():
                 api_headers[header_key_values[0]] = header_key_values[1]
 
         logger.debug(f"api headers: {api_headers}")
+
         api_body = node_data.get("RequestBody", "")
         if api_body:
             api_body = AnaHelper.verb_replacer(text=api_body, state=self.state)
 
         logger.debug(f"api_body: {api_body}")
+
         response = requests.request(method=api_method, url=api_url, headers=api_headers, data=api_body)
 
         logger.debug(f"api response: {response}")
+
         if response.status_code == 200:
             try:
                 api_response = response.json()
-            except Exception as err:
+            except ValueError:
                 api_response = response.text
         else:
             api_response = None
@@ -62,12 +67,16 @@ class ApiCallProcessor():
     def __handle_api_response(self, response, node_data):
 
         variable_data = self.state.get("var_data", "{}")
+
         if isinstance(variable_data, str):
             variable_data = json.loads(variable_data)
+
         variable_name = node_data.get("VariableName", "")
+
         logger.debug(f"Variable Name is {variable_name}")
         logger.debug(f"Response from api is {response} {response.__class__}")
         logger.debug(f"Variable Data is {variable_data} {variable_data.__class__}")
+
         if bool(response) is True:
             variable_data = Util.merge_dicts(variable_data, {variable_name : response})
             self.state["var_data"] = variable_data
@@ -84,10 +93,13 @@ class ApiCallProcessor():
         next_node_id = node_data.get('NextNodeId', '') # Fallback node id
 
         for button in node_data.get('Buttons', []):
-            root_key = re.split('\.|\[', button.get("ConditionMatchKey"))[0]
-            if data.get(root_key, None) is None:
+            root_key = re.split(r'\.|\[', button.get("ConditionMatchKey"))[0]
+
+            if data.get(root_key) is None:
                 continue
+
             logger.debug(f"rootKey %s {root_key}")
+
             path = button.get("ConditionMatchKey")
             obj = {root_key:data[root_key]}
             variable_value = Util.deep_find(obj, path)

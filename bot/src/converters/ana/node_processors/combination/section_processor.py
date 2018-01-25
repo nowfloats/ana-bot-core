@@ -39,16 +39,6 @@ class SectionProcessor():
 
         return messages_data
 
-    # def verb_replacer(self, text):
-        # variable_data = self.state.get("var_data", {})
-        # matches = re.findall("\[~(.*?)\]", text)
-        # variable_names = variable_data.keys()
-        # for match in matches:
-            # if match in variable_names:
-                # key = "[~" + match + "]"
-                # text = text.replace(key, variable_data[match])
-        # return text
-
     def __text_processor(self, data):
 
         message_type = MessageType.get_value("SIMPLE")
