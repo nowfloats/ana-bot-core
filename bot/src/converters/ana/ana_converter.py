@@ -7,6 +7,7 @@ from .node_processors.api_call_processor import ApiCallProcessor
 from .node_processors.condition_processor import ConditionProcessor
 from .node_processors.card_processor import CardProcessor
 from .node_processors.handoff_agent_processor import AgentHandOffProcessor
+from .node_processors.jump_to_bot_processor import JumpToBotProcessor
 
 class Converter():
 
@@ -28,7 +29,8 @@ class Converter():
             "ApiCall": ApiCallProcessor,
             "Condition": ConditionProcessor,
             "Card": CardProcessor,
-            "HandoffToAgent": AgentHandOffProcessor
+            "HandoffToAgent": AgentHandOffProcessor,
+            "JumpToBot": JumpToBotProcessor
             }
 
         user_messages = []

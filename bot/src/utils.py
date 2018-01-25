@@ -23,17 +23,6 @@ class Util(object):
             result.update(dictionary)
         return result
 
-    #@staticmethod
-    #def deep_find(dictionary, keys):
-    #    if not isinstance(dictionary, dict):
-    #        logger.error("Object you passed to deep find is not a dictionary")
-    #        return None
-    #    if not isinstance(keys, list):
-    #        # change it to list if it's one element
-    #        keys = [keys]
-
-    #    return reduce(lambda d, key: d.get(key) if d else None, keys, dictionary)
-
     @staticmethod
     def deep_find(obj, path):
         try:
@@ -84,12 +73,6 @@ class Util(object):
         """
 
         sender = SenderType.get_name(meta_data["senderType"])
-
-        # if sender_type == "AGENT" and event == "HANDOVER":
-            # user_id = meta_data["recipient"]["id"]
-            # session_id = meta_data["sessionId"]
-            # state_saved = User(user_id).set_state(session_id, state, meta_data)
-            # return state_saved
 
         if sender == "AGENT":
             # no need to update user state
