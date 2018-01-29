@@ -46,10 +46,11 @@ class ApiCallProcessor():
         api_body = node_data.get("RequestBody", "")
         if api_body:
             api_body = AnaHelper.verb_replacer(text=api_body, state=self.state)
+            api_body = json.loads(api_body)
 
         logger.debug(f"api_body: {api_body}")
 
-        response = requests.request(method=api_method, url=api_url, headers=api_headers, data=api_body)
+        response = requests.request(method=api_method, url=api_url, headers=api_headers, json=api_body)
 
         logger.debug(f"api response: {response}")
 
