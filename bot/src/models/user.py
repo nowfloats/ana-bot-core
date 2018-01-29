@@ -42,6 +42,9 @@ class User():
         return response
 
     def set_state(self, session_id, state, meta_data):
+        #TODO define an object for state and pass data to blueprint object
+        # this is not really good, can cause lot of confusions
+        # check if appending to state can work
         try:
             new_state = {}
             final_var_data = state.get("var_data", {})
@@ -60,6 +63,7 @@ class User():
 
             new_state["timestamp"] = timestamp
             new_state["var_data"] = json.dumps(final_var_data)
+            new_state["flow_id"] = state["flow_id"]
 
             self.CACHE.hmset(session_id, new_state)
             logger.info(f"User state with session_id {session_id} updated with state {new_state}")

@@ -105,9 +105,15 @@ class Util(object):
 
         business_id = flow_id if flow_id else business_id
         flow_data = Business(business_id).get_business_data()
-        current_state = Util.merge_dicts(state, flow_data)
+        logger.debug(f"Flow data is {flow_data}")
 
-        return current_state
+        #TODO following should be sorted along with flow_id changes
+        state["flow_id"] = state.get("flow_id") if state.get("flow_id") else flow_data.get("flow_id", "")
+        state["business_name"] = state.get("business_name") if state.get("business_name") \
+                else flow_data.get("business_name", "")
+        # current_state = Util.merge_dicts(state, flow_data)
+
+        return state
 
     @staticmethod
     def log_events(meta_data, state, events):
