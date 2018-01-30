@@ -46,7 +46,11 @@ class ApiCallProcessor():
         api_body = node_data.get("RequestBody", "")
         if api_body:
             api_body = AnaHelper.verb_replacer(text=api_body, state=self.state)
-            api_body = json.loads(api_body)
+            try:
+                api_body = json.loads(api_body)
+            except ValueError:
+                logger.error(f"Could not parse api body {api_body}")
+                return {}
 
         logger.debug(f"api_body: {api_body}")
 
