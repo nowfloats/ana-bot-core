@@ -6,6 +6,7 @@ from src import CACHE, DB
 from src.logger import logger
 from src.event_logger import EventLogger
 from src.models.types import MediumWrapper as Medium
+from src.models.types import SenderTypeWrapper as SenderType
 
 class User():
 
@@ -17,7 +18,18 @@ class User():
 
         response = {}
         session_data = {}
-        user_session_key = self.user_id + "." + "sessions"
+        flow_id = meta_data.get("flowId")
+        sender = SenderType.get_name(meta_data.get("senderType"))
+        if sender == "USER":
+            business_id = meta_data["recipient"]["id"]
+        else:
+            business_id = meta_data["sender"]["id"]
+
+        if flow_id:
+            user_session_key = self.user_id + "." + business_id + "." + flow_id + "." + "sessions"
+        else:
+            user_session_key = self.user_id + "." + "sessions"
+
         user_sessions = self.CACHE.lrange(user_session_key, 0, -1)
 
         session_id = meta_data.get("sessionId")

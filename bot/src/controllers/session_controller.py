@@ -26,3 +26,16 @@ class SessionController():
             return jsonify(message="sessions_cleared")
 
         return jsonify(message="could_not_clear_sessions"), 500
+
+    @staticmethod
+    def get_active_session(user_id, business_id, flow_id):
+        if flow_id:
+            user_session_key = user_id + "." + business_id + "." + flow_id + "." + "sessions"
+        else:
+            user_session_key = user_id + "." + "sessions"
+
+        user_sessions = CACHE.lrange(user_session_key, 0, -1)
+
+        if user_sessions != []:
+            return jsonify(active_session_id=user_sessions[0])
+        return jsonify(message="Not found"), 404

@@ -36,6 +36,16 @@ def clear_sessions():
 
     return response
 
+@app.route("/bot/session", endpoint="get_session")
+@Validator.validate_session_params
+def get_session():
+    user_id = request.args.get("user_id")
+    flow_id = request.args.get("flow_id", "")
+    business_id = request.args.get("business_id", "")
+
+    response = SessionController.get_active_session(user_id, business_id, flow_id)
+
+    return response
 
 @app.route("/bot/message", methods=["POST"])
 def message_handler():

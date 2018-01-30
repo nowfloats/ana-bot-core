@@ -107,7 +107,8 @@ class Util(object):
         flow_data = Business(business_id).get_business_data()
         logger.debug(f"Flow data is {flow_data}")
 
-        #TODO following should be sorted along with flow_id changes
+        # if state has flow_id use it else use flowId from meta_data
+        # else use flow_id got from business_id for backwards compatibility
         if state.get("flow_id"):
             state["flow_id"] = state.get("flow_id")
         elif flow_id:

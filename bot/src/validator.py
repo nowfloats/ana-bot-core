@@ -30,8 +30,11 @@ class Validator():
         @wraps(func)
         def validate_session(*args, **kwargs):
             user_id = request.args.get("user_id")
+            # flow_id = request.args.get("flow_id")
+            # business_id = request.args.get("business_id")
+            # if user_id is None or flow_id is None or business_id is None:
             if user_id is None:
-                response = jsonify(message="user_id missing"), 400
+                response = jsonify(message="Required param missing"), 400
                 return response
             return func(*args, **kwargs)
         return validate_session
