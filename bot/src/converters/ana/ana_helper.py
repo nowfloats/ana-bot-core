@@ -100,7 +100,7 @@ class AnaHelper():
                 if variable_data.get(match, None) is not None:
                     logger.debug(f"Match exists in variable_data {variable_data[match]}")
                     variable_value = variable_data[match]
-                    variable_value = AnaHelper.escape_json_text(variable_value)
+                    variable_value = str(AnaHelper.escape_json_text(variable_value))
                     text = text.replace("[~" + match + "]", variable_value).replace("{{" + match + "}}", variable_value)
                     logger.debug(f"Text just after replacing is {text}")
                 else:
@@ -111,7 +111,7 @@ class AnaHelper():
                     if variable_data.get(root_key, None) is None:
                         continue
                     variable_value = Util.deep_find({root_key:variable_data[root_key]}, match)
-                    variable_value = AnaHelper.escape_json_text(variable_value)
+                    variable_value = str(AnaHelper.escape_json_text(variable_value))
                     logger.debug(f"match: {match}")
                     logger.debug(f"variable_value: {variable_value}")
                     text = text.replace("[~" + match + "]", str(variable_value)).replace("{{" + match + "}}", str(variable_value))

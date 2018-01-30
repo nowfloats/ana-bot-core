@@ -77,8 +77,15 @@ class AnaNode():
 
             if next_node_id == "":
                 for button in input_buttons:
+                    button_type = button.get("ButtonType", button.get("Type"))
+
+                    if button_type == "GetNumber":
+                        input_value = int(input_data["val"])
+                    else:
+                        input_value = str(input_data["val"])
+
                     if var_name:
-                        user_input[var_name] = input_data["val"]
+                        user_input[var_name] = input_value
                     next_node_id = button["NextNodeId"]
                     event_data.append({
                         "type_of_event": "click",
@@ -94,8 +101,13 @@ class AnaNode():
             for button in button_contents:
                 button_type = button.get("ButtonType", button.get("Type"))
                 if button_type in valid_button_types:
-                    var_name = node_content.get("VariableName", "DEFAULT_VAR")
-                    user_input[var_name] = input_data[input_key]
+                    if button_type == "GetNumber":
+                        input_value = int(input_data[input_key])
+                    else:
+                        input_value = str(input_data[input_key])
+
+                    if var_name:
+                        user_input[var_name] = input_value
                     next_node_id = button["NextNodeId"]
                     event_data.append({
                         "type_of_event": "click",
