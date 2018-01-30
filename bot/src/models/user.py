@@ -76,6 +76,7 @@ class User():
             new_state["timestamp"] = timestamp
             new_state["var_data"] = json.dumps(final_var_data)
             new_state["flow_id"] = state["flow_id"]
+            new_state["previous_flow_id"] = state.get("previous_flow_id", "")
 
             self.CACHE.hmset(session_id, new_state)
             logger.info(f"User state with session_id {session_id} updated with state {new_state}")

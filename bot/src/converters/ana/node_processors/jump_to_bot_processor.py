@@ -11,6 +11,8 @@ class JumpToBotProcessor():
 
     def get_next_node(self, node_data):
 
+        current_flow_id = self.state.get("flow_id", "")
+        self.state["previous_flow_id"] = current_flow_id
         new_flow_id = node_data.get("TargetBotId")
         self.state["flow_id"] = new_flow_id
         next_node_id = node_data.get("TargetNodeId")

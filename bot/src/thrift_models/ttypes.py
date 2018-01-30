@@ -253,7 +253,7 @@ class EventType(object):
         19: "ALLOCATION_REQUEST",
         20: "OUT_OF_BUSINESS_HOURS",
         21: "SET_SESSION_DATA",
-        22: "HANDOVER"
+        22: "HANDOVER",
     }
 
     _NAMES_TO_VALUES = {
@@ -279,7 +279,7 @@ class EventType(object):
         "ALLOCATION_REQUEST": 19,
         "OUT_OF_BUSINESS_HOURS": 20,
         "SET_SESSION_DATA": 21,
-        "HANDOVER": 22
+        "HANDOVER": 22,
     }
 
 
@@ -954,6 +954,8 @@ class MessageMeta(object):
      - businessId
      - flowId
      - threadId
+     - currentFlowId
+     - previousFlowId
     """
 
     thrift_spec = (
@@ -968,9 +970,11 @@ class MessageMeta(object):
         (8, TType.STRING, 'businessId', 'UTF8', None, ),  # 8
         (9, TType.STRING, 'flowId', 'UTF8', None, ),  # 9
         (10, TType.STRING, 'threadId', 'UTF8', None, ),  # 10
+        (11, TType.STRING, 'currentFlowId', 'UTF8', None, ),  # 11
+        (12, TType.STRING, 'previousFlowId', 'UTF8', None, ),  # 12
     )
 
-    def __init__(self, id=None, sender=None, recipient=None, senderType=thrift_spec[4][4], timestamp=None, sessionId=None, responseTo=None, businessId=None, flowId=None, threadId=None,):
+    def __init__(self, id=None, sender=None, recipient=None, senderType=thrift_spec[4][4], timestamp=None, sessionId=None, responseTo=None, businessId=None, flowId=None, threadId=None, currentFlowId=None, previousFlowId=None,):
         self.id = id
         self.sender = sender
         self.recipient = recipient
@@ -981,6 +985,8 @@ class MessageMeta(object):
         self.businessId = businessId
         self.flowId = flowId
         self.threadId = threadId
+        self.currentFlowId = currentFlowId
+        self.previousFlowId = previousFlowId
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1043,6 +1049,16 @@ class MessageMeta(object):
                     self.threadId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.STRING:
+                    self.currentFlowId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 12:
+                if ftype == TType.STRING:
+                    self.previousFlowId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1092,6 +1108,14 @@ class MessageMeta(object):
         if self.threadId is not None:
             oprot.writeFieldBegin('threadId', TType.STRING, 10)
             oprot.writeString(self.threadId.encode('utf-8') if sys.version_info[0] == 2 else self.threadId)
+            oprot.writeFieldEnd()
+        if self.currentFlowId is not None:
+            oprot.writeFieldBegin('currentFlowId', TType.STRING, 11)
+            oprot.writeString(self.currentFlowId.encode('utf-8') if sys.version_info[0] == 2 else self.currentFlowId)
+            oprot.writeFieldEnd()
+        if self.previousFlowId is not None:
+            oprot.writeFieldBegin('previousFlowId', TType.STRING, 12)
+            oprot.writeString(self.previousFlowId.encode('utf-8') if sys.version_info[0] == 2 else self.previousFlowId)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1953,7 +1977,7 @@ class MessageContent(object):
         (5, TType.STRING, 'payload', 'UTF8', None, ),  # 5
         (6, TType.I32, 'inputType', None, None, ),  # 6
         (7, TType.BOOL, 'mandatory', None, True, ),  # 7
-        (8, TType.SET, 'values', (TType.STRUCT, (ListItem, ListItem.thrift_spec), False), None, ),  # 8
+        (8, TType.LIST, 'values', (TType.STRUCT, (ListItem, ListItem.thrift_spec), False), None, ),  # 8
         (9, TType.BOOL, 'multiple', None, None, ),  # 9
         (10, TType.I32, 'mediaType', None, None, ),  # 10
         (11, TType.SET, 'requiredFields', (TType.STRING, 'UTF8', False), None, ),  # 11
@@ -2038,14 +2062,14 @@ class MessageContent(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 8:
-                if ftype == TType.SET:
-                    self.values = set()
-                    (_etype23, _size20) = iprot.readSetBegin()
+                if ftype == TType.LIST:
+                    self.values = []
+                    (_etype23, _size20) = iprot.readListBegin()
                     for _i24 in range(_size20):
                         _elem25 = ListItem()
                         _elem25.read(iprot)
-                        self.values.add(_elem25)
-                    iprot.readSetEnd()
+                        self.values.append(_elem25)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 9:
@@ -2157,11 +2181,11 @@ class MessageContent(object):
             oprot.writeBool(self.mandatory)
             oprot.writeFieldEnd()
         if self.values is not None:
-            oprot.writeFieldBegin('values', TType.SET, 8)
-            oprot.writeSetBegin(TType.STRUCT, len(self.values))
+            oprot.writeFieldBegin('values', TType.LIST, 8)
+            oprot.writeListBegin(TType.STRUCT, len(self.values))
             for iter39 in self.values:
                 iter39.write(oprot)
-            oprot.writeSetEnd()
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.multiple is not None:
             oprot.writeFieldBegin('multiple', TType.BOOL, 9)

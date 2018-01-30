@@ -126,8 +126,7 @@ class Converter():
 
         return {"node": node, "publish_events": []}
 
-    @classmethod
-    def __construct_messages(cls, meta_data, messages_data, sending_to):
+    def __construct_messages(self, meta_data, messages_data, sending_to):
         """
         This method constructs messages that are being sent
         """
@@ -152,12 +151,17 @@ class Converter():
             sender = meta_data["sender"]
             sender_type = SenderType.get_value("USER")
 
+        previous_flow_id = self.state.get("previous_flow_id", "")
+        current_flow_id = self.state.get("flow_id", "")
+
         outgoing_messages = []
         message_meta_data = MessageMeta(id=message_id,
                                         sender=sender,
                                         recipient=recipient,
                                         sessionId=meta_data["sessionId"],
                                         flowId=meta_data.get("flowId"),
+                                        previousFlowId=previous_flow_id,
+                                        currentFlowId=current_flow_id,
                                         responseTo=meta_data["id"],
                                         senderType=sender_type).trim()
 
