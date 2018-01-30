@@ -34,7 +34,7 @@ class ChatFlowController():
         business_id = data["businessId"]
         business_data["business_id"] = business_id
         business_data["flow_id"] = data["id"]
-        business_data["business_name"] = data["businessName"]
+        business_data["business_name"] = data.get("businessName", "")
         business_data["flow_name"] = data["name"]
         business_data["user_id"] = data["userId"]
         nodes = data["flow"]
