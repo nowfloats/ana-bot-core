@@ -104,7 +104,7 @@ class Util(object):
         flow_id = meta_data.get("flowId")
 
         # business_id = flow_id if flow_id else business_id
-        flow_data = Business(business_id).get_business_data()
+        flow_data = Business(business_id).get_info()
         logger.debug(f"Flow data is {flow_data}")
 
         # if state has flow_id use it else use flowId from meta_data

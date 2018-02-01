@@ -32,8 +32,15 @@ class Business():
 
     def save(self, business_data):
 
-        business_keys = ["name", "email", "phone", "logoUrl", "status", "colors"]
-        data = {key : business_data[key] for key in business_keys}
+        # business_keys = ["name", "email", "phone", "logoUrl", "status", "colors"]
+        # data = {key : business_data[key] for key in business_keys}
+        data = {}
+        data["business_name"] = business_data.get("name", "")
+        data["email"] = business_data.get("email", "")
+        data["phone"] = business_data.get("phone", "")
+        data["logoUrl"] = business_data.get("logoUrl", "")
+        data["status"] = business_data.get("status", "")
+        data["colors"] = business_data.get("colors", "")
         data["timestamp"] = datetime.datetime.now()
 
         try:
@@ -52,11 +59,10 @@ class Business():
 
         if business_data is None:
             business_data = self.collection.find_one({"_id": self.business_id})
-
-        if business_data is None:
-            return {}
-
-        self.save(business_data)
+            if business_data is not None:
+                self.save(business_data)
+            else:
+                business_data = {}
 
         return business_data
 
