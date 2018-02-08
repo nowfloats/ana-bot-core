@@ -77,10 +77,13 @@ class MessageEventHandler(object):
         self.state["current_node_id"] = next_node_id
         node_data = AnaNode(next_node_id).get_contents()
         data = AnaConverter(self.state).get_messages_data(node_data, self.message_data)
-        message_data = data.get("user_messages")[0]
+        messages_data = data.get("user_messages")
 
-        message = Message(meta=self.meta_data, data=message_data).trim()
-        user_response = Util.send_messages(messages=[message], sending_to="USER")
+        self.meta_data["id"] = ""
+        messages = [Message(meta=self.meta_data, data=data).trim() for data in messages_data]
+
+        # message = Message(meta=self.meta_data, data=message_data).trim()
+        user_response = Util.send_messages(messages=messages, sending_to="USER")
 
         if user_response:
             Util.update_state(meta_data=self.meta_data, state=self.state)
