@@ -80,7 +80,7 @@ class AnaNode():
                     button_type = button.get("ButtonType", button.get("Type"))
 
                     if button_type == "GetNumber":
-                        input_value = int(input_data["val"])
+                        input_value = float(input_data["val"])
                     else:
                         input_value = str(input_data["val"])
 
