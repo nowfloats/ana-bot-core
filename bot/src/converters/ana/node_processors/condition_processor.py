@@ -2,10 +2,12 @@
 This module handles Condition node in ANA studio
 Author: https://github.com/velutha
 """
+import re
+import json
 from src.converters.ana.ana_helper import AnaHelper
 from src.models.ana_node import AnaNode
 from src.utils import Util
-import re
+from src.logger import logger
 
 class ConditionProcessor():
 
@@ -20,8 +22,19 @@ class ConditionProcessor():
 
         for button in buttons:
 
-            root_key = re.split('\.|\[', button.get("ConditionMatchKey"))[0]
-            if variable_data.get(root_key, None) is None:
+            root_key = re.split(r'\.|\[', button.get("ConditionMatchKey"))[0]
+
+            logger.debug(f"Variable Data received for condition call is {variable_data}")
+
+            if isinstance(variable_data, str):
+                try:
+                    variable_data = json.loads(variable_data)
+                except Exception as err:
+                    logger.error(f"Error parsing variable_data {variable_data}")
+                    variable_data = {}
+
+            logger.debug(f"Variable Data after dict conversion is {variable_data}")
+            if variable_data.get(root_key) is None:
                 continue
             path = button.get("ConditionMatchKey")
             obj = { root_key:variable_data[root_key] }
