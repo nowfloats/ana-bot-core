@@ -32,12 +32,12 @@ class ButtonProcessor():
         elif click_elements != [] and text_elements != []:
             messages_data = self.__process_click_inputs(click_elements, mandatory=0)
         elif click_elements == [] and text_elements != []:
-            messages_data = self.__process_text_inputs(text_elements, self.state)
+            messages_data = self.__process_text_inputs(text_elements)
 
         return messages_data
 
-    @classmethod
-    def __process_click_inputs(cls, data, mandatory):
+    # @classmethod
+    def __process_click_inputs(self, data, mandatory):
 
         button_heading = None
         elem_message_data = []
@@ -47,33 +47,34 @@ class ButtonProcessor():
         input_type = InputType.get_value("OPTIONS")
 
         button_heading = "Choose an option"
-        elem_options = [cls.__process_click_button(button) for button in data]
+        elem_options = [self.__process_click_button(button) for button in data]
 
         if elem_options != []:
             message_content = MessageContent(inputType=input_type,
-                mandatory=mandatory,
-                options=elem_options,
-                text=button_heading).trim()
+                                             mandatory=mandatory,
+                                             options=elem_options,
+                                             text=button_heading).trim()
             message_data = MessageData(type=message_type,
-                content=message_content).trim()
+                                       content=message_content).trim()
             elem_message_data.append(message_data)
 
         return elem_message_data
 
-    @classmethod
-    def __process_text_inputs(cls, data, state):
+    # @classmethod
+    def __process_text_inputs(self, data):
 
         elem_message_data = []
 
-        elem_message_data = [cls.__process_input_button(button, state) for button in data]
+        elem_message_data = [self.__process_input_button(button) for button in data]
 
         return elem_message_data
 
-    @classmethod
-    def __process_click_button(cls, button):
+    # @classmethod
+    def __process_click_button(self, button):
         button_type = button.get("ButtonType", "")
 
         title = button.get("ButtonName", button.get("ButtonText", ""))
+        title = AnaHelper.verb_replacer(text=title, state=self.state)
 
         if button_type == "OpenUrl":
             value = json.dumps({"url": button["Url"], "value": button["_id"]})
@@ -85,13 +86,13 @@ class ButtonProcessor():
         option = Option(title=title, value=value, type=type_of_button).trim()
         return option
 
-    @classmethod
-    def __process_input_button(cls, button, state):
+    # @classmethod
+    def __process_input_button(self, button):
 
         button_type = button.get("ButtonType")
 
         if button_type == "GetItemFromSource":
-            message_data = cls.__process_getitem_button(button, state)
+            message_data = self.__process_getitem_button(button)
             return message_data
 
         message_type = ""
@@ -106,7 +107,7 @@ class ButtonProcessor():
 
         elem_type = button_type_map.get(button_type)
         if elem_type is None:
-            logger.warning("Undefined Input Type" + str(button_type))
+            logger.warning(f"Undefined Input Type {button_type}")
 
         type_of_input = elem_type["input_type"]
         type_of_media = elem_type["media_type"]
@@ -115,25 +116,25 @@ class ButtonProcessor():
         media_type = MediaType.get_value(type_of_media)
 
         content = MessageContent(inputType=input_type,
-            mediaType=media_type,
-            textInputAttr=input_attr,
-            mandatory=1,).trim()
+                                 mediaType=media_type,
+                                 textInputAttr=input_attr,
+                                 mandatory=1,).trim()
         message_data = MessageData(type=message_type,
-            content=content).trim()
+                                   content=content).trim()
 
         return message_data
 
-    @classmethod
-    def __process_getitem_button(cls, data, state):
+    # @classmethod
+    def __process_getitem_button(self, data):
 
         source = data.get("ItemsSource")
         url = data.get("Url")
         values = list()
         if source:
-            source = AnaHelper.verb_replacer(text=source, state=state)
+            source = AnaHelper.verb_replacer(text=source, state=self.state)
             values = list(map(lambda x: ListItem(text=x.split(":")[0], value=x.split(":")[1]).trim(), source.split(",")))
         elif url:
-            url = AnaHelper.verb_replacer(text=url, state=state)
+            url = AnaHelper.verb_replacer(text=url, state=self.state)
             items_from_url = requests.get(url).json()
             values = []
             for key, value in items_from_url.items():
@@ -149,12 +150,12 @@ class ButtonProcessor():
         is_multiple = 1 if data.get("AllowMultiple") else 0
 
         content = MessageContent(inputType=input_type,
-            text=button_text,
-            multiple=is_multiple,
-            mandatory=1,
-            values=values).trim()
+                                 text=button_text,
+                                 multiple=is_multiple,
+                                 mandatory=1,
+                                 values=values).trim()
 
         message_data = MessageData(type=message_type,
-            content=content).trim()
+                                   content=content).trim()
 
         return message_data
