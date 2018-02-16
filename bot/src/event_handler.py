@@ -22,6 +22,7 @@ class MessageEventHandler(object):
     def handle_events(self, events):
         responses = []
         for event in events:
+            logger.debug(f"Event received {event}")
             event_type = EventType.get_name(event.get("type"))
             handler_method = getattr(self, "handle_%s" % event_type.lower(), None)
 
