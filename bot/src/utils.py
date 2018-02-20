@@ -65,7 +65,7 @@ class Util(object):
         return 1
 
     @staticmethod
-    def update_state(state, meta_data):
+    def update_state(state, meta_data, is_handover=False):
         """
         This methods updates the state of the user after the message is sent
         For e.g. updating current_node_id
@@ -74,7 +74,7 @@ class Util(object):
 
         sender = SenderType.get_name(meta_data["senderType"])
 
-        if sender == "AGENT":
+        if (not is_handover) and sender == "AGENT":
             # no need to update user state
             return state
 
