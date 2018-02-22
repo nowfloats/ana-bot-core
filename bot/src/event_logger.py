@@ -66,6 +66,7 @@ class EventLogger(EventLogInterface):
             "button_id": click_event_data.get("_id"),
             "button_type": click_event_data.get("ButtonType", click_event_data.get("Type")),
             "button_name": click_event_data.get("ButtonName", click_event_data.get("Text")),
+            "flow_id": meta_data.get("flowId", ""),
             "timestamp": int(time.time())
             }
 
