@@ -77,7 +77,9 @@ class ButtonProcessor():
         title = AnaHelper.verb_replacer(text=title, state=self.state)
 
         if button_type == "OpenUrl":
-            value = json.dumps({"url": button["Url"], "value": button["_id"]})
+            url = button.get("Url", "")
+            url = AnaHelper.verb_replacer(text=url, state=self.state)
+            value = json.dumps({"url": url, "value": button["_id"]})
             type_of_button = ButtonType.get_value("URL")
         elif button_type == "NextNode":
             value = button["_id"]
