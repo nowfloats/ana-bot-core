@@ -80,14 +80,14 @@ class User():
 
             self.CACHE.hmset(session_id, new_state)
             logger.info(f"User state with session_id {session_id} updated with state {new_state}")
-            self._persist_data(var_data=new_var_data, session_id=session_id, channel=channel, business_name=business_name)
+            self._persist_data(var_data=new_var_data, session_id=session_id, channel=channel, business_name=business_name, flow_id=state["flow_id"])
 
             return 1
         except Exception as err:
             logger.error(err)
             raise
 
-    def _persist_data(self, var_data, session_id="", channel="", business_name=""):
+    def _persist_data(self, var_data, session_id="", channel="", business_name="", flow_id=""):
         # change this method to perform async
         if var_data == {}:
             return 1
@@ -97,6 +97,7 @@ class User():
         document = {
             "_id": object_id,
             "user_id" : self.user_id,
+            "flow_id": flow_id,
             "session_id": session_id,
             "data": var_data,
             "channel": channel,
