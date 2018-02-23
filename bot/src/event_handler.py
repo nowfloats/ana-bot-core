@@ -22,6 +22,7 @@ class MessageEventHandler(object):
     def handle_events(self, events):
         responses = []
         for event in events:
+            logger.debug(f"Event received {event}")
             event_type = EventType.get_name(event.get("type"))
             handler_method = getattr(self, "handle_%s" % event_type.lower(), None)
 
@@ -85,8 +86,9 @@ class MessageEventHandler(object):
         # message = Message(meta=self.meta_data, data=message_data).trim()
         user_response = Util.send_messages(messages=messages, sending_to="USER")
 
+
         if user_response:
-            Util.update_state(meta_data=self.meta_data, state=self.state)
+            Util.update_state(meta_data=self.meta_data, state=self.state, is_handover=True)
             Util.log_events(meta_data=self.meta_data, state=self.state, events=data.get("publish_events", []))
         return []
 

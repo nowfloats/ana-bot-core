@@ -57,19 +57,3 @@ class MessageProcessor():
         if event_response == []:
             return {}
         return event_response[0]
-
-        # if nothing in event response
-        # if event_resp is None:
-            # return {}
-
-        # if event_resp:
-            # for msg in event_resp:
-                # if msg['sending_to'] == "AGENT":
-                    # msg['message'] = Util.prepare_agent_message(msg['message'])
-
-        #Temp code, need to be removed it once receiver can accept array response
-        # if event_resp and len(event_resp) > 0:
-            # return event_resp[0]['message']
-
-        # return {}
-        #return [item['message'] for item in event_resp]

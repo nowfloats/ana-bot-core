@@ -7,6 +7,7 @@ from .node_processors.api_call_processor import ApiCallProcessor
 from .node_processors.condition_processor import ConditionProcessor
 from .node_processors.card_processor import CardProcessor
 from .node_processors.handoff_agent_processor import AgentHandOffProcessor
+from .node_processors.jump_to_bot_processor import JumpToBotProcessor
 
 class Converter():
 
@@ -29,7 +30,8 @@ class Converter():
             "ApiCall": ApiCallProcessor,
             "Condition": ConditionProcessor,
             "Card": CardProcessor,
-            "HandoffToAgent": AgentHandOffProcessor
+            "HandoffToAgent": AgentHandOffProcessor,
+            "JumpToBot": JumpToBotProcessor
             }
 
         user_messages = []
@@ -37,21 +39,19 @@ class Converter():
 
         Processor = node_processor_map.get(node_type)
 
-        if node_type in ["Combination"]:
+        if Processor is None:
+            raise "Unknown Node Type. Fatal Error"
+
+        next_node_data = Processor(self.state).get_next_node(node_data)
+        node_data = next_node_data["data"]
+        self.state["current_node_id"] = next_node_data.get("id")
+
+        if node_type == "Combination":
             data = Processor(self.state).process_node(node_data)
-
-        elif node_type in ["ApiCall", "Condition"]:
-            next_node_data = Processor(self.state).get_next_node(node_data)
-            data = self.get_messages_data(next_node_data.get("data"), message_data)
-            # this should ideally not happen here this
-            # change current_node_id thing in converter
-            # both should use the same method
-            self.state["current_node_id"] = next_node_data.get("id")
-
         elif node_type == "HandoffToAgent":
             data = Processor(self.state).process_node(message_data, node_data)
         else:
-            raise "Unknown Node Type. Fatal Error"
+            data = self.get_messages_data(node_data, message_data)
 
         user_messages = data.get("user_messages", [])
         agent_messages = data.get("agent_messages", [])

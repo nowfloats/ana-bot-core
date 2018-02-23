@@ -26,6 +26,7 @@ class Converter():
     @classmethod
     def __convert_to_user_message(cls, data):
         events = data.get("events")
+        messages_data = []
         if events is None:
             type_of_input = data["content"]["inputType"]
             input_type = InputType.get_name(type_of_input)

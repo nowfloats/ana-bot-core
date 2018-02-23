@@ -23,7 +23,6 @@ class ConditionProcessor():
         for button in buttons:
 
             root_key = re.split(r'\.|\[', button.get("ConditionMatchKey"))[0]
-
             logger.debug(f"Variable Data received for condition call is {variable_data}")
 
             if isinstance(variable_data, str):
@@ -36,12 +35,13 @@ class ConditionProcessor():
             logger.debug(f"Variable Data after dict conversion is {variable_data}")
             if variable_data.get(root_key) is None:
                 continue
+
             path = button.get("ConditionMatchKey")
-            obj = { root_key:variable_data[root_key] }
+            obj = {root_key:variable_data[root_key]}
             variable_value = Util.deep_find(obj, path)
 
             match_operator = button.get("ConditionOperator")
-            match_value = AnaHelper.verb_replacer(text=button.get("ConditionMatchValue", ""), state= self.state)
+            match_value = AnaHelper.verb_replacer(text=button.get("ConditionMatchValue", ""), state=self.state)
 
             condition_matched = AnaHelper.is_condition_match(variable_value, match_operator, match_value)
             if condition_matched:

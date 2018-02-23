@@ -77,7 +77,9 @@ class ButtonProcessor():
         title = AnaHelper.verb_replacer(text=title, state=self.state)
 
         if button_type == "OpenUrl":
-            value = json.dumps({"url": button["Url"], "value": button["_id"]})
+            url = button.get("Url", "")
+            url = AnaHelper.verb_replacer(text=url, state=self.state)
+            value = json.dumps({"url": url, "value": button["_id"]})
             type_of_button = ButtonType.get_value("URL")
         elif button_type == "NextNode":
             value = button["_id"]
@@ -101,7 +103,9 @@ class ButtonProcessor():
         content = None
 
         message_type = MessageType.get_value("INPUT")
-        input_attr = TextInput(placeHolder=button.get("PlaceholderText", "")).trim()
+        placeholder_text = button.get("PlaceholderText", "")
+        placeholder_text = AnaHelper.verb_replacer(text=placeholder_text, state=self.state)
+        input_attr = TextInput(placeHolder=placeholder_text).trim()
 
         button_type_map = config["button_map"]
 
@@ -144,6 +148,7 @@ class ButtonProcessor():
                 })
 
         button_text = data.get("ButtonName")
+        button_text = AnaHelper.verb_replacer(text=button_text, state=self.state)
 
         message_type = MessageType.get_value("INPUT")
         input_type = InputType.get_value("LIST")

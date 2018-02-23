@@ -6,6 +6,7 @@ from src import CACHE, DB
 from src.logger import logger
 from src.event_logger import EventLogger
 from src.models.types import MediumWrapper as Medium
+from src.models.types import SenderTypeWrapper as SenderType
 
 class User():
 
@@ -17,7 +18,18 @@ class User():
 
         response = {}
         session_data = {}
-        user_session_key = self.user_id + "." + "sessions"
+        flow_id = meta_data.get("flowId")
+        sender = SenderType.get_name(meta_data.get("senderType"))
+        if sender == "USER":
+            business_id = meta_data["recipient"]["id"]
+        else:
+            business_id = meta_data["sender"]["id"]
+
+        if flow_id:
+            user_session_key = self.user_id + "." + business_id + "." + flow_id + "." + "sessions"
+        else:
+            user_session_key = self.user_id + "." + "sessions"
+
         user_sessions = self.CACHE.lrange(user_session_key, 0, -1)
 
         session_id = meta_data.get("sessionId")
@@ -42,6 +54,9 @@ class User():
         return response
 
     def set_state(self, session_id, state, meta_data):
+        #TODO define an object for state and pass data to blueprint object
+        # this is not really good, can cause lot of confusions
+        # check if appending to state can work
         try:
             new_state = {}
             final_var_data = state.get("var_data", {})
@@ -60,17 +75,19 @@ class User():
 
             new_state["timestamp"] = timestamp
             new_state["var_data"] = json.dumps(final_var_data)
+            new_state["flow_id"] = state["flow_id"]
+            new_state["previous_flow_id"] = state.get("previous_flow_id", "")
 
             self.CACHE.hmset(session_id, new_state)
             logger.info(f"User state with session_id {session_id} updated with state {new_state}")
-            self._persist_data(var_data=new_var_data, session_id=session_id, channel=channel, business_name=business_name)
+            self._persist_data(var_data=new_var_data, session_id=session_id, channel=channel, business_name=business_name, flow_id=state["flow_id"])
 
             return 1
         except Exception as err:
             logger.error(err)
             raise
 
-    def _persist_data(self, var_data, session_id="", channel="", business_name=""):
+    def _persist_data(self, var_data, session_id="", channel="", business_name="", flow_id=""):
         # change this method to perform async
         if var_data == {}:
             return 1
@@ -80,6 +97,7 @@ class User():
         document = {
             "_id": object_id,
             "user_id" : self.user_id,
+            "flow_id": flow_id,
             "session_id": session_id,
             "data": var_data,
             "channel": channel,

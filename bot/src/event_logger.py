@@ -1,7 +1,6 @@
 import time
 from src.models.types import MediumWrapper as Medium, EventTypeWrapper as EventType
 from src.models.message import MessageWrapper as Message, EventWrapper as Event
-# from src.connectors.kinesis_helper import KinesisHelper
 from src.event_log_interface import EventLogInterface
 from src.logger import logger
 
@@ -36,7 +35,7 @@ class EventLogger(EventLogInterface):
             }
 
         self.log_message(key="session", data=final_event_data)
-        logger.info("SESSION_STARTED event logged with data" + str(final_event_data))
+        logger.info(f"SESSION_STARTED event logged with data {final_event_data}")
         return 1
 
     def log_analytics(self, data):
@@ -67,6 +66,7 @@ class EventLogger(EventLogInterface):
             "button_id": click_event_data.get("_id"),
             "button_type": click_event_data.get("ButtonType", click_event_data.get("Type")),
             "button_name": click_event_data.get("ButtonName", click_event_data.get("Text")),
+            "flow_id": meta_data.get("flowId", ""),
             "timestamp": int(time.time())
             }
 
@@ -78,36 +78,5 @@ class EventLogger(EventLogInterface):
             }
 
         self.log_message(key="analytics", data=log_data)
-        logger.info("Analytics event logged with data" + str(log_data))
+        logger.info(f"Analytics event logged with data {log_data}")
         return 1
-
-    # def log(self, meta_data, event, state):
-
-        # event_type = event.get("type_of_event")
-        # if event == {}:
-            # return 0
-
-        # node_data = event.get("node_data")
-        # click_data = event.get("event_data")
-        # event_channel_type = meta_data["sender"]["medium"]
-        # event_channel = Medium.get_name(event_channel_type)
-
-        # final_event_data = {
-            # "business_name" : state.get("business_name"),
-            # "business_id": meta_data["recipient"]["id"],
-            # "event_channel": event_channel,
-            # "user_id": meta_data["sender"]["id"],
-            # "session_id": meta_data.get("sessionId"),
-            # "event_name": event_type,
-            # "node_id": node_data.get("Id"),
-            # "node_name": node_data.get("Name"),
-            # "node_type": node_data.get("NodeType"),
-            # "button_id": click_data.get("_id"),
-            # "button_type": click_data.get("ButtonType", click_data.get("Type")),
-            # "button_name": click_data.get("ButtonName", click_data.get("Text")),
-            # "timestamp": int(time.time())
-            # }
-
-        # self.log_message(key="analytics", data=final_event_data)
-        # logger.info(str(event_type) + " event logged with data" + str(final_event_data))
-        # return 1
