@@ -33,8 +33,6 @@ class ConditionProcessor():
                     variable_data = {}
 
             logger.debug(f"Variable Data after dict conversion is {variable_data}")
-
-
             if variable_data.get(root_key) is None:
                 continue
 

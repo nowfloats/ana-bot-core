@@ -37,21 +37,21 @@ class SenderType(object):
 class MediaType(object):
     IMAGE = 0
     AUDIO = 1
-    VIDEO = 3
-    FILE = 4
+    VIDEO = 2
+    FILE = 3
 
     _VALUES_TO_NAMES = {
         0: "IMAGE",
         1: "AUDIO",
-        3: "VIDEO",
-        4: "FILE",
+        2: "VIDEO",
+        3: "FILE",
     }
 
     _NAMES_TO_VALUES = {
         "IMAGE": 0,
         "AUDIO": 1,
-        "VIDEO": 3,
-        "FILE": 4,
+        "VIDEO": 2,
+        "FILE": 3,
     }
 
 
@@ -1980,8 +1980,8 @@ class MessageContent(object):
         (8, TType.LIST, 'values', (TType.STRUCT, (ListItem, ListItem.thrift_spec), False), None, ),  # 8
         (9, TType.BOOL, 'multiple', None, None, ),  # 9
         (10, TType.I32, 'mediaType', None, None, ),  # 10
-        (11, TType.SET, 'requiredFields', (TType.STRING, 'UTF8', False), None, ),  # 11
-        (12, TType.SET, 'options', (TType.STRUCT, (Option, Option.thrift_spec), False), None, ),  # 12
+        (11, TType.LIST, 'requiredFields', (TType.STRING, 'UTF8', False), None, ),  # 11
+        (12, TType.LIST, 'options', (TType.STRUCT, (Option, Option.thrift_spec), False), None, ),  # 12
         (13, TType.STRUCT, 'dateRange', (DateRange, DateRange.thrift_spec), None, ),  # 13
         (14, TType.STRUCT, 'timeRange', (TimeRange, TimeRange.thrift_spec), None, ),  # 14
         (15, TType.STRUCT, 'dateTimeRange', (DateTimeRange, DateTimeRange.thrift_spec), None, ),  # 15
@@ -2083,24 +2083,24 @@ class MessageContent(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 11:
-                if ftype == TType.SET:
-                    self.requiredFields = set()
-                    (_etype29, _size26) = iprot.readSetBegin()
+                if ftype == TType.LIST:
+                    self.requiredFields = []
+                    (_etype29, _size26) = iprot.readListBegin()
                     for _i30 in range(_size26):
                         _elem31 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                        self.requiredFields.add(_elem31)
-                    iprot.readSetEnd()
+                        self.requiredFields.append(_elem31)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 12:
-                if ftype == TType.SET:
-                    self.options = set()
-                    (_etype35, _size32) = iprot.readSetBegin()
+                if ftype == TType.LIST:
+                    self.options = []
+                    (_etype35, _size32) = iprot.readListBegin()
                     for _i36 in range(_size32):
                         _elem37 = Option()
                         _elem37.read(iprot)
-                        self.options.add(_elem37)
-                    iprot.readSetEnd()
+                        self.options.append(_elem37)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 13:
@@ -2196,18 +2196,18 @@ class MessageContent(object):
             oprot.writeI32(self.mediaType)
             oprot.writeFieldEnd()
         if self.requiredFields is not None:
-            oprot.writeFieldBegin('requiredFields', TType.SET, 11)
-            oprot.writeSetBegin(TType.STRING, len(self.requiredFields))
+            oprot.writeFieldBegin('requiredFields', TType.LIST, 11)
+            oprot.writeListBegin(TType.STRING, len(self.requiredFields))
             for iter40 in self.requiredFields:
                 oprot.writeString(iter40.encode('utf-8') if sys.version_info[0] == 2 else iter40)
-            oprot.writeSetEnd()
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.options is not None:
-            oprot.writeFieldBegin('options', TType.SET, 12)
-            oprot.writeSetBegin(TType.STRUCT, len(self.options))
+            oprot.writeFieldBegin('options', TType.LIST, 12)
+            oprot.writeListBegin(TType.STRUCT, len(self.options))
             for iter41 in self.options:
                 iter41.write(oprot)
-            oprot.writeSetEnd()
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.dateRange is not None:
             oprot.writeFieldBegin('dateRange', TType.STRUCT, 13)

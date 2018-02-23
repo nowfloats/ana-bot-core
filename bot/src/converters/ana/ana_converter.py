@@ -13,6 +13,7 @@ class Converter():
 
     def __init__(self, state):
         self.state = state
+        self.events = []
 
     def get_messages_data(self, node_data, message_data):
         """
@@ -55,7 +56,9 @@ class Converter():
         user_messages = data.get("user_messages", [])
         agent_messages = data.get("agent_messages", [])
         events = data.get("events", [])
+        self.add_events(events)
 
-        return {"user_messages": user_messages,
-                "agent_messages": agent_messages,
-                "publish_events": events}
+        return {"user_messages": user_messages, "agent_messages": agent_messages, "publish_events": self.events}
+
+    def add_events(self, events):
+        self.events.extend(events)
