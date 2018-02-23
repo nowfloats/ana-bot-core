@@ -82,7 +82,7 @@ class ApiCallProcessor():
         logger.debug(f"Response from api is {response} {response.__class__}")
         logger.debug(f"Variable Data is {variable_data} {variable_data.__class__}")
 
-        if bool(response) is True:
+        if response is not None:
             variable_data = Util.merge_dicts(variable_data, {variable_name : response})
             self.state["var_data"] = variable_data
 
