@@ -41,6 +41,7 @@ class Business():
         data["logoUrl"] = business_data.get("logoUrl", "")
         data["status"] = business_data.get("status", "")
         data["colors"] = business_data.get("colors", "")
+        data["flow_id"] = business_data.get("flow_id", "")
         data["timestamp"] = datetime.datetime.now()
 
         try:
