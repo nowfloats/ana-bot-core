@@ -104,8 +104,8 @@ class Util(object):
         flow_id = meta_data.get("flowId")
 
         # business_id = flow_id if flow_id else business_id
-        flow_data = Business(business_id).get_info()
-        logger.debug(f"Flow data is {flow_data}")
+        business_data = Business(business_id).get_info()
+        logger.debug(f"Business data is {business_data}")
 
         # if state has flow_id use it else use flowId from meta_data
         # else use flow_id got from business_id for backwards compatibility
@@ -114,10 +114,10 @@ class Util(object):
         elif state.get("flow_id"):
             state["flow_id"] = state.get("flow_id")
         else:
-            state["flow_id"] = flow_data.get("flow_id", "")
+            state["flow_id"] = business_data.get("flow_id", "")
         # state["flow_id"] = state.get("flow_id") if state.get("flow_id") else flow_data.get("flow_id", "")
-        state["business_name"] = state.get("business_name") if state.get("business_name") \
-                else flow_data.get("business_name", "")
+        state["business_name"] = business_data.get("business_name", "")
+        state["business_id"] = business_data.get("business_id")
         # current_state = Util.merge_dicts(state, flow_data)
 
         return state
