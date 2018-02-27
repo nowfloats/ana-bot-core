@@ -30,13 +30,15 @@ def get_session():
 
     return response
 
-# @app.route("/bot/clear", endpoint="clear_sessions")
-# @Validator.validate_session_params
-# def clear_sessions():
-    # user_id = request.args.get("user_id")
-    # response = SessionController.clear_sessions(user_id)
+@app.route("/bot/clear", endpoint="clear_sessions")
+@Validator.validate_session_params
+def clear_sessions():
+    user_id = request.args.get("user_id")
+    flow_id = request.args.get("flow_id")
+    business_id = request.args.get("business_id")
+    response = SessionController.clear_sessions(user_id, business_id, flow_id)
 
-    # return response
+    return response
 
 # add a validator method to check for data in body
 @app.route("/bot/flow", methods=["POST"])
