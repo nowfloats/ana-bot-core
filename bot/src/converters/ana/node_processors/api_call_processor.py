@@ -71,10 +71,10 @@ class ApiCallProcessor():
 
     def __handle_api_response(self, response, node_data):
 
-        variable_data = self.state.get("var_data", "{}")
+        variable_data = self.state.get("var_data", {})
 
-        if isinstance(variable_data, str):
-            variable_data = json.loads(variable_data)
+        # if isinstance(variable_data, str):
+            # variable_data = json.loads(variable_data)
 
         variable_name = node_data.get("VariableName", "")
 
@@ -89,7 +89,8 @@ class ApiCallProcessor():
             next_node_data = AnaNode(next_node_key).get_contents()
 
         else:
-            variable_data = Util.merge_dicts(variable_data, {variable_name : response})
+            variable_data[variable_name] = response
+            # variable_data = Util.merge_dicts(variable_data, {variable_name : response})
             self.state["var_data"] = variable_data
             next_node_id = self.__get_next_node_id(data=variable_data, state=self.state, node_data=node_data)
             next_node_key = self.state.get("flow_id", "") + "." + next_node_id

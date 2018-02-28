@@ -49,10 +49,10 @@ def flow_handler():
     return response
 
 @app.route("/bot/refresh")
-@Validator.validate_business_params
+@Validator.validate_flow_params
 def populate_ana_flows():
-    business_id = request.args.get("business_id")
-    response = ChatFlowController.populate_flows(business_id)
+    flow_id = request.args.get("flow_id")
+    response = ChatFlowController.refresh_flows(flow_id)
 
     return response
 # @app.route("/bot/business", methods=["GET"], endpoint="get_business")
@@ -74,10 +74,7 @@ def populate_ana_flows():
 def message_handler():
     message = request.get_json()
 
-    logger.info("****************")
-    logger.info("Message Received")
-    logger.info(message)
-    logger.info("****************")
+    logger.info(f"Message Received {message}")
 
     handle_message = MessageHandlerPool.submit(MessageProcessor(message).respond_to_message)
     exception = handle_message.exception()
@@ -91,17 +88,11 @@ def message_handler():
 def event_handler():
     message = request.get_json()
 
-    logger.info("****************")
-    logger.info("Event Received")
-    logger.info(message)
-    logger.info("****************")
+    logger.info(f"Event Received {message}")
 
     response = MessageProcessor(message).respond_to_events()
 
-    logger.info("****************")
-    logger.info("Event Response")
-    logger.info(response)
-    logger.info("****************")
+    logger.info(f"Event Response {response}")
 
     return jsonify(response)
 

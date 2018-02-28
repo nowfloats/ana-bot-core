@@ -51,6 +51,8 @@ class User():
         for key, value in session_data.items():
             response[key] = value
 
+        var_data = response.get("var_data", "{}")
+        response["var_data"] = json.loads(var_data)
         return response
 
     def set_state(self, session_id, state, meta_data):

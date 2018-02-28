@@ -20,7 +20,7 @@ class MessageProcessor():
         self.recipient_id = self.meta_data["recipient"]["id"]
 
         self.state = Util.get_current_state(self.meta_data)
-        logger.debug(f"Current state of user is {self.state}")
+        logger.info(f"Current state of user is {self.state}")
         self.meta_data["sessionId"] = self.state.get("session_id")
 
     def respond_to_message(self):
