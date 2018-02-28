@@ -109,10 +109,10 @@ class Util(object):
 
         # if state has flow_id use it else use flowId from meta_data
         # else use flow_id got from business_id for backwards compatibility
-        if flow_id:
-            state["flow_id"] = flow_id
-        elif state.get("flow_id"):
+        if state.get("flow_id"):
             state["flow_id"] = state.get("flow_id")
+        elif flow_id:
+            state["flow_id"] = flow_id
         else:
             state["flow_id"] = business_data.get("flow_id", "")
         # state["flow_id"] = state.get("flow_id") if state.get("flow_id") else flow_data.get("flow_id", "")
