@@ -15,12 +15,12 @@ class Validator():
         pass
 
     @staticmethod
-    def validate_business_params(func):
+    def validate_flow_params(func):
         @wraps(func)
         def validate_business(*args, **kwargs):
-            business_id = request.args.get("business_id")
+            business_id = request.args.get("flow_id")
             if business_id is None:
-                response = jsonify(message="business_id missing"), 400
+                response = jsonify(message="flow_id missing"), 400
                 return response
             return func(*args, **kwargs)
         return validate_business

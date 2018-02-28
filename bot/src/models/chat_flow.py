@@ -40,3 +40,7 @@ class ChatFlow():
             logger.error("Error writing to cache")
             logger.error(err)
             return False
+
+    def get_flow(self):
+        flow = self.collection.find({"_id": self.flow_id}).sort("createdAt", -1).limit(1)
+        return flow[0]

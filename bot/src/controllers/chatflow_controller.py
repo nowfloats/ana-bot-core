@@ -12,21 +12,12 @@ class ChatFlowController():
     def __init__(self):
         pass
 
-    # @staticmethod
-    # def populate_flows(business_id):
-
-        # business_data = Business(business_id).get_details()
-        # if business_data is None:
-            # return {"message": "business not found"}
-
-        # nodes = business_data.get("flow", [])
-
-        # if nodes == []:
-            # logger.error(f"Flow not found or empty")
-            # return jsonify(message="failure")
-
-        # data_saved_to_cache = Business(business_id).save_business_data_to_cache(business_data=business_data, nodes=nodes)
-        # return jsonify(message="success") if data_saved_to_cache else jsonify(message="failure")
+    @staticmethod
+    def refresh_flows(flow_id):
+        flow = ChatFlow(flow_id).get_flow()
+        nodes = flow["flow"]
+        chat_flow_saved = ChatFlow(flow_id).save(nodes)
+        return jsonify(message="success") if chat_flow_saved else jsonify(message="failure")
 
     @staticmethod
     def populate_flows_new(data):
