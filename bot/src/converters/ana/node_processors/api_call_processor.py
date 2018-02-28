@@ -82,13 +82,18 @@ class ApiCallProcessor():
         logger.debug(f"Response from api is {response} {response.__class__}")
         logger.debug(f"Variable Data is {variable_data} {variable_data.__class__}")
 
-        if response is not None:
+        if response is None:
+            # get fallback node since api call failed
+            next_node_id = self.__get_next_node_id(data={}, state=self.state, node_data=node_data)
+            next_node_key = self.state.get("flow_id", "") + "." + next_node_id
+            next_node_data = AnaNode(next_node_key).get_contents()
+
+        else:
             variable_data = Util.merge_dicts(variable_data, {variable_name : response})
             self.state["var_data"] = variable_data
-
-        next_node_id = self.__get_next_node_id(data=variable_data, state=self.state, node_data=node_data)
-        next_node_key = self.state.get("flow_id", "") + "." + next_node_id
-        next_node_data = AnaNode(next_node_key).get_contents()
+            next_node_id = self.__get_next_node_id(data=variable_data, state=self.state, node_data=node_data)
+            next_node_key = self.state.get("flow_id", "") + "." + next_node_id
+            next_node_data = AnaNode(next_node_key).get_contents()
 
         return {"id": next_node_key, "data": next_node_data}
 
