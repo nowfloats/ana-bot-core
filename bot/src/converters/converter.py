@@ -5,6 +5,7 @@ import json
 from src.config import flow_config
 from src.models.ana_node import AnaNode
 from src.utils import Util
+from src.logger import logger
 
 from src.converters.ana.ana_converter import Converter as AnaConverter
 from src.converters.agent.agent_converter import Converter as AgentConverter
@@ -103,8 +104,16 @@ class Converter():
             event_data = next_node_data.get("publish_events", [])
             next_node_id = next_node_data["node_id"]
 
-            var_data = json.loads(self.state.get("var_data", "{}"))
+            var_data = self.state.get("var_data", {})
             new_var_data = next_node_data.get("input_data", {})
+            logger.debug(f"var_data type is {type(var_data)} {var_data}")
+            logger.debug(f"new_var_data type is {type(var_data)} {new_var_data}")
+            while isinstance(var_data, str):
+                var_data = self.__get_dict(var_data)
+            if isinstance(new_var_data, str):
+                new_var_data = json.loads(new_var_data)
+            logger.debug(f"var_data type is {type(var_data)} {var_data}")
+            logger.debug(f"new_var_data type is {type(new_var_data)} {new_var_data}")
             final_var_data = Util.merge_dicts(var_data, new_var_data)
             self.state["var_data"] = final_var_data
             self.state["new_var_data"] = new_var_data
@@ -114,6 +123,11 @@ class Converter():
 
         return {"node": node, "publish_events": event_data}
 
+    @staticmethod
+    def __get_dict(string):
+        if isinstance(string, str):
+            return json.loads(string)
+        return string
     def __get_current_node(self):
         """
         Gets the current node based on the state

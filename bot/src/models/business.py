@@ -65,6 +65,7 @@ class Business():
             else:
                 business_data = {}
 
+        business_data["business_id"] = self.business_id
         return business_data
 
     # def get_business_data(self):

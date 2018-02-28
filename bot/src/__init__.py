@@ -18,12 +18,7 @@ CACHE = RedisHelper().create_client()
 
 DB_CONNECTION = os.environ.get("DB_CONNECTION") or "mongodb://localhost:27027/anachatdb"
 
-MONGO_CLIENT = MongoClient(
-    host=os.environ.get("DB_CONNECTION"),
-    maxPoolSize=None,
-    serverSelectionTimeoutMS=100,
-    connectTimeoutMS=20000
-    )
+MONGO_CLIENT = MongoClient(DB_CONNECTION)
 
 MessageHandlerPool = ThreadPoolExecutorStackTraced(max_workers=20)
 EventLogPool = ThreadPoolExecutorStackTraced(max_workers=2)

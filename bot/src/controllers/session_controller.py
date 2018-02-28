@@ -10,21 +10,25 @@ class SessionController():
     def __init__(self, *args, **kwargs):
         pass
 
-    # @staticmethod
-    # def clear_sessions(user_id):
-        # user_key = user_id + "." + "sessions"
-        # sessions = CACHE.lrange(user_key, 0, -1)
+    @staticmethod
+    def clear_sessions(user_id, business_id, flow_id):
+        if flow_id:
+            user_session_key = user_id + "." + business_id + "." + flow_id + "." + "sessions"
+        else:
+            user_session_key = user_id + "." + "sessions"
 
-        # if sessions == []:
-            # return jsonify(message="no_sessions_found")
+        sessions = CACHE.lrange(user_session_key, 0, -1)
 
-        # sessions.append(user_key)
-        # clear_sessions = CACHE.delete(*sessions)
+        if sessions == []:
+            return jsonify(message="no_sessions_found")
 
-        # if clear_sessions:
-            # return jsonify(message="sessions_cleared")
+        sessions.append(user_session_key)
+        clear_sessions = CACHE.delete(*sessions)
 
-        # return jsonify(message="could_not_clear_sessions"), 500
+        if clear_sessions:
+            return jsonify(message="sessions_cleared")
+
+        return jsonify(message="could_not_clear_sessions"), 500
 
     @staticmethod
     def get_active_session(user_id, business_id, flow_id):
