@@ -103,6 +103,11 @@ class AnaNode():
                 if button_type in valid_button_types:
                     if button_type == "GetNumber":
                         input_value = int(input_data[input_key])
+                    elif button_type == "GetLocation":
+                        if isinstance(input_data[input_key], str):
+                            input_value = json.loads(input_data[input_key])
+                        else:
+                            input_value = input_data[input_key]
                     else:
                         input_value = str(input_data[input_key])
 
