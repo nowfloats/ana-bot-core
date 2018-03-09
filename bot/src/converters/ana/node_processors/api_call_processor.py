@@ -58,7 +58,7 @@ class ApiCallProcessor():
 
         logger.debug(f"api response: {response}")
 
-        if response.status_code == 200:
+        if response.status_code in [200, 201]:
             try:
                 api_response = response.json()
             except ValueError:
