@@ -64,11 +64,11 @@ class SectionProcessor():
             media_type = MediaType.get_value("VIDEO")
 
         url = data.get("Url", "")
-        url = furl(url).url
         url = AnaHelper.verb_replacer(text=url, state=self.state)
+        url = furl(url).url
         preview_url = data.get("PreviewUrl", "")
-        preview_url = furl(preview_url).url
         preview_url = AnaHelper.verb_replacer(text=preview_url, state=self.state)
+        preview_url = furl(preview_url).url
         text = data.get("Title", "")
         text = AnaHelper.verb_replacer(text=text, state=self.state)
         media_content = Media(type=media_type, url=url, previewUrl=preview_url).trim()
