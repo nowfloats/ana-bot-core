@@ -29,7 +29,7 @@ try:
     logger.info("Connected to anachatdb")
 
 except pymongo.errors.ServerSelectionTimeoutError as err:
-    logger.error("Error connecting to mongodb\n" + str(err))
+    logger.error(f"Error connecting to mongodb {err}")
     raise
 
 except:
