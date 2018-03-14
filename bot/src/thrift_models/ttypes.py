@@ -127,6 +127,7 @@ class Medium(object):
     TWITTER = 5
     SLACK = 6
     TELEGRAM = 7
+    WHATSAPPBOTIF = 8
 
     _VALUES_TO_NAMES = {
         0: "IOS",
@@ -137,6 +138,7 @@ class Medium(object):
         5: "TWITTER",
         6: "SLACK",
         7: "TELEGRAM",
+        8: "WHATSAPPBOTIF",
     }
 
     _NAMES_TO_VALUES = {
@@ -148,6 +150,7 @@ class Medium(object):
         "TWITTER": 5,
         "SLACK": 6,
         "TELEGRAM": 7,
+        "WHATSAPPBOTIF": 8,
     }
 
 
@@ -155,17 +158,20 @@ class ButtonType(object):
     URL = 0
     QUICK_REPLY = 1
     ACTION = 2
+    DEEPLINK = 3
 
     _VALUES_TO_NAMES = {
         0: "URL",
         1: "QUICK_REPLY",
         2: "ACTION",
+        3: "DEEPLINK",
     }
 
     _NAMES_TO_VALUES = {
         "URL": 0,
         "QUICK_REPLY": 1,
         "ACTION": 2,
+        "DEEPLINK": 3,
     }
 
 
