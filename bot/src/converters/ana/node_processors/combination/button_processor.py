@@ -81,6 +81,11 @@ class ButtonProcessor():
             url = AnaHelper.verb_replacer(text=url, state=self.state)
             value = json.dumps({"url": url, "value": button["_id"]})
             type_of_button = ButtonType.get_value("URL")
+        elif button_type == "DeepLink":
+            url = button.get("DeepLinkUrl", "")
+            url = AnaHelper.verb_replacer(text=url, state=self.state)
+            value = json.dumps({"url": url, "value": button["_id"]})
+            type_of_button = ButtonType.get_value("DEEPLINK")
         elif button_type == "NextNode":
             value = button["_id"]
             type_of_button = ButtonType.get_value("QUICK_REPLY")

@@ -118,14 +118,20 @@ class SectionProcessor():
     def __process_carousel_button(self, button):
 
         if button["Type"] == "OpenUrl":
-            button_title = button.get("Text", "")
-            button_value = json.dumps({"url": button["Url"], "value": button["_id"]})
+            url = button.get("Url", "")
+            url = AnaHelper.verb_replacer(text=url, state=self.state)
+            button_value = json.dumps({"url": url, "value": button["_id"]})
             button_type = ButtonType.get_value("URL")
+        elif button_type == "DeepLink":
+            url = button.get("DeepLinkUrl", "")
+            url = AnaHelper.verb_replacer(text=url, state=self.state)
+            button_value = json.dumps({"url": url, "value": button["_id"]})
+            button_type = ButtonType.get_value("DEEPLINK")
         else:
-            button_title = button.get("Text", "")
             button_value = button["_id"]
             button_type = ButtonType.get_value("ACTION")
 
+        button_title = button.get("Text", "")
         button_title = AnaHelper.verb_replacer(text=button_title, state=self.state)
         option_element = Option(title=button_title, value=button_value, type=button_type).trim()
 

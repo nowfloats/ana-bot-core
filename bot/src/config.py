@@ -21,7 +21,7 @@ flow_config = {
     }
 
 ana_config = {
-    "click_input_types" : ["NextNode", "OpenUrl"],
+    "click_input_types" : ["NextNode", "OpenUrl", "DeepLink"],
 
     "text_input_types" : ["GetText", "GetEmail", "GetNumber", "GetPhoneNumber",\
             "GetItemFromSource", "GetLocation", "GetAddress", "GetDate", "GetDateTime",\
