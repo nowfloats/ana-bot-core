@@ -3,7 +3,7 @@ This module handles acting on "events" in message object
 Author: https://github.com/velutha
 """
 import json
-from src.models.types import EventTypeWrapper as EventType
+from src.models.types import EventTypeWrapper as EventType, SenderTypeWrapper as SenderType
 from src.models.message import MessageWrapper as Message
 from src.models.ana_node import AnaNode
 from src.models.custom_message import CustomMessage
@@ -33,6 +33,37 @@ class MessageEventHandler(object):
                 responses.extend(response)
 
         return responses
+
+    def handle_typing(self, event):
+        logger.debug(f"Typing event received meta {self.meta_data} event {event}")
+        response = self.__handle_delivery_events(event)
+        return response
+
+    def handle_ack(self, event):
+        logger.debug(f"ACK event received meta {self.meta_data} event {event}")
+        response = self.__handle_delivery_events(event)
+        return response
+
+    def __handle_delivery_events(self, event):
+        sender = SenderType.get_name(self.meta_data["senderType"])
+
+        sending_to = None
+
+        if sender == "AGENT":
+            sending_to = "USER"
+        elif sender == "USER":
+            node_key = self.state.get("current_node_id")
+            is_agent_node = AnaNode(node_key).check_if_agent_node()
+            if is_agent_node:
+                sending_to = "AGENT"
+
+        logger.debug(f"Typing event forwarded to {sending_to} meta {self.meta_data} event {event}")
+
+        message = Message(meta=self.meta_data, events=[event]).trim()
+
+        Util.send_messages(messages=[message], sending_to=sending_to)
+        return []
+
 
     def handle_set_session_data(self, event):
 

@@ -45,7 +45,10 @@ class Util(object):
 
         endpoints = {"USER": application_config["GATEWAY_URL"], \
                 "AGENT": application_config["AGENT_URL"]}
-        url = endpoints[sending_to]
+        url = endpoints.get(sending_to)
+
+        if url is None:
+            return 0
 
         headers = {"Content-Type" : "application/json"}
         if messages == []:
