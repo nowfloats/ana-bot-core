@@ -45,6 +45,12 @@ class ConditionProcessor():
 
             condition_matched = AnaHelper.is_condition_match(variable_value, match_operator, match_value)
             if condition_matched:
+                variable_data = self.state.get("var_data", {})
+                node_variable_name = node_data.get("VariableName")
+                if node_variable_name:
+                    button_variable_value = button.get("VariableValue")
+                    button_variable_value = AnaHelper.verb_replacer(text=button_variable_value, state=self.state)
+                    variable_data[node_variable_name] = button_variable_value
                 next_node_id = button["NextNodeId"]
                 break
 

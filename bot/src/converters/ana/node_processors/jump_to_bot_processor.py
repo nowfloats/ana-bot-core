@@ -3,6 +3,7 @@ This module handles when chat jumps from one bot to another
 Author: https://github.com/velutha
 """
 from src.models.ana_node import AnaNode
+from src.config import flow_config as config
 
 class JumpToBotProcessor():
 
@@ -16,7 +17,10 @@ class JumpToBotProcessor():
         new_flow_id = node_data.get("TargetBotId")
         self.state["flow_id"] = new_flow_id
         next_node_id = node_data.get("TargetNodeId")
-        next_node_key = new_flow_id + "." + next_node_id
+        if next_node_id:
+            next_node_key = new_flow_id + "." + next_node_id
+        else:
+            next_node_key = new_flow_id + "." + config["first_node_key"]
         next_node_data = AnaNode(next_node_key).get_contents()
         return {"id": next_node_key, "data": next_node_data}
 
