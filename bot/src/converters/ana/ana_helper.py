@@ -10,8 +10,9 @@ class AnaHelper():
 
         match = 0
 
-        if left_operand is None or right_operand is None:
-            return match
+        if operator != "IsNull":
+            if left_operand is None or right_operand is None:
+                return match
 
         if isinstance(left_operand, bool):
 

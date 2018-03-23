@@ -43,7 +43,10 @@ class ConditionProcessor():
             match_operator = button.get("ConditionOperator")
             match_value = AnaHelper.verb_replacer(text=button.get("ConditionMatchValue", ""), state=self.state)
 
+            logger.debug(f"variable_value {variable_value} {variable_value.__class__} match_operator {match_operator} match_value {match_value}")
+
             condition_matched = AnaHelper.is_condition_match(variable_value, match_operator, match_value)
+            logger.debug(f"Condition matched is {condition_matched}")
             if condition_matched:
                 variable_data = self.state.get("var_data", {})
                 node_variable_name = node_data.get("VariableName")
