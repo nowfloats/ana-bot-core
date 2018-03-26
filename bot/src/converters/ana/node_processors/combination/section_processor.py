@@ -123,7 +123,7 @@ class SectionProcessor():
             button_value = json.dumps({"url": url, "value": button["_id"]})
             button_type = ButtonType.get_value("URL")
         elif button["Type"] == "DeepLink":
-            url = button.get("DeepLinkUrl", "")
+            url = button.get("Url", "")
             url = AnaHelper.verb_replacer(text=url, state=self.state)
             button_value = json.dumps({"url": url, "value": button["_id"]})
             button_type = ButtonType.get_value("DEEPLINK")
