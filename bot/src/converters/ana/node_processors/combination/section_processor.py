@@ -97,6 +97,7 @@ class SectionProcessor():
 
         media_type = MediaType.get_value("IMAGE")
         image_url = section_item.get("ImageUrl", "")
+        image_url = AnaHelper.verb_replacer(text=image_url, state=self.state)
         image_url = furl(image_url).url
 
         title = section_item.get("Title", "")
