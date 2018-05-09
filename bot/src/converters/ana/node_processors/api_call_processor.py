@@ -43,7 +43,7 @@ class ApiCallProcessor():
 
         logger.debug(f"api headers: {api_headers}")
 
-        api_body = node_data.get("RequestBody", "")
+        api_body = node_data.get("RequestBody", None)
         if api_body:
             api_body = AnaHelper.verb_replacer(text=api_body, state=self.state)
             try:
