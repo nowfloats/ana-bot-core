@@ -90,7 +90,8 @@ class ApiCallProcessor():
 
         else:
             variable_data[variable_name] = response
-            # variable_data = Util.merge_dicts(variable_data, {variable_name : response})
+            # variable_data = Util.merge_dicts(variable_data, {variable_name :
+            # response})
             self.state["var_data"] = variable_data
             next_node_id = self.__get_next_node_id(data=variable_data, state=self.state, node_data=node_data)
             next_node_key = self.state.get("flow_id", "") + "." + next_node_id
@@ -104,24 +105,28 @@ class ApiCallProcessor():
         next_node_id = node_data.get('NextNodeId', '') # Fallback node id
 
         for button in node_data.get('Buttons', []):
-            root_key = re.split(r'\.|\[', button.get("ConditionMatchKey"))[0]
-
-            if data.get(root_key) is None:
-                continue
-
-            logger.debug(f"rootKey %s {root_key}")
-
-            path = button.get("ConditionMatchKey")
-            obj = {root_key:data[root_key]}
-            variable_value = Util.deep_find(obj, path)
-
-            match_operator = button.get("ConditionOperator")
-            match_value = AnaHelper.verb_replacer(text=button.get("ConditionMatchValue", ""), state=state)
-
-            condition_matched = AnaHelper.is_condition_match(variable_value, match_operator, match_value)
-
-            if condition_matched:
-                next_node_id = button["NextNodeId"]
-                break
+            try:
+                root_key = re.split(r'\.|\[', button.get("ConditionMatchKey"))[0]
+                
+                #if data.get(root_key) is None:
+                #    continue
+                
+                logger.debug("rootKey " + root_key)
+                
+                path = button.get("ConditionMatchKey")
+                obj = {root_key:data[root_key]}
+                variable_value = Util.deep_find(obj, path)
+                
+                match_operator = button.get("ConditionOperator")
+                match_value = AnaHelper.verb_replacer(text=button.get("ConditionMatchValue", ""), state=state)
+                
+                condition_matched = AnaHelper.is_condition_match(variable_value, match_operator, match_value)
+                
+                if condition_matched:
+                    next_node_id = button["NextNodeId"]
+                    break
+            except :
+                logger.error("error in btn " + str(button))
+                pass
 
         return next_node_id
