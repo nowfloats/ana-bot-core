@@ -108,8 +108,8 @@ class ApiCallProcessor():
             try:
                 root_key = re.split(r'\.|\[', button.get("ConditionMatchKey"))[0]
                 
-                #if data.get(root_key) is None:
-                #    continue
+                if data.get(root_key) is None:
+                    data[root_key] = None
                 
                 logger.debug("rootKey " + root_key)
                 

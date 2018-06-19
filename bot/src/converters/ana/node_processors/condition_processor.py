@@ -34,8 +34,8 @@ class ConditionProcessor():
                         # variable_data = {}
                 
                 logger.debug(f"Variable Data after dict conversion is {variable_data}")
-                #if variable_data.get(root_key) is None:
-                #    continue
+                if variable_data.get(root_key) is None:
+                    variable_data[root_key] = None
                 
                 path = button.get("ConditionMatchKey")
                 obj = {root_key:variable_data[root_key]}
@@ -57,8 +57,8 @@ class ConditionProcessor():
                         variable_data[node_variable_name] = button_variable_value
                     next_node_id = button["NextNodeId"]
                     break
-            except:
-                logger.error("error condition node in btn " + str(button))
+            except Exception as e:
+                logger.error("error condition node in btn " + str(button) + ", Ex: " + str(e))
                 pass
 
         next_node_key = self.state.get("flow_id", "") + "." + next_node_id
