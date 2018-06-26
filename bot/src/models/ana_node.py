@@ -58,7 +58,7 @@ class AnaNode():
         user_input = {}
         var_name = node_content.get("VariableName", "")
 
-        button_contents = cls._extract_button_elements(node_content)
+        button_contents = cls._extract_button_elements(node_content, state)
 
         click_buttons = cls._get_button_elements(buttons=button_contents, type_of_button="click")
         input_buttons = cls._get_button_elements(buttons=button_contents, type_of_button="input")
@@ -130,9 +130,10 @@ class AnaNode():
         return {"node_id": next_node_id, "event_data": event_data, "user_input": user_input}
 
     @classmethod
-    def _extract_button_elements(cls, data):
+    def _extract_button_elements(cls, data, state):
 
         node_buttons = data.get("Buttons", [])
+        node_buttons = AnaHelper.process_repeatable(node_buttons, state)
         sections = data.get("Sections", [])
         section_buttons = []
 
