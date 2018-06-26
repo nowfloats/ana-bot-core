@@ -21,9 +21,9 @@ class ButtonProcessor():
 
     def process(self, buttons):
 
-        print(f"btns before: {len(buttons)}")
+        logger.info(f"btns before: {len(buttons)}")
         buttons = AnaHelper.process_repeatable(buttons, self.state)
-        print(f"btns after: {len(buttons)}")
+        logger.info(f"btns after: {len(buttons)}")
         click_elements = [button for button in buttons if button["ButtonType"] in self.click_inputs]
         text_elements = [button for button in buttons if button["ButtonType"] in self.text_inputs]
 

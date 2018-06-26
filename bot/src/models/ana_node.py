@@ -35,7 +35,7 @@ class AnaNode():
         next_node_data = self.__get_next_node_data(input_data=input_data, node_content=current_node_contents, state=state)
 
         next_node_id = next_node_data.get("node_id", "")
-        node_key = state.get("flow_id", "")+ "." + next_node_id if next_node_id != "" else self.node_key
+        node_key = state.get("flow_id", "") + "." + next_node_id if next_node_id != "" else self.node_key
 
         events = next_node_data["event_data"]
         user_input = next_node_data["user_input"]
@@ -68,8 +68,8 @@ class AnaNode():
         if input_key == "val":
 
             for button in click_buttons:
-                current_node_id = input_data["val"]
-                if button["_id"] == current_node_id:
+                input_button_id = input_data["val"]
+                if button["_id"] == input_button_id:
                     if var_name:
                         var_val = button.get("VariableValue", "")
                         user_input[var_name] = AnaHelper.verb_replacer(text=var_val, state=state)
