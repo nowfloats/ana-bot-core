@@ -17,7 +17,7 @@ from src.responder import MessageProcessor
 
 @app.route("/bot/health")
 def hello_world():
-    status_message = {"status": "UP v 1.3"}
+    status_message = {"status": "UP v 1.7"}
     return jsonify(status_message)
 
 

@@ -135,15 +135,17 @@ class AnaNode():
         node_buttons = data.get("Buttons", [])
         node_buttons = AnaHelper.process_repeatable(node_buttons, state)
         sections = data.get("Sections", [])
-        section_buttons = []
+        all_section_buttons = []
 
         for section in sections:
             if section["SectionType"] == "Carousel":
-                section_items = section["Items"]
-                for item in section_items:
-                    button_element = item.get("Buttons", [])
-                    section_buttons = section_buttons + button_element
-        return node_buttons + section_buttons
+                carousel_items = section["Items"]
+                carousel_items = AnaHelper.process_repeatable(carousel_items, state, True)
+                for car_item in carousel_items:
+                    carousel_buttons = car_item.get("Buttons", [])
+                    carousel_buttons = AnaHelper.process_repeatable(carousel_buttons, state)
+                    all_section_buttons = all_section_buttons + carousel_buttons
+        return node_buttons + all_section_buttons
 
     @classmethod
     def _get_button_elements(cls, buttons, type_of_button):
