@@ -17,7 +17,7 @@ from src.responder import MessageProcessor
 
 @app.route("/bot/health")
 def hello_world():
-    status_message = {"status": "UP"}
+    status_message = {"status": "UP v 1.1"}
     return jsonify(status_message)
 
 
@@ -71,7 +71,6 @@ def populate_ana_flows():
     # response = BusinessController.create_business(business_data)
 
     # return response
-
 @app.route("/bot/message", methods=["POST"])
 def message_handler():
     message = request.get_json()

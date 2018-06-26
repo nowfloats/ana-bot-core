@@ -123,10 +123,10 @@ class AnaHelper():
     def __process_repeatable_item(ana_repeatable, state):
         variable_data = state.get("var_data", {})
 
-        repeat_on = variable_data.get("RepeatOn", None)
-        repeat_as = variable_data.get("RepeatAs", None)
-        start_position = variable_data.get("StartPosition", 0)
-        max_repeats = variable_data.get("MaxRepeats", None)
+        repeat_on = ana_repeatable.get("RepeatOn", None)
+        repeat_as = ana_repeatable.get("RepeatAs", None)
+        start_position = ana_repeatable.get("StartPosition", 0)
+        max_repeats = ana_repeatable.get("MaxRepeats", None)
         end_position = None
         if max_repeats:
             end_position = start_position + max_repeats
