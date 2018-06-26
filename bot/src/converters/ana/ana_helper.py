@@ -120,6 +120,47 @@ class AnaHelper():
         return text
 
     @staticmethod
+    def __process_repeatable_item(ana_repeatable, state):
+        variable_data = state.get("var_data", {})
+
+        repeat_on = variable_data.get("RepeatOn", None)
+        repeat_as = variable_data.get("RepeatAs", None)
+        start_position = variable_data.get("StartPosition", 0)
+        max_repeats = variable_data.get("MaxRepeats", None)
+        end_position = None
+        if max_repeats:
+            end_position = start_position + max_repeats
+            pass
+        resulting_btns = []
+
+        if isinstance(repeat_on, list):
+            for item in repeat_on[start_position:end_position]:
+                tempState = {}
+                tempState['var_data'] = variable_data
+                tempState['var_data'][repeat_as] = item
+                btn_json = json.dumps(ana_repeatable)
+                btn_replaced_json = AnaHelper.verb_replacer(text=btn_json, state=tempState)
+                btn_replaced = json.loads(btn_replaced_json)
+                resulting_btns.append(btn_replaced)
+                pass
+            pass
+        pass
+        return resulting_btns
+
+    @staticmethod
+    def process_repeatable(ana_repeatable_items, state):
+        items_after_repeatation = []
+        for ana_repeatable in ana_repeatable_items:
+            if ana_repeatable.get("DoesRepeat", None):
+                processed_item_list = AnaHelper.__process_repeatable_item(ana_repeatable, state)
+                items_after_repeatation.extend(processed_item_list)
+            else:
+                items_after_repeatation.append(ana_repeatable)
+                pass
+            pass
+        return items_after_repeatation
+
+    @staticmethod
     def escape_json_text(text):
         if isinstance(text, str):
             text = text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r")

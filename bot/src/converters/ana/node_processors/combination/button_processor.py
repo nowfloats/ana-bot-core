@@ -21,11 +21,12 @@ class ButtonProcessor():
 
     def process(self, buttons):
 
+        buttons = AnaHelper.process_repeatable(buttons, self.state)
+
         click_elements = [button for button in buttons if button["ButtonType"] in self.click_inputs]
         text_elements = [button for button in buttons if button["ButtonType"] in self.text_inputs]
 
         messages_data = []
-
 
         if click_elements != [] and text_elements == []:
             messages_data = self.__process_click_inputs(click_elements, mandatory=1)
@@ -36,7 +37,6 @@ class ButtonProcessor():
 
         return messages_data
 
-    # @classmethod
     def __process_click_inputs(self, data, mandatory):
 
         button_heading = None
@@ -60,7 +60,6 @@ class ButtonProcessor():
 
         return elem_message_data
 
-    # @classmethod
     def __process_text_inputs(self, data):
 
         elem_message_data = []
@@ -69,7 +68,6 @@ class ButtonProcessor():
 
         return elem_message_data
 
-    # @classmethod
     def __process_click_button(self, button):
         button_type = button.get("ButtonType", "")
 
@@ -93,7 +91,6 @@ class ButtonProcessor():
         option = Option(title=title, value=value, type=type_of_button).trim()
         return option
 
-    # @classmethod
     def __process_input_button(self, button):
 
         button_type = button.get("ButtonType")
@@ -133,7 +130,6 @@ class ButtonProcessor():
 
         return message_data
 
-    # @classmethod
     def __process_getitem_button(self, data):
 
         source = data.get("ItemsSource")
