@@ -2,6 +2,7 @@ import re
 import json
 from src.logger import logger
 from src.utils import Util
+import copy
 
 class AnaHelper():
 
@@ -118,6 +119,73 @@ class AnaHelper():
                     text = text.replace("[~" + match + "]", str(variable_value)).replace("{{" + match + "}}", str(variable_value))
         logger.debug(f"Text after replacing verbs is {text}")
         return text
+
+    @staticmethod
+    def __process_repeatable_item(ana_repeatable, state, is_carousel):
+        variable_data = state.get("var_data", {})
+
+        repeat_on_varname = ana_repeatable.get("RepeatOn", None)
+        repeat_on = variable_data.get(repeat_on_varname, None)
+
+        if repeat_on is None:
+            logger.debug(f"No exact repeat_on_varname")
+            root_key = re.split(r"\.|\[", repeat_on_varname)[0]
+            if variable_data.get(root_key, None) is not None:
+                repeat_on = Util.deep_find({root_key:variable_data[root_key]}, repeat_on_varname)
+        
+        logger.info("repeat_on: " + json.dumps(repeat_on))
+        
+        repeat_as_varname = ana_repeatable.get("RepeatAs", None)
+        start_position = ana_repeatable.get("StartPosition", 0)
+        max_repeats = ana_repeatable.get("MaxRepeats", None)
+        end_position = None
+        if max_repeats:
+            end_position = start_position + max_repeats
+            pass
+        resulting_items = []
+        if isinstance(repeat_on, list):
+            for item in repeat_on[start_position:end_position]:
+                tempState = {}
+                tempState['var_data'] = copy.deepcopy(variable_data)
+                tempState['var_data'][repeat_as_varname] = item
+                item_json = json.dumps(ana_repeatable)
+                replaced_item_json = AnaHelper.verb_replacer(text=item_json, state=tempState)
+                replaced_item = json.loads(replaced_item_json)
+                if is_carousel:
+                    car_buttons = replaced_item.get("Buttons", [])
+                    car_buttons = AnaHelper.process_repeatable(car_buttons, tempState, False)
+                    for car_button in car_buttons:
+                        car_button["DoesRepeat"] = False
+                    replaced_item["Buttons"] = car_buttons
+                    pass
+                replaced_item['_id'] = replaced_item.get('_id', '') + "--" + str(repeat_on.index(item))
+                resulting_items.append(replaced_item)
+                pass
+            pass
+        pass
+        return resulting_items
+
+    @staticmethod
+    def process_repeatable(ana_repeatable_items, state, is_carousel=False):
+        items_after_repeatation = []
+        for ana_repeatable in ana_repeatable_items:
+            if ana_repeatable.get("DoesRepeat", None):
+                logger.info(f"Inside process_repeatable does repeat")
+                processed_item_list = AnaHelper.__process_repeatable_item(ana_repeatable, state, is_carousel)
+                items_after_repeatation.extend(processed_item_list)
+            else:
+                items_after_repeatation.append(ana_repeatable)
+                pass
+            pass
+        if is_carousel:
+            for item in items_after_repeatation:
+                btns = item.get("Buttons", [])
+                for btn in btns:
+                    btn['_id'] = btn.get('_id', '') + "--" + str(items_after_repeatation.index(item))
+                    pass
+                pass
+            pass
+        return items_after_repeatation
 
     @staticmethod
     def escape_json_text(text):

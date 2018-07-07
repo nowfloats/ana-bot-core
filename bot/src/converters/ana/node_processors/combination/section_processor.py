@@ -83,7 +83,7 @@ class SectionProcessor():
 
         message_type = MessageType.get_value("CAROUSEL")
         section_items = data.get("Items", [])
-
+        section_items = AnaHelper.process_repeatable(section_items, self.state, True)
         item_elements = []
         item_elements = [self.__process_carousel_item(item) for item in section_items]
 
@@ -107,7 +107,7 @@ class SectionProcessor():
 
         media_content = Media(type=media_type, url=image_url).trim()
         buttons = section_item.get("Buttons", [])
-
+        buttons = AnaHelper.process_repeatable(buttons, self.state)
         options = []
         options = [self.__process_carousel_button(button) for button in buttons]
 
